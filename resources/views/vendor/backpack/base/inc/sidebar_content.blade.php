@@ -1,6 +1,7 @@
 <!-- This file is used to store sidebar items, starting with Backpack\Base 0.9.0 -->
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('osoba') }}'><i class='nav-icon fa fa-user'></i> Osobe</a></li>
 @role('admin')
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('licenca') }}'><i class='nav-icon la la-question'></i> Licence</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="fa fa-dashboard nav-icon"></i> {{ trans('backpack::base.dashboard') }}</a></li>
 <li class=nav-item><a class=nav-link href="{{ backpack_url('elfinder') }}"><i class="nav-icon fa fa-files-o"></i> <span>{{ trans('backpack::crud.file_manager') }}</span></a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('tag') }}'><i class='nav-icon fa fa-question'></i> Tags</a></li>
@@ -23,4 +24,3 @@
 </li>
 @endrole
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('licenca') }}'><i class='nav-icon la la-question'></i> Licencas</a></li>
