@@ -64,7 +64,8 @@ return [
     // ------
 
     // Menu logo. You can replace this with an <img> tag if you have a logo.
-    'project_logo'   => '<b>Back</b>pack',
+    'project_logo'   => '<img class="img-thumbnail " style="height: 2cm; vertical-align: middle" src="/storage/images/iks_grb.png" alt="In¾enjerska komora Srbije"/>
+',
 
     // Show / hide breadcrumbs on admin panel pages.
     'breadcrumbs' => true,
@@ -98,10 +99,10 @@ return [
         // change background color with bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
 
     // Developer or company name. Shown in footer.
-    'developer_name' => 'Cristian Tabacitu',
+    'developer_name' => 'In¾enjerska komora Srbije - Slu¾ba za informacione tehnologije',
 
     // Developer website. Link in footer. Type false if you want to hide it.
-    'developer_link' => 'http://tabacitu.ro',
+    'developer_link' => 'http://www.ingkomora.rs',
 
     // Show powered by Laravel Backpack in the footer? true/false
     'show_powered_by' => true,
@@ -187,12 +188,13 @@ return [
     */
 
     // Fully qualified namespace of the User model
-    'user_model_fqn' => App\Models\BackpackUser::class,
+    'user_model_fqn' => App\Models\User::class,
 
     // The classes for the middleware to check if the visitor is an admin
     // Can be a single class or an array of clases
     'middleware_class' => [
         App\Http\Middleware\CheckIfAdmin::class,
+//        \App\Http\Middleware\AdminMiddleware::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         // \Backpack\CRUD\app\Http\Middleware\UseBackpackAuthGuardInsteadOfDefaultAuthGuard::class,
     ],
@@ -209,7 +211,7 @@ return [
 
     // The guard that protects the Backpack admin panel.
     // If null, the config.auth.defaults.guard value will be used.
-    'guard' => 'backpack',
+    'guard' => null,
 
     // The password reset configuration for Backpack.
     // If null, the config.auth.defaults.passwords value will be used.
