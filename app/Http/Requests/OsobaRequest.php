@@ -4,16 +4,15 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
+use Tesla\JMBG\JMBG;
 
-class OsobaRequest extends FormRequest
-{
+class OsobaRequest extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
-    {
+    public function authorize() {
         // only allow updates if the user is logged in
         return backpack_auth()->check();
     }
@@ -23,10 +22,25 @@ class OsobaRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            // 'name' => 'required|min:5|max:255'
+            'id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!JMBG::for($value)->isValid()) {
+                        $fail('JMBG: <strong>' . $value . '</strong> nije ispravan, proverite unos.');
+                    }
+                }
+            ],
+            'zvanjeId' => 'required',
+            'ime' => 'required',
+            'prezime' => 'required',
+            'opstinaId' => 'required',
+            'firma_mb' => 'required',
+            'diplfakultet' => 'required',
+            'diplmesto' => 'required',
+            'dipldrzava' => 'required',
+            'diplgodina' => 'required'
         ];
     }
 
@@ -35,8 +49,7 @@ class OsobaRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
-    {
+    public function attributes() {
         return [
             //
         ];
@@ -47,8 +60,7 @@ class OsobaRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
-    {
+    public function messages() {
         return [
             //
         ];

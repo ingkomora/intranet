@@ -15,7 +15,8 @@
         "backpack/permissionmanager": "^6.0",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^7.0",
-        "laravel/tinker": "^2.0"
+        "laravel/tinker": "^2.0",
+        "tesla-software/jmbg": "^1.0"
     },
     "require-dev": {
         "backpack/generators": "^3.0",
