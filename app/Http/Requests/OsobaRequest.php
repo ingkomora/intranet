@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use Tesla\JMBG\JMBG;
 
@@ -27,7 +28,7 @@ class OsobaRequest extends FormRequest {
             'id' => [
                 'required',
                 'size:13',
-                'unique:tosoba,id',
+//                Rule::unique('tosoba')->ignore('id','id'),
                 function ($attribute, $value, $fail) {
                     if (!JMBG::for($value)->isValid()) {
                         $fail('JMBG: <strong>' . $value . '</strong> nije ispravan, proverite unos.');
