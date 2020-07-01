@@ -23,8 +23,8 @@ class FirmaRequest extends FormRequest {
      */
     public function rules() {
         return [
-            'mb' => 'required|size:8',
-            'pib' => 'required|size:9',
+            'mb' => ['required','size:8','unique:firme,mb'],
+            'pib' => ['required','size:9','unique:firme,pib'],
             'naziv' => 'required',
             'drzava' => 'required',
             'mesto' => 'required',

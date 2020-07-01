@@ -26,6 +26,8 @@ class OsobaRequest extends FormRequest {
         return [
             'id' => [
                 'required',
+                'size:13',
+                'unique:tosoba,id',
                 function ($attribute, $value, $fail) {
                     if (!JMBG::for($value)->isValid()) {
                         $fail('JMBG: <strong>' . $value . '</strong> nije ispravan, proverite unos.');
