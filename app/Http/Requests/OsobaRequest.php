@@ -36,7 +36,7 @@ class OsobaRequest extends FormRequest {
             'ime' => 'required',
             'prezime' => 'required',
             'opstinaId' => 'required',
-            'firma_mb' => 'required',
+            'firma' => 'required',
             'diplfakultet' => 'required',
             'diplmesto' => 'required',
             'dipldrzava' => 'required',
