@@ -28,7 +28,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
         $this->crud->setEntityNameStrings('osoba', 'osobe');
 
-        $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanje', 'zvanjeId', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firma_mb', 'firma', 'lib', 'clan', 'created_at', 'updated_at']);
+        $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanjeId', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firma_mb', 'firma', 'lib', 'clan', 'created_at', 'updated_at']);
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
@@ -136,8 +136,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->field('prebivalistemesto')->tab('Podaci o prebivalistu');
         $this->crud->field('opstinaId')->label('Op¹tina prebivali¹ta')->tab('Podaci o prebivalistu');
         $this->crud->field('prebivalisteadresa')->tab('Podaci o prebivalistu');
-        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi');
-        $this->crud->field('firma_mb')->tab('Podaci o firmi');
+        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly'=>'readonly']);
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firma',

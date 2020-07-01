@@ -5,15 +5,13 @@ namespace App\Http\Requests;
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FirmaRequest extends FormRequest
-{
+class FirmaRequest extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
-    {
+    public function authorize() {
         // only allow updates if the user is logged in
         return backpack_auth()->check();
     }
@@ -23,10 +21,16 @@ class FirmaRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            // 'name' => 'required|min:5|max:255'
+            'mb' => 'required',
+            'pib' => 'required',
+            'naziv' => 'required',
+            'drzava' => 'required',
+            'mesto' => 'required',
+            'pb' => 'required',
+            'adresa' => 'required',
+            'opstina' => 'required',
         ];
     }
 
@@ -35,8 +39,7 @@ class FirmaRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
-    {
+    public function attributes() {
         return [
             //
         ];
@@ -47,8 +50,7 @@ class FirmaRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
-    {
+    public function messages() {
         return [
             //
         ];

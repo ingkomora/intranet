@@ -55,6 +55,14 @@ class Firma extends Model {
 
     public $identifiableAttribute = 'naziv';
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function opstina()
+    {
+        return $this->belongsTo('App\Models\Opstina', 'opstina_id');
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
