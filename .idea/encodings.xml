@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/app/Libraries" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/Models/Firma.php" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/Models/Lib.php" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/Models/Licenca.php" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/Models/LicencaTip.php" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/Models/Opstina.php" charset="UTF-8" />

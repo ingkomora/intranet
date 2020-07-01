@@ -118,6 +118,7 @@
       <path value="$PROJECT_DIR$/vendor/anam/captcha" />
       <path value="$PROJECT_DIR$/vendor/spatie/laravel-permission" />
       <path value="$PROJECT_DIR$/vendor/backpack/permissionmanager" />
+      <path value="$PROJECT_DIR$/vendor/tesla-software/jmbg" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.2" />
