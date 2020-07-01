@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $web
  * @property string $created_at
  * @property string $updated_at
+ * @property Opstina $opstina
  * @property Osiguranje[] $osiguravajucaKuca
  * @property Osiguranje[] $ugovaracOsiguranja
  */

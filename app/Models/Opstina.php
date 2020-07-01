@@ -30,7 +30,7 @@ class Opstina extends Model
     /**
      * @var array
      */
-    protected $fillable = ['region_id', 'ime', 'sifrasz', 'region_id_old', 'pat h'];
+    protected $fillable = ['region_id', 'ime', 'sifrasz', 'region_id_old', 'path'];
 
     /**
      * Indicates if the model should be timestamped.

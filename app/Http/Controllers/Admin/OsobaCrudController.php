@@ -140,7 +140,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firma',
-            'label' => 'Firma po matiènom broju ako postoji',
+            'label' => 'Firma po maticnom broju (pretrazi po MB ili Nazivu)',
 //            'attribute' => 'naziv_mb',
 //            'tab' => 'firma',
             'ajax' => true,
@@ -155,8 +155,6 @@ class OsobaCrudController extends CrudController {
                         ]*/
         ]);
         $this->crud->field('firma')->tab('Podaci o firmi');
-//        $this->crud->field('ime');
-//        $this->crud->field('ime');
 
         $this->crud->addField([
             'type' => 'relationship',
@@ -178,10 +176,6 @@ class OsobaCrudController extends CrudController {
         $this->crud->field('mrgodina')->tab('Osnovne akademske / master studije');
         $this->crud->field('mrbroj')->tab('Osnovne akademske / master studije');
         $this->crud->field('bolonja')->tab('Osnovne akademske / master studije');
-
-        /*
-         * 'id', 'zvanje', 'titula', 'funkcija', 'ime', 'prezime', 'roditelj', 'devojackoprezime', 'rodjenjemesto', 'rodjenjeopstina', 'rodjenjedrzava', 'prebivalistebroj', 'prebivalistemesto', 'prebivalisteopstina', 'prebivalisteadresa', 'kontakttel', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firmamesto', 'firmaopstina', 'firmaweb', 'firmatel', 'firmaemail', 'diplfakultet', 'diplmesto', 'dipldrzava', 'diplodsek', 'diplsmer', 'diplgodina', 'mrfakultet', 'mrmesto', 'mrdrzava', 'mrodsek', 'mrsmer', 'mrgodina', 'drfakultet', 'drmesto', 'drdrzava', 'drodsek', 'drsmer', 'drgodina', 'lozinka', 'biografija', 'diplbroj', 'mrbroj', 'drbroj', 'pol', 'rodjenjedan', 'rodjenjemesec', 'rodjenjegodina', 'rodjenjeopstinaid', 'rodjenjeinodrzava', 'rodjenjeinomesto', 'diplfakultetid', 'diplsmerid', 'diplunetfakultet', 'diplunetsmer', 'specfakultetid', 'specunetfakultet', 'specsmerid', 'specunetsmer', 'specgodina', 'magfakultetid', 'magunetfakultet', 'magsmerid', 'magunetsmer', 'docfakultetid', 'docunetfakultet', 'docsmerid', 'docunetsmer', 'prebivalisteopstinaid', 'kontaktfax', 'licniweb', 'adresaprikazi', 'telefonprikazi', 'mobilniprikazi', 'faxprikazi', 'mailprikazi', 'prikazisliku', 'firmaopstinaid', 'firmafax', 'imalp', 'zaposlen', 'st_drzavljanstvoscg', 'clanskupstine', 'dozvolareklamnimail', 'lib', 'temp_dms_password', 'prezime_staro', 'primary_serial', 'ranije_deaktivirao_clanstvo', 'clan','datumrodjenja','prebivalistedrzava','vrsta_poslova','godine_radnog_iskustva','bolonja','firma_mb','created_at','updated_at'
-         * */
 
     }
 

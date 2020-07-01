@@ -30,6 +30,7 @@ class FirmaCrudController extends CrudController {
 
         $this->crud->setColumns(['mb', 'pib', 'naziv', 'drzava', 'mesto', 'pb', 'adresa', 'opstina', 'fax', 'telefon', 'email', 'web', 'created_at', 'updated_at']);
 
+        $this->crud->enableExportButtons();
 
     }
 
@@ -57,7 +58,11 @@ class FirmaCrudController extends CrudController {
         $this->crud->field('mesto');
         $this->crud->field('pb');
         $this->crud->field('adresa');
-        $this->crud->field('opstina')->label('Op¹tina');
+        $this->crud->addField([
+            'type' => 'relationship',
+            'name' => 'opstina',
+            'label' => 'Op¹tina'
+        ]);
         $this->crud->field('fax');
         $this->crud->field('telefon');
         $this->crud->field('email');
