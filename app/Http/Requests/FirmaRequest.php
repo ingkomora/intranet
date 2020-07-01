@@ -28,7 +28,6 @@ class FirmaRequest extends FormRequest {
             'naziv' => 'required',
             'drzava' => 'required',
             'mesto' => 'required',
-            'pb' => 'required',
             'adresa' => 'required',
             'opstina' => 'required',
         ];
