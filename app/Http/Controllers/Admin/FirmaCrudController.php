@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\FirmaRequest;
 use App\Http\Requests\OsobaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -43,11 +44,11 @@ class FirmaCrudController extends CrudController {
             'model' => 'App\Models\Opstina',
         ]);
         // TODO: remove setFromDb() and manually define Columns, maybe Filters
-        $this->crud->setFromDb();
+//        $this->crud->setFromDb();
     }
 
     protected function setupCreateOperation() {
-//        $this->crud->setValidation(OsobaRequest::class);
+        $this->crud->setValidation(FirmaRequest::class);
 
         $this->crud->field('mb');
         $this->crud->field('pib');
@@ -61,11 +62,6 @@ class FirmaCrudController extends CrudController {
         $this->crud->field('telefon');
         $this->crud->field('email');
         $this->crud->field('web');
-
-
-
-        // TODO: remove setFromDb() and manually define Fields
-//        $this->crud->setFromDb();
     }
 
     protected function setupUpdateOperation() {
