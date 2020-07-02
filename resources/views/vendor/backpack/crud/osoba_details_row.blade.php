@@ -18,6 +18,7 @@
                         <th scope="col">iznos uplate</th>
                         <th scope="col">pretplata</th>
                         <th scope="col">datum uplate</th>
+                        <th scope="col">napomena</th>
                     </tr>
                     </thead>
                     @foreach($entry->clanarine as $unos)
@@ -27,6 +28,7 @@
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
                             <td>{{$unos->datumuplate}}</td>
+                            <td>{{$unos->napomena}}</td>
                         </tr>
                     @endforeach
                 </table>
