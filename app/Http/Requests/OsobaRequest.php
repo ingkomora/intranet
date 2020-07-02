@@ -24,11 +24,13 @@ class OsobaRequest extends FormRequest {
      * @return array
      */
     public function rules() {
+//        $value = \request('id');
         return [
             'id' => [
                 'required',
                 'size:13',
-//                Rule::unique('tosoba')->ignore('id','id'),
+//                Rule::unique('tosoba')->ignore('id'),
+//                Rule::unique('tosoba')->ignore($value),//ne radi
                 function ($attribute, $value, $fail) {
                     if (!JMBG::for($value)->isValid()) {
                         $fail('JMBG: <strong>' . $value . '</strong> nije ispravan, proverite unos.');
@@ -38,6 +40,10 @@ class OsobaRequest extends FormRequest {
             'zvanjeId' => 'required',
             'ime' => 'required',
             'prezime' => 'required',
+            'roditelj' => 'required',
+            'rodjenjemesto' => 'required',
+            'rodjenjeopstina' => 'required',
+            'rodjenjedrzava' => 'required',
             'opstinaId' => 'required',
             'firma' => 'required',
             'diplfakultet' => 'required',
@@ -46,7 +52,12 @@ class OsobaRequest extends FormRequest {
             'diplgodina' => 'required'
         ];
     }
-
+/*$this->crud->field('roditelj')->tab('Licni podaci');
+$this->crud->field('devojackoprezime')->tab('Licni podaci');
+$this->crud->field('zvanjeId')->tab('Licni podaci');
+$this->crud->field('rodjenjemesto')->tab('Licni podaci');
+$this->crud->field('rodjenjeopstina')->tab('Licni podaci');
+$this->crud->field('rodjenjedrzava')->tab('Licni podaci');*/
     /**
      * Get the validation attributes that apply to the request.
      *

@@ -133,6 +133,15 @@ class Osoba extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function clanarine()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function siPrijave()
     {
         return $this->hasMany('App\Models\SiPrijava', 'osoba_id');

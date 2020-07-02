@@ -96,9 +96,18 @@ class OsobaCrudController extends CrudController {
             false,
             function () {
                 $this->crud->addClause('where', 'lib', NULL);
+            }
+        );
+
+        $this->crud->addFilter([
+            'type'  => 'date',
+            'name'  => 'updated_at',
+            'label' => 'Datum azuriranja'
+        ],
+            false,
+            function ($value) { // if the filter is active, apply these constraints
+                 $this->crud->addClause('where', 'updated_at', $value);
             });
-        // TODO: remove setFromDb() and manually define Columns, maybe Filters
-//        $this->crud->setFromDb();
     }
 
     protected function setupCreateOperation() {
@@ -136,7 +145,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->field('prebivalistemesto')->tab('Podaci o prebivalistu');
         $this->crud->field('opstinaId')->label('Op¹tina prebivali¹ta')->tab('Podaci o prebivalistu');
         $this->crud->field('prebivalisteadresa')->tab('Podaci o prebivalistu');
-        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly'=>'readonly']);
+        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly' => 'readonly']);
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firma',
@@ -197,7 +206,7 @@ class OsobaCrudController extends CrudController {
 
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
-//dd($this->data['entry']);
+//dd($this->data['entry']->clanarine->count());
         // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
 //        return view('crud.details_row', $this->data);
         return view('crud::osoba_details_row', $this->data);
