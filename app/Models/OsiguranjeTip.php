@@ -43,6 +43,9 @@ class OsiguranjeTip extends Model
      */
     public $timestamps = false;
 
+    public $identifiableAttribute = 'naziv';
+
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

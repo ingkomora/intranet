@@ -52,12 +52,7 @@ class OsobaRequest extends FormRequest {
             'diplgodina' => 'required'
         ];
     }
-/*$this->crud->field('roditelj')->tab('Licni podaci');
-$this->crud->field('devojackoprezime')->tab('Licni podaci');
-$this->crud->field('zvanjeId')->tab('Licni podaci');
-$this->crud->field('rodjenjemesto')->tab('Licni podaci');
-$this->crud->field('rodjenjeopstina')->tab('Licni podaci');
-$this->crud->field('rodjenjedrzava')->tab('Licni podaci');*/
+
     /**
      * Get the validation attributes that apply to the request.
      *

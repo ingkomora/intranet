@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\OsiguranjeRequest;
-use App\Http\Requests\OsobaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -17,45 +16,44 @@ class OsiguranjeCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
     public function setup() {
         $this->crud->setModel('App\Models\Osiguranje');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osiguranje');
         $this->crud->setEntityNameStrings('osiguranje', 'osiguranja');
 
-        $this->crud->setColumns(['id','osiguravajuca_kuca_mb', 'ugovarac_osiguranja_mb', 'polisa_broj', 'polisaPokrice', 'polisa_pokrice_id', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena']);
+        $this->crud->setColumns(['id', 'firmaOsiguravajucaKuca', 'firmaUgovarac', 'polisa_broj', 'polisaPokrice', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena']);
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
-
-/*        $this->crud->modifyColumn('polisa_pokrice_id', [
-            'name' => 'polisa_pokrice_id',
-            'type' => 'select2',
-            'label' => 'Pokriæe polise',
-            'entity' => 'polisaPokrice',
-//            'attribute' => 'naziv',
-//            'model' => 'App\Models\OsiguranjePolisaPokrice',
-        ]);*/
-
-
-        /*        $this->crud->addField([
-                    'type' => 'relationship_count',
-                    'name' => 'osobe',
-                    'label' => 'Osobe',
-        //            'ajax' => true,
-        //            'attribute' => 'ime_prezime_jmbg'
-        //            'attribute' => 'id'  //accessor u Osoba modelu
-                ]);*/
-
 
     }
 
     protected function setupListOperation() {
 
-        $this->crud->setColumnDetails('statusPolise',[
+        $this->crud->setColumnDetails('firmaOsiguravajucaKuca', [
+            'name' => 'firmaOsiguravajucaKuca',
+            'type' => 'select',
+            'label' => 'Osiguravajuca kuca',
+            'entity' => 'firmaOsiguravajucaKuca',
+            'attribute' => 'naziv_mb',
+            'model' => 'App\Models\Firma',
+        ]);
+
+        $this->crud->setColumnDetails('firmaUgovarac', [
+            'name' => 'firmaUgovarac',
+            'type' => 'select',
+            'label' => 'Ugovarac osiguranja',
+            'entity' => 'firmaUgovarac',
+            'attribute' => 'naziv_mb',
+            'model' => 'App\Models\Firma',
+        ]);
+
+        $this->crud->setColumnDetails('statusPolise', [
             'name' => 'statusPolise',
             'type' => 'select',
             'label' => 'Status polise',
@@ -64,16 +62,17 @@ class OsiguranjeCrudController extends CrudController {
             'model' => 'App\Models\Status',
         ]);
 
-        $this->crud->setColumnDetails('statusDokumenta',[
+        $this->crud->setColumnDetails('statusDokumenta', [
             'name' => 'statusDokumenta',
             'type' => 'select',
             'label' => 'Status dokumenta',
             'entity' => 'statusDokumenta',
             'attribute' => 'naziv',
             'model' => 'App\Models\Status',
+            //samo od grupe dokumenti
         ]);
 
-        $this->crud->setColumnDetails('polisaPokrice',[
+        $this->crud->setColumnDetails('polisaPokrice', [
             'name' => 'polisaPokrice',
             'type' => 'select',
             'label' => 'Pokriæe polise',
@@ -81,7 +80,18 @@ class OsiguranjeCrudController extends CrudController {
             'attribute' => 'naziv',
             'model' => 'App\Models\OsiguranjePolisaPokrice',
         ]);
+        $this->crud->setColumnDetails('osiguranjeTip', [
+            'name' => 'osiguranjeTip',
+            'type' => 'select',
+            'label' => 'Tip osiguranja',
+            'entity' => 'osiguranjeTip',
+//            'attribute' => 'naziv_mb',
+            'model' => 'App\Models\OsiguranjeTip',
+        ]);
 
+        //vrsta osiguranja da default bude ono prvo
+
+        //status polise
 
         $this->crud->addFilter([
             'type' => 'select2',
@@ -97,8 +107,6 @@ class OsiguranjeCrudController extends CrudController {
         }
         );
 
-        // TODO: remove setFromDb() and manually define Columns, maybe Filters
-//        $this->crud->setFromDb();
     }
 
     protected function setupCreateOperation() {
@@ -106,13 +114,14 @@ class OsiguranjeCrudController extends CrudController {
 
         $this->crud->setValidation(OsiguranjeRequest::class);
 
-        /*        $this->crud->addField([
-        //        $this->crud->setColumnDetails('polisa_pokrice_id',[
-                    'name' => 'polisaPokrice',
-                    'type' => 'relationship',
-                    'label' => 'Pokriæe polise',
-                    'attribute' => 'naziv',
-                ]);*/
+        $this->crud->field('osiguranje_vrsta');
+        $this->crud->field('polisa_broj');
+
+        $this->crud->addField([
+            'type' => 'relationship',
+            'name' => 'osiguranjeTip',
+            'label' => 'Tip osiguranja',
+        ]);
 
         $this->crud->addField([
             'type' => 'relationship',
@@ -122,12 +131,44 @@ class OsiguranjeCrudController extends CrudController {
 //            'attribute' => 'ime_prezime_jmbg'  //accessor u Osoba modelu
             'attribute' => 'id'  //accessor u Osoba modelu
         ]);
+
+        $this->crud->addField([
+            'type' => 'relationship',
+            'name' => 'firmaOsiguravajucaKuca',
+            'label' => 'Osiguravajuca kuca (pretrazi po MB ili Nazivu, case sensitive)',
+            'ajax' => true,
+//            'inline_create' => true
+        ]);
+
+        $this->crud->addField([
+            'type' => 'relationship',
+            'name' => 'firmaUgovarac',
+            'label' => 'Ugovarac osiguranja (pretrazi po MB ili Nazivu, case sensitive)',
+            'ajax' => true,
+//            'inline_create' => true
+        ]);
+
         $this->crud->addField([
             'name' => 'polisaPokrice',
             'type' => 'relationship',
-            'label' => 'Pokriæe polise',
+            'label' => 'Pokrice polise',
             'attribute' => 'naziv',
         ]);
+
+        $this->crud->field('polisa_predmet');
+        $this->crud->field('polisa_iskljucenost');
+        $this->crud->field('polisa_teritorijalni_limit');
+        $this->crud->field('polisa_datum_izdavanja');
+        $this->crud->field('polisa_datum_pocetka');
+        $this->crud->field('polisa_datum_zavrsetka');
+
+        $this->crud->addField([
+            'name' => 'statusPolise',
+            'type' => 'relationship',
+            'label' => 'Status polise',
+            'attribute' => 'naziv',
+        ]);
+
         $this->crud->addField([
             'name' => 'statusDokumenta',
             'type' => 'relationship',
@@ -135,8 +176,8 @@ class OsiguranjeCrudController extends CrudController {
             'attribute' => 'naziv',
         ]);
 
-        // TODO: remove setFromDb() and manually define Fields
-        $this->crud->setFromDb();
+        $this->crud->field('napomena');
+
     }
 
     protected function setupUpdateOperation() {
@@ -153,6 +194,24 @@ class OsiguranjeCrudController extends CrudController {
 //            } // to filter the results that are returned
         ]);
 
+    }
+
+    public function fetchFirmaOsiguravajucaKuca() {
+        return $this->fetch([
+            'model' => \App\Models\Firma::class, // required
+//            'searchable_attributes' => ['mb'],
+            'searchable_attributes' => ['mb', 'naziv'],
+            'paginate' => 10, // items to show per page
+        ]);
+    }
+
+    public function fetchFirmaUgovarac() {
+        return $this->fetch([
+            'model' => \App\Models\Firma::class, // required
+//            'searchable_attributes' => ['mb'],
+            'searchable_attributes' => ['mb', 'naziv'],
+            'paginate' => 10, // items to show per page
+        ]);
     }
 
     protected function showDetailsRow($id) {
