@@ -17,7 +17,7 @@ class OsiguranjeCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
@@ -26,7 +26,7 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osiguranje');
         $this->crud->setEntityNameStrings('osiguranje', 'osiguranja');
 
-        $this->crud->setColumns(['id', 'firmaOsiguravajucaKuca', 'firmaUgovarac', 'polisa_broj', 'polisaPokrice', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena']);
+        $this->crud->setColumns(['id', 'firmaOsiguravajucaKuca', 'firmaUgovarac', 'osobaUgovarac', 'polisa_broj', 'polisaPokrice', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena','osiguravajuca_kuca_mb','ugovarac_osiguranja_mb']);
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
@@ -51,6 +51,15 @@ class OsiguranjeCrudController extends CrudController {
             'entity' => 'firmaUgovarac',
             'attribute' => 'naziv_mb',
             'model' => 'App\Models\Firma',
+        ]);
+
+        $this->crud->setColumnDetails('osobaUgovarac', [
+            'name' => 'osobaUgovarac',
+            'type' => 'select',
+            'label' => 'Ugovarac osiguranja',
+            'entity' => 'osobaUgovarac',
+            'attribute' => 'ime_prezime_jmbg',
+            'model' => 'App\Models\Osoba',
         ]);
 
         $this->crud->setColumnDetails('statusPolise', [
@@ -85,13 +94,11 @@ class OsiguranjeCrudController extends CrudController {
             'type' => 'select',
             'label' => 'Tip osiguranja',
             'entity' => 'osiguranjeTip',
-//            'attribute' => 'naziv_mb',
             'model' => 'App\Models\OsiguranjeTip',
         ]);
 
         //vrsta osiguranja da default bude ono prvo
 
-        //status polise
 
         $this->crud->addFilter([
             'type' => 'select2',
@@ -119,8 +126,10 @@ class OsiguranjeCrudController extends CrudController {
 
         $this->crud->addField([
             'type' => 'relationship',
-            'name' => 'osiguranjeTip',
+            'name' => 'osiguranje_tip_id',
             'label' => 'Tip osiguranja',
+            'entity' => 'osiguranjeTip',
+            'model' => 'App\Models\OsiguranjeTip',
         ]);
 
         $this->crud->addField([
@@ -128,8 +137,8 @@ class OsiguranjeCrudController extends CrudController {
             'name' => 'osobe',
             'label' => 'Osobe',
             'ajax' => true,
-//            'attribute' => 'ime_prezime_jmbg'  //accessor u Osoba modelu
-            'attribute' => 'id'  //accessor u Osoba modelu
+            'attribute' => 'id',  //accessor u Osoba modelu
+            'pivot'     => true
         ]);
 
         $this->crud->addField([
@@ -139,6 +148,7 @@ class OsiguranjeCrudController extends CrudController {
             'ajax' => true,
 //            'inline_create' => true
         ]);
+//        $this->crud->field('firmaOsiguravajucaKuca');
 
         $this->crud->addField([
             'type' => 'relationship',
@@ -147,12 +157,22 @@ class OsiguranjeCrudController extends CrudController {
             'ajax' => true,
 //            'inline_create' => true
         ]);
+//        $this->crud->field('firmaUgovarac');
 
         $this->crud->addField([
-            'name' => 'polisaPokrice',
+            'type' => 'relationship',
+            'name' => 'osobaUgovarac',
+            'label' => 'Ugovarac osiguranja (osoba jmbg)',
+            'ajax' => true,
+        ]);
+
+        $this->crud->addField([
+            'name' => 'polisa_pokrice_id',
             'type' => 'relationship',
             'label' => 'Pokrice polise',
             'attribute' => 'naziv',
+            'entity' => 'polisaPokrice',
+            'model' => 'App\Models\OsiguranjePolisaPokrice'
         ]);
 
         $this->crud->field('polisa_predmet');
@@ -163,17 +183,27 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->field('polisa_datum_zavrsetka');
 
         $this->crud->addField([
-            'name' => 'statusPolise',
-            'type' => 'relationship',
+            'name' => 'status_polise_id',
+            'type' => 'select2',
             'label' => 'Status polise',
+            'entity' => 'statusPolise',
             'attribute' => 'naziv',
+            'default' => '-',
+            'options'   => (function ($query) {
+                return $query->where('log_status_grupa_id', 1)->get();
+            }),
         ]);
 
         $this->crud->addField([
-            'name' => 'statusDokumenta',
-            'type' => 'relationship',
             'label' => 'Status dokumenta',
+            'type' => 'select2',
+            'name' => 'status_dokumenta_id',
+            'entity' => 'statusDokumenta',
             'attribute' => 'naziv',
+            'default' => '-',
+            'options'   => (function ($query) {
+                return $query->where('log_status_grupa_id', 6)->get();
+            }),
         ]);
 
         $this->crud->field('napomena');
@@ -202,6 +232,9 @@ class OsiguranjeCrudController extends CrudController {
 //            'searchable_attributes' => ['mb'],
             'searchable_attributes' => ['mb', 'naziv'],
             'paginate' => 10, // items to show per page
+/*            'query' => function($model) {
+                return $model->select('mb', 'mb as id', 'naziv');
+            }*/
         ]);
     }
 
@@ -210,7 +243,25 @@ class OsiguranjeCrudController extends CrudController {
             'model' => \App\Models\Firma::class, // required
 //            'searchable_attributes' => ['mb'],
             'searchable_attributes' => ['mb', 'naziv'],
+//            'routeSegment' => 'mb', // falls back to the key of this array if not specified ("category")
             'paginate' => 10, // items to show per page
+/*            'query' => function($model) {
+                return $model->select('mb', 'mb as id', 'naziv');
+//                return $model->select('mb', 'naziv');
+            }*/
+        ]);
+    }
+
+    public function fetchOsobaUgovarac() {
+        return $this->fetch([
+            'model' => \App\Models\Osoba::class, // required
+            'searchable_attributes' => ['id'],
+//            'searchable_attributes' => ['id', 'ime', 'prezime'],
+//            'routeSegment' => 'mb', // falls back to the key of this array if not specified ("category")
+            'paginate' => 10, // items to show per page
+            'query' => function($model) {
+                return $model->select('id'/*, 'ime','prezime'*/);
+            }
         ]);
     }
 

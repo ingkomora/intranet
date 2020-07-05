@@ -119,8 +119,6 @@ class OsobaCrudController extends CrudController {
             'tab' => 'Licni podaci'
         ], 'create');
         $this->setupUpdateOperation();
-        // TODO: remove setFromDb() and manually define Fields
-//        $this->crud->setFromDb();
     }
 
     protected function setupUpdateOperation() {

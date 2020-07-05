@@ -49,7 +49,7 @@ class OsiguranjeTip extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function osiguranjas()
+    public function osiguranja()
     {
         return $this->hasMany('App\Models\Osiguranja');
     }

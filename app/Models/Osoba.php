@@ -44,6 +44,7 @@ class Osoba extends Model
      */
     public $timestamps = true;
 
+//    public $identifiableAttribute = 'ime_prezime_jmbg';
     public $identifiableAttribute = 'id';
 
     /*

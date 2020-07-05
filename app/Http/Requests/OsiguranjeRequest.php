@@ -22,14 +22,20 @@ class OsiguranjeRequest extends FormRequest {
      * @return array
      */
     public function rules() {
+        // fallback to global request instance
+/*        if (is_null($request)) {
+            $request = \Request::instance();
+        }*/
         return [
             'osiguranje_vrsta' => 'required',
-            'polisaPokrice' => 'required',
-            'firmaUgovarac' => 'required',
+            'polisa_broj' => 'required',
+            'polisa_pokrice_id' => 'required',
             'firmaOsiguravajucaKuca' => 'required',
-            'osiguranjeTip' => 'required',
-            'statusPolise' => 'required',
-            'statusDokumenta' => 'required',
+//            'firmaUgovarac' => 'required',
+//            'osobaUgovarac' => 'required',
+            'osiguranje_tip_id' => 'required',
+            'status_polise_id' => 'required',
+            'status_dokumenta_id' => 'required',
             'polisa_datum_pocetka' => 'required',
             'polisa_datum_zavrsetka' => 'required',
             'polisa_predmet' => 'required',

@@ -5,6 +5,7 @@
 @role('admin')
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('licenca') }}'><i class='nav-icon la la-question'></i> Licence</a></li>
 {{--<li class='nav-item'><a class='nav-link' href='{{ backpack_url('tag') }}'><i class='nav-icon fa fa-question'></i> Tags</a></li>--}}
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('zahtev') }}'><i class='nav-icon la la-question'></i> Zahtevi</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('osiguranje') }}'><i class='nav-icon fa fa-building'></i> Osiguranja</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('prijava') }}'><i class='nav-icon fa fa-address-book'></i> Prijave SI</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('zvanje') }}'><i class='nav-icon fa fa-question'></i> Zvanja</a></li>

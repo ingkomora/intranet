@@ -5,32 +5,6 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property integer $id
- * @property int $osiguranje_tip_id
- * @property integer $osiguravajuca_kuca_mb
- * @property integer $ugovarac_osiguranja_mb
- * @property string $osiguranje_vrsta
- * @property string $polisa_broj
- * @property string $polisa_predmet
- * @property int $polisa_pokrice_id
- * @property string $polisa_iskljucenost
- * @property string $polisa_teritorijalni_limit
- * @property string $polisa_datum_izdavanja
- * @property string $polisa_datum_pocetka
- * @property string $polisa_datum_zavrsetka
- * @property int $status_polise_id
- * @property int $status_dokumenta_id
- * @property string $napomena
- * @property string $created_at
- * @property string $updated_at
- * @property OsiguranjeTip $osiguranjeTip
- * @property Firma $firmaOsiguravajucaKuca
- * @property Firma $firmaUgovarac
- * @property Status $statusPolise
- * @property Status $statusDokumenta
- * @property Osoba[] $osobe
- */
 class Osiguranje extends Model {
 
     use CrudTrait;
@@ -52,7 +26,7 @@ class Osiguranje extends Model {
     /**
      * @var array
      */
-    protected $fillable = ['osiguranje_tip_id', 'osiguravajuca_kuca_mb', 'ugovarac_osiguranja_mb', 'osiguranje_vrsta', 'polisa_broj', 'polisa_predmet', 'polisa_pokrice_id', 'polisa_iskljucenost', 'polisa_teritorijalni_limit', 'polisa_datum_izdavanja', 'polisa_datum_pocetka', 'polisa_datum_zavrsetka', 'status_polise_id', 'status_dokumenta_id', 'napomena', 'created_at', 'updated_at'];
+    protected $fillable = ['osiguranje_tip_id', 'osiguravajuca_kuca_mb', 'ugovarac_osiguranja_mb', 'ugovarac_osiguranja_osoba_id', 'osiguranje_vrsta', 'polisa_broj', 'polisa_predmet', 'polisa_pokrice_id', 'polisa_iskljucenost', 'polisa_teritorijalni_limit', 'polisa_datum_izdavanja', 'polisa_datum_pocetka', 'polisa_datum_zavrsetka', 'status_polise_id', 'status_dokumenta_id', 'napomena', 'created_at', 'updated_at'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -67,7 +41,7 @@ class Osiguranje extends Model {
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function osiguranjeTip() {
-        return $this->belongsTo('App\Models\OsiguranjeTip');
+        return $this->belongsTo('App\Models\OsiguranjeTip','osiguranje_tip_id');
     }
 
     /**
@@ -82,6 +56,13 @@ class Osiguranje extends Model {
      */
     public function firmaUgovarac() {
         return $this->belongsTo('App\Models\Firma', 'ugovarac_osiguranja_mb', 'mb');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function osobaUgovarac() {
+        return $this->belongsTo('App\Models\Osoba', 'ugovarac_osiguranja_osoba_id');
     }
 
     /**

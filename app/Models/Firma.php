@@ -69,14 +69,14 @@ class Firma extends Model {
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function osiguravajucaKuca() {
-        return $this->hasMany('App\Models\Osiguranja', 'osiguravajuca_kuca_mb', 'mb');
+        return $this->hasMany('App\Models\Osiguranje', 'osiguravajuca_kuca_mb', 'mb');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function ugovaracOsiguranja() {
-        return $this->hasMany('App\Models\Osiguranja', 'ugovarac_osiguranja_mb', 'mb');
+        return $this->hasMany('App\Models\Osiguranje', 'ugovarac_osiguranja_mb', 'mb');
     }
 
     /*
