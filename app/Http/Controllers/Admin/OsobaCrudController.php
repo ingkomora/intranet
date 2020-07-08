@@ -86,7 +86,30 @@ class OsobaCrudController extends CrudController {
             function () {
                 $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
                 $this->crud->addClause('where', 'firma_mb', '<>', 0);
-            });
+            }
+        );
+
+        $this->crud->addFilter([
+            'type' => 'text',
+            'name' => 'ime',
+            'label' => 'Ime'
+        ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'ime', 'LIKE', "%$value%");
+            }
+        );
+
+        $this->crud->addFilter([
+            'type' => 'text',
+            'name' => 'prezime',
+            'label' => 'Prezime'
+        ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'prezime', 'LIKE', "%$value%");
+            }
+        );
 
         $this->crud->addFilter([
             'type' => 'simple',
@@ -100,13 +123,13 @@ class OsobaCrudController extends CrudController {
         );
 
         $this->crud->addFilter([
-            'type'  => 'date',
-            'name'  => 'updated_at',
+            'type' => 'date',
+            'name' => 'updated_at',
             'label' => 'Datum azuriranja'
         ],
             false,
             function ($value) { // if the filter is active, apply these constraints
-                 $this->crud->addClause('where', 'updated_at', $value);
+                $this->crud->addClause('where', 'updated_at', $value);
             });
     }
 
