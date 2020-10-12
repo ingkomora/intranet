@@ -104,16 +104,16 @@ class ZahtevController extends Controller {
                 $data->licencaTip = $licencaO->tipLicence->id;
                 $data->vrstaLicenceNaslov = $h->iso88592_to_cirUTF(mb_strtoupper($licencaO->tipLicence->vrstaLicence->naziv_genitiv));
                 $data->vrstaLicence = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->vrstaLicence->naziv_genitiv));
-                if (is_null($licencaO->tipLicence->oznaka)) {
-                    if ($licencaO->tipLicence->idn == '381') {
-                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni inženjer', 'Odgovornog inženjera', $licencaO->tipLicence->naziv)));
-                    } else if ($licencaO->tipLicence->idn == '381E') {
-                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni projektant za energetsku efikasnost zgrada (oznaka EE 12-01)', 'Odgovornog projektanta za energetsku efikasnost zgrada', $licencaO->tipLicence->naziv)));
-                    } else {
-                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace($licencaO->tipLicence->vrstaLicence->naziv, $licencaO->tipLicence->vrstaLicence->naziv_genitiv, $licencaO->tipLicence->naziv)));
-                    }
+                if ($data->licencaTip == '381') {
+                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni inženjer', 'Odgovornog inženjera', $licencaO->tipLicence->naziv)));
+                } else if ($data->licencaTip == '381E') {
+                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni projektant za energetsku efikasnost zgrada (oznaka EE 12-01)', 'Odgovornog projektanta za energetsku efikasnost zgrada', $licencaO->tipLicence->naziv)));
                 } else {
-                    $data->nazivLicence = "";
+                    if (is_null($licencaO->tipLicence->oznaka)) {
+                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace($licencaO->tipLicence->vrstaLicence->naziv, $licencaO->tipLicence->vrstaLicence->naziv_genitiv, $licencaO->tipLicence->naziv)));
+                    } else {
+                        $data->nazivLicence = "";
+                    }
                 }
                 $data->strucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->tipLicenceReg->podOblast->regOblast->naziv));
                 $data->uzaStrucnaOblastId = $licencaO->tipLicence->tipLicenceReg->podOblast->id;
