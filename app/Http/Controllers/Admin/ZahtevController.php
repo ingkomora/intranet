@@ -126,9 +126,9 @@ class ZahtevController extends Controller {
 //                  poziv direktno - aktuelno
                 $pdf = PDF::loadView('svecanaforma', (array)$data);
 //                $pdf = PDF::loadView('svecanaforma-datum', (array)$data);
-                Storage::put("public/pdf/$data->filename.pdf", $pdf->output());
+//                Storage::put("public/pdf/$data->filename.pdf", $pdf->output());
 //                  PREVIEW
-//                return $pdf->stream("$data->filename.pdf");
+                return $pdf->stream("$data->filename.pdf");
 
                 $countOK++;
                 echo "<br>$count. $licenca OK";
