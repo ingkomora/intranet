@@ -7,7 +7,7 @@ use App\Models\Clanarina;
 use App\Models\Licenca;
 use App\Models\Osiguranje;
 use App\Models\Osoba;
-use App\Models\Zahtev;
+use App\Models\ZahtevLicenca;
 use App\Models\EvidencijaMirovanja;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +30,7 @@ class ProveraLibrary {
     /**
      * @param $licenca
      */
-    public function statusNoveLicence(Zahtev $zahtev) {
+    public function statusNoveLicence(ZahtevLicenca $zahtev) {
         if ($zahtev->exists) {
             $this->setZahtev($zahtev);
             $this->setJmbg($zahtev->osoba);
@@ -190,7 +190,7 @@ class ProveraLibrary {
      */
     public function getJmbgFromZahtev($zahtev) {
         $this->setZahtev($zahtev);
-        $this->jmbg = Zahtev::find($zahtev)->osoba;
+        $this->jmbg = ZahtevLicenca::find($zahtev)->osoba;
         return $this->jmbg;
     }
 

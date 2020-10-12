@@ -5,16 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property int $id
- * @property string osoba_id',13
- * @property string zavodni_broj
- * @property date datum_prijema
- * @property integer zahtev_tip_id
- * @property integer status_id
- * @property text napomena
-*/
-class Zahtev extends Model
+class PrijavaClanstvo extends Model
 {
     use CrudTrait;
 
@@ -24,7 +15,7 @@ class Zahtev extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'zahtevi';
+    protected $table = 'prijave_clanstvo';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -45,7 +36,6 @@ class Zahtev extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -53,21 +43,12 @@ class Zahtev extends Model
     {
         return $this->belongsTo('App\Models\Osoba', 'osoba_id');
     }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function tip()
-    {
-        return $this->belongsTo('App\Models\ZahtevTip', 'zahtev_tip_id');
-    }
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function status()
     {
-        return $this->belongsTo('App\Models\Statusi', 'status_id');
+        return $this->belongsTo('App\Models\Status', 'status_id');
     }
     /*
     |--------------------------------------------------------------------------

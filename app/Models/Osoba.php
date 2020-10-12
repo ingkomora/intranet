@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Tesla\JMBG\JMBG;
 
 class Osoba extends Model
 {
@@ -52,6 +53,13 @@ class Osoba extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
+    public function validanJmbg(){
+        if(JMBG::for($this->id)->isValid()){
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -128,7 +136,7 @@ class Osoba extends Model
      */
     public function zahtevi()
     {
-        return $this->hasMany('App\Models\Zahtev', 'osoba');
+        return $this->hasMany('App\Models\ZahtevLicenca', 'osoba');
     }
 
     /**
@@ -153,7 +161,7 @@ class Osoba extends Model
      */
     public function preglediZahteva()
     {
-        return $this->belongsToMany('App\Models\Zahtev', 'tzahtevpregled', 'osoba_id', 'zahtev_id');
+        return $this->belongsToMany('App\Models\ZahtevLicenca', 'tzahtevpregled', 'osoba_id', 'zahtev_id');
     }
 
     /**

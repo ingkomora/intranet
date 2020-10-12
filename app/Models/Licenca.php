@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $broj_resenja
  * @property string $licencatip
  * @property Osoba $osobaId
- * @property Zahtev $zahtevId
+ * @property ZahtevLicenca $zahtevId
  */
 class Licenca extends Model
 {
@@ -82,9 +82,18 @@ class Licenca extends Model
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     */
+    public function tipLicenceReg()
+    {
+        return $this->belongsTo('App\Models\RegLicencaTip', 'licencatip');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function zahtevId()
     {
-        return $this->belongsTo('App\Models\Zahtev', 'zahtev');
+        return $this->belongsTo('App\Models\ZahtevLicenca', 'zahtev');
     }
 }

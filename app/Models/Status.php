@@ -8,20 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $naziv
- * @property string $tekst
+ * @property string $log_status_grupa_id
  * @property string $napomena
- * @property string $stateable_type
- * @property integer $stateable_id
- * @property string $created_at
- * @property string $updated_at
+ * @property string $const
  */
-class Status extends Model
-{
+class Status extends Model {
+
     use CrudTrait;
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL VARIABLES
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'statusi';
@@ -29,21 +31,60 @@ class Status extends Model
     /**
      * @var array
      */
-    protected $fillable = ['naziv', 'tekst', 'napomena', 'stateable_type', 'stateable_id', 'created_at', 'updated_at'];
+    protected $fillable = ['naziv', 'log_status_grupa_id', 'napomena', 'const'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = false;
 
+    public $identifiableAttribute = 'id';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\morphOne
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function log()
+    public function statusGrupa()
     {
-        return $this->morphOne('App\Models\Log', 'loggable');
+        return $this->belongsTo('App\Models\LogStatusGrupa', 'log_status_grupa_id');
     }
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * Get the user's Full name with jmbg.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getNazivIdAttribute() {
+        return "{$this->naziv} ($this->id)";
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATORS
+    |--------------------------------------------------------------------------
+    */
 
 }
