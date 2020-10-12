@@ -130,7 +130,9 @@ class ZahtevController extends Controller {
 //                $pdf = PDF::loadView('svecanaforma-datum', (array)$data);
 //                Storage::put("public/pdf/$data->filename.pdf", $pdf->output());
 //                  PREVIEW
-                return $pdf->stream("$data->filename.pdf");
+//                return $pdf->stream("$data->filename.pdf");
+                return $pdf->download("$data->filename.pdf");
+
 
                 $countOK++;
                 echo "<br>$count. $licenca OK";
