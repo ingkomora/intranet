@@ -36,9 +36,9 @@ class PrijavaCrudController extends CrudController {
         | CrudPanel Configuration
         |--------------------------------------------------------------------------
         */
-        $this->crud->setColumns(['id', 'osoba_id','reg_oblast_id', 'reg_pod_oblast_id', 'zvanje_id', 'si_vrsta_id','status_prijave', 'strucni_rad', 'barcode']);
+        $this->crud->setColumns(['id', 'osoba_id', 'reg_oblast_id', 'reg_pod_oblast_id', 'zvanje_id', 'si_vrsta_id', 'status_prijave', 'strucni_rad', 'barcode']);
 
-$this->crud->setColumnDetails('osoba_id',[
+        $this->crud->setColumnDetails('osoba_id', [
             'name' => 'osoba_id',
             'type' => 'select',
             'label' => 'Osoba',
@@ -46,7 +46,7 @@ $this->crud->setColumnDetails('osoba_id',[
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
         ]);
-        $this->crud->setColumnDetails('reg_oblast_id',[
+        $this->crud->setColumnDetails('reg_oblast_id', [
             'name' => 'reg_oblast_id',
             'type' => 'select',
             'label' => 'Strucna oblast',
@@ -54,16 +54,16 @@ $this->crud->setColumnDetails('osoba_id',[
             'attribute' => 'naziv',
             'model' => 'App\Models\RegOblast',
         ]);
-/*        $this->crud->setColumnDetails('reg_pod_oblast_id',[
-            'name' => 'reg_pod_oblast_id',
-            'type' => 'select',
-            'label' => 'Uza Strucna oblast',
-            'entity' => 'regPodOblast',
-            'attribute' => 'naziv',
-            'model' => 'App\Models\RegPodOblast',
-        ]);*/
+        /*        $this->crud->setColumnDetails('reg_pod_oblast_id',[
+                    'name' => 'reg_pod_oblast_id',
+                    'type' => 'select',
+                    'label' => 'Uza Strucna oblast',
+                    'entity' => 'regPodOblast',
+                    'attribute' => 'naziv',
+                    'model' => 'App\Models\RegPodOblast',
+                ]);*/
 
-        $this->crud->setColumnDetails('zvanje_id',[
+        $this->crud->setColumnDetails('zvanje_id', [
             'name' => 'zvanje_id',
             'type' => 'select',
             'label' => 'Zvanje',
@@ -71,7 +71,7 @@ $this->crud->setColumnDetails('osoba_id',[
             'attribute' => 'naziv',
             'model' => 'App\Models\Zvanje',
         ]);
-        $this->crud->setColumnDetails('si_vrsta_id',[
+        $this->crud->setColumnDetails('si_vrsta_id', [
             'name' => 'si_vrsta_id',
             'type' => 'select',
             'label' => 'Vrsta SI',

@@ -58,7 +58,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->setColumnDetails('opstinaId', [
             'name' => 'opstinaId',
             'type' => 'select',
-            'label' => 'Op¹tina',
+            'label' => 'OpÅ¡tina',
             'entity' => 'opstinaId',
             'attribute' => 'ime',
             'model' => 'App\Models\Opstina',
@@ -164,7 +164,7 @@ class OsobaCrudController extends CrudController {
         $this->crud->field('kontaktemail')->tab('Licni podaci');
         $this->crud->field('prebivalistebroj')->tab('Podaci o prebivalistu');
         $this->crud->field('prebivalistemesto')->tab('Podaci o prebivalistu');
-        $this->crud->field('opstinaId')->label('Op¹tina prebivali¹ta')->tab('Podaci o prebivalistu');
+        $this->crud->field('opstinaId')->label('OpÅ¡tina prebivaliÅ¡ta')->tab('Podaci o prebivalistu');
         $this->crud->field('prebivalisteadresa')->tab('Podaci o prebivalistu');
         $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly' => 'readonly']);
         $this->crud->addField([

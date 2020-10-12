@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ZahtevRequest;
+use App\Http\Requests\ZahtevTipRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class ZahtevCrudController
+ * Class ZahtevTipCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ZahtevCrudController extends CrudController
+class ZahtevTipCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class ZahtevCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Zahtev::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtev');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi');
+        CRUD::setModel(\App\Models\ZahtevTip::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevtip');
+        CRUD::setEntityNameStrings('zahtevtip', 'zahtev_tip');
     }
 
     /**
@@ -39,7 +39,7 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        
+        CRUD::setFromDb(); // columns
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,9 +56,9 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ZahtevRequest::class);
+        CRUD::setValidation(ZahtevTipRequest::class);
 
-        
+        CRUD::setFromDb(); // fields
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

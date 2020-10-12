@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\OsiguranjeRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Backpack\PermissionManager\app\Models\Role;
 
 
 /**
@@ -13,11 +14,14 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @property-read CrudPanel $crud
  */
 class OsiguranjeCrudController extends CrudController {
+
+//if(backpack_user()->can('edit articles'))
+//backpack_user()->hasPermissionTo('edit')
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
@@ -30,6 +34,13 @@ class OsiguranjeCrudController extends CrudController {
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
+
+        $permissionNames = backpack_user()->getPermissionNames(); // collection of name strings
+        $permissions = backpack_user()->permissions; // collection of permission objects
+        $this->crud->denyAccess('all');
+        if(backpack_user()->hasPermissionTo('update')){
+
+        }
 
     }
 

@@ -21,7 +21,7 @@ class RegPodOblastCrudController extends CrudController
 
     public function setup()
     {
-        $this->crud->setModel('App\Models\RegPodOblast');
+        $this->crud->setModel('App\Models\RegPodoblast');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/regpodoblast');
         $this->crud->setEntityNameStrings('regpodoblast', 'reg_pod_oblasti');
     }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ZahtevRequest;
+use App\Http\Requests\ZahtevLicencaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -11,13 +11,13 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ZahtevCrudController extends CrudController
+class ZahtevLicencaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -26,9 +26,9 @@ class ZahtevCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Zahtev::class);
+        CRUD::setModel(\App\Models\ZahtevLicenca::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtev');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi');
+        CRUD::setEntityNameStrings('zahtevlicenca', 'Zahtevi Licence');
     }
 
     /**
@@ -39,7 +39,28 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        
+        CRUD::column('id');
+        CRUD::column('osoba');
+        CRUD::column('licencatip');
+//        CRUD::column('strucniispit');
+//        CRUD::column('referenca1');
+//        CRUD::column('referenca2');
+//        CRUD::column('pecat');
+        CRUD::column('datum');
+        CRUD::column('status');
+//        CRUD::column('razlog');
+        CRUD::column('prijem');
+//        CRUD::column('preporuka2');
+//        CRUD::column('preporuka1');
+//        CRUD::column('mestopreuzimanja');
+        CRUD::column('status_pregleda');
+        CRUD::column('datum_statusa_pregleda');
+        CRUD::column('prijava_clan_id');
+        CRUD::column('licenca_broj');
+        CRUD::column('licenca_broj_resenja');
+        CRUD::column('licenca_datum_resenja');
+        CRUD::column('created_at');
+        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,9 +77,27 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ZahtevRequest::class);
+        CRUD::setValidation(ZahtevLicencaRequest::class);
 
-        
+        CRUD::field('osoba');
+        CRUD::field('licencatip');
+        CRUD::field('strucniispit');
+        CRUD::field('referenca1');
+        CRUD::field('referenca2');
+        CRUD::field('pecat');
+        CRUD::field('datum');
+        CRUD::field('status');
+        CRUD::field('razlog');
+        CRUD::field('prijem');
+        CRUD::field('preporuka2');
+        CRUD::field('preporuka1');
+        CRUD::field('mestopreuzimanja');
+        CRUD::field('status_pregleda');
+        CRUD::field('datum_statusa_pregleda');
+        CRUD::field('prijava_clan_id');
+        CRUD::field('licenca_broj');
+        CRUD::field('licenca_broj_resenja');
+        CRUD::field('licenca_datum_resenja');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

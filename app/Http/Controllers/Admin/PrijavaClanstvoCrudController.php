@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ZahtevRequest;
+use App\Http\Requests\PrijavaClanstvoRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class ZahtevCrudController
+ * Class PrijavaClanstvoCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ZahtevCrudController extends CrudController
+class PrijavaClanstvoCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,29 @@ class ZahtevCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Zahtev::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtev');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi');
+        CRUD::setModel(\App\Models\PrijavaClanstvo::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/prijavaclanstvo');
+        CRUD::setEntityNameStrings('prijavaclanstvo', 'prijava_clanstvos');
+
+        $this->crud->setColumns(['id', 'osoba_id', 'datum_prijema', 'zavodni_broj', 'barcode', 'broj_odluke_uo', 'status_id', 'napomena']);
+
+        $this->crud->setColumnDetails('osoba_id', [
+            'name' => 'osoba_id',
+            'type' => 'select',
+            'label' => 'Osoba',
+            'entity' => 'osoba',
+            'attribute' => 'ime_prezime_jmbg',
+            'model' => 'App\Models\Osoba',
+        ]);
+
+        $this->crud->setColumnDetails('status_id', [
+            'name' => 'status_id',
+            'type' => 'select',
+            'label' => 'Status',
+            'entity' => 'status',
+            'attribute' => 'naziv_id',
+            'model' => 'App\Models\Status',
+        ]);
     }
 
     /**
@@ -39,7 +59,7 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        
+        CRUD::setFromDb(); // columns
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,9 +76,9 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ZahtevRequest::class);
+        CRUD::setValidation(PrijavaClanstvoRequest::class);
 
-        
+        CRUD::setFromDb(); // fields
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

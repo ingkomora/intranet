@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ZahtevRequest;
+use App\Http\Requests\StatusRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class ZahtevCrudController
+ * Class StatusCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ZahtevCrudController extends CrudController
+class StatusCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,21 @@ class ZahtevCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Zahtev::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtev');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi');
+        CRUD::setModel(\App\Models\Status::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/status');
+        CRUD::setEntityNameStrings('status', 'Statusi');
+
+        $this->crud->setColumns(['id', 'naziv', 'log_status_grupa_id', 'napomena', 'const']);
+
+
+        $this->crud->setColumnDetails('log_status_grupa_id', [
+            'name' => 'log_status_grupa_id',
+            'type' => 'select',
+            'label' => 'Status',
+            'entity' => 'statusGrupa',
+            'attribute' => 'naziv_id',
+            'model' => 'App\Models\LogStatusGrupa',
+        ]);
     }
 
     /**
@@ -39,7 +51,20 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        
+        CRUD::column('naziv');
+        CRUD::column('log_status_grupa_id');
+        CRUD::column('napomena');
+        CRUD::column('const');
+
+        $this->crud->addFilter([
+            'type' => 'select2',
+            'name' => 'log_status_grupa_id',
+            'label' => 'Status grupa'
+        ], function () {
+            return \App\Models\LogStatusGrupa::all()->keyBy('id')->pluck('naziv', 'id')->toArray();
+        }, function ($value) {
+            $this->crud->addClause('where', 'log_status_grupa_id', $value);
+        });
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,9 +81,17 @@ class ZahtevCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(ZahtevRequest::class);
+        CRUD::setValidation(StatusRequest::class);
 
-        
+        CRUD::field('naziv');
+//        CRUD::field('log_status_grupa_id');
+        $this->crud->addField([
+            'type' => 'relationship',
+            'name' => 'statusGrupa',
+            'label' => 'Status grupa'
+        ]);
+        CRUD::field('napomena');
+        CRUD::field('const');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

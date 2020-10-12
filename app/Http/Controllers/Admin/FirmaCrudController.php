@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\FirmaRequest;
-use App\Http\Requests\OsobaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -39,7 +38,7 @@ class FirmaCrudController extends CrudController {
         $this->crud->setColumnDetails('opstina', [
             'name' => 'opstina',
             'type' => 'select',
-            'label' => 'Op¹tina',
+            'label' => 'OpÅ¡tina',
             'entity' => 'opstina',
             'attribute' => 'ime',
             'model' => 'App\Models\Opstina',
@@ -61,7 +60,7 @@ class FirmaCrudController extends CrudController {
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'opstina',
-            'label' => 'Op¹tina'
+            'label' => 'OpÅ¡tina'
         ]);
         $this->crud->field('fax');
         $this->crud->field('telefon');
