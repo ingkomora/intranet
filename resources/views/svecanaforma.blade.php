@@ -31,14 +31,15 @@
         <table id="potpis">
             <tr>
                 <td style="width: 64%;"></td>
-                <td class="potpis">ПОТПРЕДСЕДНИЦА ВЛАДЕ<br>И МИНИСТАРКА</td>
+                <td class="potpis">МИНИСТАР</td>
             </tr>
             <tr>
                 <td style="width: 64%;"></td>
-                <td class="potpis">Проф. др Зорана З. Михајловић</td>
+                <td class="potpis">Томислав Момировић</td>
             </tr>
             <tr style="height: 70px; padding-top: 0;">
                 <td class="datum" style="width: 60%;">У Београду, {{ $datumStampe }} године</td>
+{{--                <td class="datum" style="width: 60%;">У Београду, {{ $datumStampe }}</td>--}}
                 {{--                <td class="datum" style="width: 60%;">У Београду, {{ date('d.m.Y.') }}</td>--}}
 
                 <td></td>

@@ -31,6 +31,7 @@ Route::get('pdf', 'PdfController@downloadPDF');
 Route::get('test', 'HomeController@test');
     Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi');
     Route::post('obradizahtevsvecanaforma', 'ZahtevController@obradizahtevsvecanaforma');
+    Route::post('preuzimanjesvecanaforma', 'ZahtevController@preuzimanjesvecanaforma');
 
     Route::crud('prijavasistara', 'PrijavaSiStaraCrudController');
     Route::crud('prijavaclanstvo', 'PrijavaClanstvoCrudController');

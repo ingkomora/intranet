@@ -17,9 +17,6 @@
         .container {
             text-align: center;
         }
-        .report {
-            text-align: left;
-        }
 
         #nadnaslov{
             font-weight: bold;
@@ -30,6 +27,49 @@
         #naslov{
             font-weight: bold;
             font-size: 8.5pt;
+            margin-top: 0;
+        }
+
+        #report-header {
+            position: relative;
+            margin: 0 auto;
+            font-family: DejaVu Sans;
+            display: block;
+        }
+
+        #report-content {
+            position: relative;
+            font-family: DejaVu Sans;
+            font-size: 11pt;
+            text-align: left;
+            margin-top: 1cm;
+        }
+
+        #logo{
+
+            /*height: 2cm;*/
+            display: block;
+            margin: 0 auto;
+        }
+        #logo img{
+            height: 2cm;
+        }
+
+        #report-header #nadnaslov{
+            font-weight: bold;
+            font-size: 10pt;
+            margin-top: 2cm;
+        }
+
+        #report-header #naslov{
+            font-weight: bold;
+            font-size: 14pt;
+            margin-top: 0;
+        }
+
+        #report-header #podnaslov{
+            font-weight: bold;
+            font-size: 10pt;
             margin-top: 0;
         }
 
@@ -112,7 +152,8 @@
             font-size: 8.5pt;
             padding-top: 0.5cm;
         }
-        .datum, .list{
+        .datum{
+            padding-top: 0.7cm;
             font-size: 8.5pt;
         }
 
