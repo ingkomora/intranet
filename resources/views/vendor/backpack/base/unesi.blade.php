@@ -18,9 +18,9 @@
 
             </div>
             <div class="form-group row">
-                <label for="datum" class="col-sm-3 col-form-label col-form-label-sm">Izaberi Excel datoteku</label>
+                <label for="datum" class="col-sm-3 col-form-label col-form-label-sm">Datum</label>
                 <div class="col-sm-9">
-                    <input type="file" class="form-control form-control-sm" id="upload" name="upload"/>
+                    <input type="date" class="form-control form-control-sm" id="datum" name="datum"/>
                 </div>
 
             </div>
