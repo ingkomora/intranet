@@ -46,4 +46,27 @@ class Helper {
         return strtr($text, $map);
     }
 
+    public function in_array_recursive($needle, Array $haystack, string $attribute) {
+//        echo "<br>test";
+//        var_dump($haystack);
+        if (!empty($haystack) AND is_array($haystack)) {
+            foreach ($haystack as $key => $item) {
+                if (is_array($item)) {
+//                    echo "<br>item is array";
+                    $this->in_array_recursive($needle, $item, $attribute);
+                } else {
+//                    if ($attribute == $key) {
+//                    echo strcmp(mb_strtolower($item), mb_strtolower($needle));
+                    if (strcmp(mb_strtolower($item), mb_strtolower($needle)) == 0) {
+//                        var_dump($item);
+                        echo "<br>item $item = needle $needle";
+                        return true;
+                    }
+//                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }

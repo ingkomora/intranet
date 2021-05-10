@@ -4,11 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Imports\ExcelImport;
 use App\Libraries\Helper;
+use App\Libraries\ProveraLibrary;
+use App\Models\LicencaTip;
+use App\Models\Log;
+use App\Models\LogOsoba;
+use App\Models\Osoba;
+use App\Models\ZahtevLicenca;
+use Doctrine\DBAL\Schema\AbstractAsset;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
+use App\Models\Licenca;
 
 
 class ZahtevController extends Controller {
@@ -35,6 +44,8 @@ class ZahtevController extends Controller {
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function obradizahtevsvecanaforma(Request $request) {
+//        TODO U TABELU
+
         $file = $request->file('upload');
 
         if (!is_null($file)) {
@@ -79,7 +90,7 @@ class ZahtevController extends Controller {
         $messageZahtevOK = 'Zahtevi: ';
         $messageZahtevNOK = 'Zahtevi: ';
         $flagOK = false;
-        $flagNOTOK = false;
+        $flagNOK = false;
         $count = 0;
         $countOK = 0;
         $countNOK = 0;
@@ -93,8 +104,8 @@ class ZahtevController extends Controller {
 
 //dd($licenca);
             $status_grupa = LICENCE;
-            $licencaO = \App\Models\Licenca::find($licenca);
-//dd($licencaO);
+            $licencaO = Licenca::find($licenca);
+//dd($licencaO->tipLicence->vrstaLicence->naziv);
             if (!is_null($licencaO)) {
                 $osoba = $licencaO->osobaId;
                 $h = new Helper();
@@ -112,22 +123,58 @@ class ZahtevController extends Controller {
                 $data->zvanjeskr = $h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
                 $data->licenca = $h->iso88592_to_cirUTF(mb_strtoupper($licenca));
                 $data->licencaTip = $licencaO->tipLicence->id;
-                $data->vrstaLicenceNaslov = $h->iso88592_to_cirUTF(mb_strtoupper($licencaO->tipLicence->vrstaLicence->naziv_genitiv));
-                $data->vrstaLicence = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->vrstaLicence->naziv_genitiv));
-                if ($data->licencaTip == '381') {
-                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni inženjer', 'Odgovornog inženjera', $licencaO->tipLicence->naziv)));
-                } else if ($data->licencaTip == '381E') {
-                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni projektant za energetsku efikasnost zgrada (oznaka EE 12-01)', 'Odgovornog projektanta za energetsku efikasnost zgrada', $licencaO->tipLicence->naziv)));
+                $gen = $licencaO->tipLicence->generacija;
+                $licencaTipNaziv = $licencaO->tipLicence->naziv;
+                $temp = '';
+                $nazivArr = array_filter(array_keys(PROFESIONALNI_NAZIV[$gen]), function ($value) use ($licencaTipNaziv, $temp) {
+                    return strpos($licencaTipNaziv, $value) !== false;
+                });
+                if ($nazivArr) {
+                    $lenArr = array_map('strlen', $nazivArr);
+                    $naziv = $nazivArr[array_search(max($lenArr), $lenArr)];
                 } else {
-                    if (is_null($licencaO->tipLicence->oznaka)) {
-                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace($licencaO->tipLicence->vrstaLicence->naziv, $licencaO->tipLicence->vrstaLicence->naziv_genitiv, $licencaO->tipLicence->naziv)));
-                    } else {
-                        $data->nazivLicence = "";
-                    }
+                    $errormsg = "Nije pronadjen ispravan naziv tipa licence za broj licence: $licenca";
+                    toastr()->error($errormsg);
+                    return redirect($this->path . "unesi/obradizahtevsvecanaforma/")
+                        ->withErrors($errormsg)
+                        ->withInput();
+
+                    exit("Greška, nije pronadjen ");
+                    return false;
                 }
-                $data->strucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->tipLicenceReg->podOblast->regOblast->naziv));
-                $data->uzaStrucnaOblastId = $licencaO->tipLicence->tipLicenceReg->podOblast->id;
-                $data->uzaStrucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->tipLicenceReg->podOblast->naziv));
+//                dd($naziv);
+//                $naziv = $nazivArr[0];
+                $nazivPadez = PROFESIONALNI_NAZIV[$gen][$naziv];
+                $data->vrstaLicenceNaslov = $h->iso88592_to_cirUTF(mb_strtoupper($nazivPadez));
+                switch ($gen) {
+                    case  1:
+                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaO->tipLicence->naziv)));
+                        break;
+                    case  2:
+                        $data->vrstaLicence = 'ималац лиценце ' . $h->iso88592_to_cirUTF(mb_strtolower($nazivPadez));
+                        break;
+                    case  3:
+                        $data->vrstaLicence = 'лиценцирани ' . $h->iso88592_to_cirUTF(mb_strtolower($naziv));
+                        break;
+                    default:
+                        break;
+                }
+                /*                if ($data->licencaTip == '381') {
+                                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni inženjer', 'Odgovornog inženjera', $licencaO->tipLicence->naziv)));
+                                } else if ($data->licencaTip == '381E') {
+                                    $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace('Odgovorni projektant za energetsku efikasnost zgrada (oznaka EE 12-01)', 'Odgovornog projektanta za energetsku efikasnost zgrada', $licencaO->tipLicence->naziv)));
+                                } else {
+                                    if (is_null($licencaO->tipLicence->oznaka)) {
+                                        $data->nazivLicence = mb_strtolower($h->iso88592_to_cirUTF(str_replace($licencaO->tipLicence->vrstaLicence->naziv, $licencaO->tipLicence->vrstaLicence->naziv_genitiv, $licencaO->tipLicence->naziv)));
+                                    } else {
+                                        $data->nazivLicence = "";
+                                    }
+                                }*/
+                $data->strucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->regOblast->naziv));
+                $data->uzaStrucnaOblastId = $licencaO->tipLicence->podOblast->id;
+                $data->uzaStrucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->naziv));
+                $data->brojResenja = $licencaO->broj_resenja;
+                $data->datumResenja = date('d.m.Y.', strtotime($licencaO->datumuo));
                 $data->datumStampe = date('d.m.Y.', strtotime($datumstampe));
                 $data->filename = $osoba->ime . "_" . $osoba->roditelj . "_" . $osoba->prezime . "_" . $licenca;
 
@@ -164,7 +211,7 @@ class ZahtevController extends Controller {
             }
 //                var_dump($dataPrint);
 //            break;
-        }
+        } //end foreach
 
         usort($dataPrint['dataOK'], function ($a, $b) {
             return $a->osobaImeRPrezime <=> $b->osobaImeRPrezime;
@@ -210,15 +257,15 @@ class ZahtevController extends Controller {
         echo "<br>OK: $countOK";
         echo "<br>NOT OK: $countNOK";
 
-        dd($countOK);
         $path = storage_path('app/public/pdf');
 
         if ($countOK > 1) {
             $pdfFiles = Storage::files($path);
             //zip files
-            $zip_file = 'zahtevi.zip';
+            $zip_file = 'storage/zip/zahtevi.zip';
             $zip = new \ZipArchive();
             $zip->open($zip_file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+            dd($pdfFiles);
 
             $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
             foreach ($files as $name => $file) {
@@ -233,9 +280,14 @@ class ZahtevController extends Controller {
                 }
             }
             $zip->close();
-//            Storage::delete($pdfFiles);
+            Storage::delete($pdfFiles);
+//            TODO dobro snimi lose downloaduje
+            return Storage::download($zip_file);
 //            return response()->download($zip_file);
         } else if ($countOK == 1) {
+            Storage::delete("public/pdf/$data->filename.pdf");
+//            TODO font je drugaciji
+            return $pdf->download("$data->filename.pdf");
 
             //download one file
         } else {
@@ -271,33 +323,295 @@ class ZahtevController extends Controller {
 
                 $osoba = $licenca->osobaId;
             }
-
-
         }
         dd($result);
+    }
+
+    public function unesinovelicence(Request $request) {
+        $file = $request->file('upload');
+        if (!is_null($file)) {
+//            UNOS LICENCI IZ EXCEL DATOTEKE
+            $import = new ExcelImport();
+            try {
+                $collection = ($import->toCollection($file));
+//        dd($import);
+                $licence = $collection[0]->where('import', 1)->toArray();
+            } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+                $failures = $e->failures();
+                dd($failures);
+            }
+        } else {
+//            UNOS LICENCI IZ POLJA ZA UNOS
+            $licence = $request->get('licence');
+            $validated = $request->validate([
+                'licence' => [
+                    function ($attribute, $values, $fail) {
+                        $error = false;
+                        foreach ($values as $value) {
+                            $zahtev = ZahtevLicenca::where(['licenca_broj' => $value['broj']])->first();
+//                            dd($zahtev);
+                            if (!is_null($zahtev)) {
+                                if ($zahtev->osoba !== $value['jmbg']) {
+                                    $error = true;
+                                    $fail('JMBG: ' . $value['jmbg'] . ' se ne slaže sa brojem licence, proverite unos.');
+                                }
+                            }
+                        }
+//        dd($error);
+                    }
+                ],
+            ]);
+        }
+        $messageLicencaOK = 'Licence: ';
+        $messageLicencaNOTOK = 'Licence: ';
+        $flagOK = false;
+        $flagNOTOK = false;
+        $countOK = 0;
+        $countNOTOK = 0;
+//            dd($licence);
+//        LICENCE SPREMNE ZA UNOS U BAZU
+        foreach ($licence as $licenca) {
+//                IMPORTUJU SE SAMO ZAHTEVI KAD VEC POSTOJI OSOBA SA LICENCAMA
+//                ZA SADA SU SVE DODATE LICENCE AKTIVNE
+//            UBUDUCE CE SE UBACIVATI I LICENCE AUTOMATSKI DOBIJENE NAKON POLOZENOG STRUCNOG ISPITA
+//            $provera->getJmbgFromLicenca($licenca['broj']);
+
+            $licenca['broj'] = strtoupper(trim($licenca['broj']));
+
+
+            if (!$this->getOsoba(trim($licenca['jmbg']))) {
+                return Redirect::back()->withErrors(['Osoba ne postoji!']);
+            }
+            $respZ = $this->getZahtevLicenca($licenca['broj']);
+
+            if ($respZ->status) {
+                if ($respZ->zahtev->status <= ZAHTEV_LICENCA_GENERISAN) {
+//                  AZURIRAJ ZAHTEV
+                    $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
+                } else {
+//                  ZAHTEV JE VEC OBRADJEN
+                    $messageLicencaNOTOK = "Zahtev za broj licence: " . $licenca['broj'] . ' je ' . strtoupper($respZ->zahtev->status);
+                }
+            } else {
+//              KREIRAJ ZAHTEV
+                $respZ = $this->kreirajZahtevLicenca($licenca);
+            }
+            $this->log($respZ->zahtev, LICENCE, $respZ->message);
+            $respL = $this->getLicenca($respZ->zahtev->licenca_broj);
+            if ($respL->status) {
+                $respL = $this->azurirajLicencu($respL->licenca, $respZ->zahtev);
+            } else {
+                $respL = $this->kreirajlicencu($respZ->zahtev);
+            }
+
+//            TODO prikazati status licence u toasteru
+            if ($respL->status) {
+                $messageLicencaOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
+                $flagOK = true;
+                $countOK++;
+            } else {
+                $messageLicencaNOTOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
+                $flagNOTOK = true;
+                $countNOTOK++;
+            }
+//            dd($respL->licenca);
+            $this->logOsoba($respL->licenca, LICENCE, $respL->message);
+
+//            TODO TREBA DODATI SLUCAJ KAD NEMA OSOBE A NIJE PODNEO ZAHTEV ZA CLANSTVO TJ. UPIS NOVE OSOBE U REGISTAR ALI TREBALO BI DA JE IMA IZ SI
+        }
+        $messageLicencaOK .= "su uspešno sačuvane u bazi ($countOK)";
+        $messageLicencaNOTOK .= "nisu sačuvane u bazi ($countNOTOK)";
+
+        info($messageLicencaOK);
+//        $flagNOTOK ? toastr()->error($messageLicencaNOTOK) : toastr()->warning("Nema grešaka");
+//        $flagOK ? toastr()->success($messageLicencaOK) : toastr()->warning("Nema kreiranih licenci");
+        return redirect('/admin/unesinovelicence')->with('message', $messageLicencaOK)->withInput();
+    }
+
+    private function getOsoba($jmbg) {
+        $osoba = Osoba::find($jmbg);
+        if (!is_null($osoba)) {
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
-    public function in_array_recursive($needle, Array $haystack, string $attribute) {
-//        echo "<br>test";
-//        var_dump($haystack);
-        if (!empty($haystack) AND is_array($haystack)) {
-            foreach ($haystack as $key => $item) {
-                if (is_array($item)) {
-//                    echo "<br>item is array";
-                    $this->in_array_recursive($needle, $item, $attribute);
-                } else {
-//                    if ($attribute == $key) {
-//                    echo strcmp(mb_strtolower($item), mb_strtolower($needle));
-                    if (strcmp(mb_strtolower($item), mb_strtolower($needle)) == 0) {
-//                        var_dump($item);
-                        echo "<br>item $item = needle $needle";
-                        return true;
-                    }
-//                    }
-                }
+    private function getZahtevLicenca($broj_licence) {
+        $response = new \stdClass();
+        $zahtev = ZahtevLicenca::where(['licenca_broj' => $broj_licence])->get();
+        if (!$zahtev->isEmpty()) {
+            if (count($zahtev) > 1) {
+//                IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE
+                $response->status = false;
+                $response->message = "IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE: $broj_licence";
+            } else if (count($zahtev) == 1) {
+//                IMA JEDAN ZAHTEV
+                $response->status = true;
+                $response->message = "Pronadjen zahtev";
+                $response->zahtev = $zahtev[0];
+            }
+        } else {
+//                NEMA ZAHTEVA
+            $response->status = false;
+            $response->zahtev = NULL;
+        }
+        return $response;
+    }
+
+    private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca) {
+        $response = new \stdClass();
+        $tipLicence = LicencaTip::find($licenca['tip']);
+        $zahtev->osoba = $licenca['jmbg'];
+        $zahtev->licenca_broj = $licenca['broj'];
+        $zahtev->licenca_broj_resenja = $licenca['broj_resenja'];
+        $zahtev->licenca_datum_resenja = Carbon::parse($licenca['datum_resenja'])->format('Y-m-d');
+        $zahtev->licencatip = $tipLicence->id;
+        $zahtev->vrsta_posla_id = $tipLicence->sekcija;
+        $zahtev->reg_oblast_id = $tipLicence->podOblast->oblast_id;
+        $zahtev->reg_pod_oblast_id = $tipLicence->pod_oblast_id;
+        //todo treba zahtev status da bude zavrsen ako je kreirana licenca => azurira se prilikom azuriranja licence
+        $zahtev->status = ZAHTEV_LICENCA_GENERISAN;
+        $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
+        $zahtev->datum = date("Y-m-d");
+        if ($zahtev->isDirty()) {
+            $zahtev->save();
+            $response->message = "Ažuriran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
+            $response->status = true;
+        } else {
+            $response->message = "Nema promena";
+            $response->status = true;
+        }
+        $response->zahtev = $zahtev;
+        return $response;
+    }
+
+    private function kreirajZahtevLicenca($licenca) {
+        $response = new \stdClass();
+
+        $zahtev = new ZahtevLicenca();
+        $response->zahtev = $this->azurirajZahtevLicenca($zahtev, $licenca);
+        $response->message = "Kreiran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
+        return $response;
+    }
+
+    private function getLicenca($broj_licence) {
+        $response = new \stdClass();
+        $licenca = Licenca::find($broj_licence);
+        if (!is_null($licenca)) {
+//                IMA JEDAN ZAHTEV
+            $response->status = true;
+            $response->message = "Pronadjena licenca";
+            $response->licenca = $licenca;
+        } else {
+//                NEMA ZAHTEVA
+            $response->status = false;
+            $response->licenca = NULL;
+        }
+//        dd($response);
+        return $response;
+    }
+
+    private function azurirajLicencu(Licenca $licenca, ZahtevLicenca $zahtev) {
+        $response = new \stdClass();
+        $licenca->id = $zahtev->licenca_broj;
+        $licenca->licencatip = $zahtev->licencatip;
+        $licenca->osoba = $zahtev->osoba;
+        $licenca->datum = $zahtev->datum;
+        $licenca->zahtev = $zahtev->id;
+        $licenca->datumuo = $zahtev->licenca_datum_resenja;
+        $licenca->datumobjave = $zahtev->licenca_datum_resenja;
+
+        $provera = new ProveraLibrary();
+        if ($provera->statusLicence($licenca)) {
+            $licenca->status = LICENCA_AKTIVNA;
+        } else {
+            $licenca->status = LICENCA_NEAKTIVNA;
+        }
+        $licenca->preuzeta = 1;
+//            dd(Licenca::where('osoba', $zahtev->osoba)->where('prva', 1)->get()->isEmpty());
+        if (Licenca::where('osoba', $zahtev->osoba)->where('prva', 1)->get()->isEmpty()) {
+            $licenca->prva = 1;
+            // default je 0 ako nije prva
+        }
+        $licenca->broj_resenja = $zahtev['licenca_broj_resenja'];
+//dd($licenca->wasRecentlyCreated);
+        $licenca->save();
+        $response->licenca = $licenca;
+        $response->message = "Ažurirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status";
+        $response->status = true;
+        return $response;
+    }
+
+    private function kreirajlicencu(ZahtevLicenca $zahtev) {
+//dd($zahtev);
+        $licenca = new Licenca();
+        $response = $this->azurirajLicencu($licenca, $zahtev);
+
+        $zahtev->status = ZAHTEV_LICENCA_ZAVRSEN;
+        $zahtev->save();
+        $this->log($zahtev, LICENCE, "Ažuriran datum prijema zahteva: $zahtev->prijem, status: " . ZAHTEV_LICENCA_ZAVRSEN);
+
+        $response->message = "Kreirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status";
+        return $response;
+    }
+
+    /*
+     * funkcija koja se poziva iz bladea AJAX
+     */
+    public function checkLicencaTip(Request $request) {
+        $licTip4 = strtoupper(substr(trim($request->input('licence.*.broj')[0]), 0, 4));
+        $licencaTip = LicencaTip::where("id", $licTip4)->pluck('naziv', 'id')->toArray();
+        if ($licencaTip) {
+            return json_encode(true);
+        } else {
+            $licTip3 = strtoupper(substr($request->input('licence.*.broj')[0], 0, 3));
+            $licencaTip = LicencaTip::where("id", $licTip3)->pluck('naziv', 'id')->toArray();
+            if ($licencaTip) {
+                return json_encode(true);
+            } else {
+                return json_encode(false);
             }
         }
-        return false;
     }
+
+    /*
+     * funkcija koja se poziva iz bladea AJAX
+     */
+    public function getLicencaTip($id) {
+        $id = substr($id, 0, 3);
+        $licencaTip = LicencaTip::where("id", 'LIKE', $id . '%')->get()->pluck('tip_naziv', 'id')->toArray();
+        return json_encode($licencaTip);
+    }
+
+
+    /*
+     * funkcija koja se poziva iz bladea AJAX
+     */
+    public function checkZahtev($licenca, $jmbg) {
+//        dd($licenca . $jmbg);
+
+        return json_encode(true);
+    }
+
+//    TODO dodati ovo u helper ili LOG klasu
+    private function log($object, $statusGrupa, $naziv, $napomena = '') {
+        $log = Log::firstOrNew(['naziv' => $naziv, 'loggable_id' => $object->id]);
+        $log->naziv = $naziv;
+        $log->napomena = $napomena;
+        $log->log_status_grupa_id = $statusGrupa;
+        $log->loggable()->associate($object);
+        $log->save();
+    }
+
+    private function logOsoba($object, $statusGrupa, $naziv, $napomena = '') {
+        $log = LogOsoba::firstOrNew(['naziv' => $naziv, 'loggable_id' => $object->id]);
+        $log->naziv = $naziv;
+        $log->napomena = $napomena;
+        $log->log_status_grupa_id = $statusGrupa;
+        $log->loggable()->associate($object);
+        $log->save();
+    }
+
 }

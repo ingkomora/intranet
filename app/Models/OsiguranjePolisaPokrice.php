@@ -51,4 +51,19 @@ class OsiguranjePolisaPokrice extends Model
     {
         return $this->hasMany('App\Models\Osiguranja', 'polisa_pokrice_id');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * Get the user's Full name.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getIdNazivAttribute() {
+        return "{$this->id} {$this->naziv}";
+    }
 }

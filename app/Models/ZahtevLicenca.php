@@ -8,8 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $osoba
- * @property float $licencatip
+ * @property string $licencatip
+ * @property string $licenca_broj
  * @property int $strucniispit
+ * @property int $vrsta_posla_id
+ * @property string $reg_oblast_id
+ * @property int $reg_pod_oblast_id
  * @property int $referenca1
  * @property int $referenca2
  * @property int $pecat
@@ -22,10 +26,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $mestopreuzimanja
  * @property string $status_pregleda
  * @property string $datum_statusa_pregleda
+ * @property string $licenca_datum_resenja
  * @property Licencatip $tipLicence
  * @property Osoba $osobaId
  * @property Licenca $licenca
- * @property ClanPrijava $prijavaClan
+ * @property VrstaPosla $vrstaPosla
+ * @property RegOblast $regOblast
+ * @property RegPodoblast $regPodoblast
+ * @property PrijavaClanstvo $prijavaClan
 
  */
 class ZahtevLicenca extends Model
@@ -33,7 +41,7 @@ class ZahtevLicenca extends Model
     use CrudTrait;
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'tzahtev';
@@ -45,7 +53,7 @@ class ZahtevLicenca extends Model
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = true;
@@ -88,6 +96,14 @@ class ZahtevLicenca extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function licencaOsoba()
+    {
+        return $this->hasOne('App\Models\Licenca', 'osoba','osoba');
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function prijavaClan()
@@ -101,5 +117,12 @@ class ZahtevLicenca extends Model
     public function log()
     {
         return $this->morphOne('App\Models\Log', 'loggable');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function statusId()
+    {
+        return $this->belongsTo('App\Models\Status', 'status');
     }
 }

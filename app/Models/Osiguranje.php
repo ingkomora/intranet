@@ -41,7 +41,7 @@ class Osiguranje extends Model {
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function osiguranjeTip() {
-        return $this->belongsTo('App\Models\OsiguranjeTip','osiguranje_tip_id');
+        return $this->belongsTo('App\Models\OsiguranjeTip', 'osiguranje_tip_id');
     }
 
     /**
@@ -99,6 +99,11 @@ class Osiguranje extends Model {
             ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
     /*
      * Metoda proverava datume polise i status dokumenta
      *

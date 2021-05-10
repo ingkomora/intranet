@@ -50,6 +50,20 @@ class PrijavaClanstvo extends Model
     {
         return $this->belongsTo('App\Models\Status', 'status_id');
     }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function zahteviLicence()
+    {
+        return $this->hasMany('App\Models\ZahtevLicenca', 'prijava_clan_id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function zahteviLicenceOsoba()
+    {
+        return $this->hasMany('App\Models\ZahtevLicenca', 'osoba','osoba_id');
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES

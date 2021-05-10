@@ -32,6 +32,15 @@ Route::get('test', 'HomeController@test');
     Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi');
     Route::post('obradizahtevsvecanaforma', 'ZahtevController@obradizahtevsvecanaforma');
     Route::post('preuzimanjesvecanaforma', 'ZahtevController@preuzimanjesvecanaforma');
+    Route::view('/unesinovelicence', 'unesinovelicence');
+    Route::post('/unesinovelicence', 'ZahtevController@unesinovelicence');
+    Route::get('/licencatip/{id}','ZahtevController@getLicencaTip');
+    Route::get('/checkzahtev/{licenca}/{jmbg}','ZahtevController@checkZahtev');
+    Route::get('/checklicencatip','ZahtevController@checkLicencaTip');
+
+
+
+
 
     Route::crud('prijavasistara', 'PrijavaSiStaraCrudController');
     Route::crud('prijavaclanstvo', 'PrijavaClanstvoCrudController');
@@ -40,4 +49,5 @@ Route::get('test', 'HomeController@test');
     Route::crud('logstatusgrupa', 'LogStatusGrupaCrudController');
     Route::crud('zahtevtip', 'ZahtevTipCrudController');
     Route::crud('zahtev', 'ZahtevCrudController');
+    Route::crud('sikandidat', 'SiKandidatCrudController');
 }); // this should be the absolute last line of this file

@@ -30,21 +30,21 @@ class Licenca extends Model
 
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'tlicenca';
 
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'string';
 
     /**
      * Indicates if the IDs are auto-incrementing.
-     * 
+     *
      * @var bool
      */
     public $incrementing = false;
@@ -52,11 +52,11 @@ class Licenca extends Model
     /**
      * @var array
      */
-    protected $fillable = ['id', 'osoba', 'zahtev', 'datum', 'datumuo', 'datumobjave', 'status', 'datumukidanja', 'razlogukidanja', 'preuzeta', 'mirovanje', 'prva','prijava_clan_id','broj_resenja','created_at','updated_at','licencatip','napomena'];
+    protected $fillable = ['id', 'osoba', 'zahtev', 'datum', 'datumuo', 'datumobjave', 'status', 'datumukidanja', 'razlogukidanja', 'preuzeta', 'mirovanje', 'prva','prijava_clan_id','broj_resenja','created_at','updated_at','licencatip','napomena','reg_oblast_id','reg_pod_oblast_id','vrsta_posla_id'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = true;
@@ -71,6 +71,7 @@ class Licenca extends Model
     {
         return $this->belongsTo('App\Models\Osoba', 'osoba');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      *
@@ -78,15 +79,6 @@ class Licenca extends Model
     public function tipLicence()
     {
         return $this->belongsTo('App\Models\LicencaTip', 'licencatip');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     *
-     */
-    public function tipLicenceReg()
-    {
-        return $this->belongsTo('App\Models\RegLicencaTip', 'licencatip');
     }
 
     /**
