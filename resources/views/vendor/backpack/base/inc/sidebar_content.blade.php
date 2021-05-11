@@ -15,11 +15,18 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('sivrsta') }}'><i class='nav-icon fa fa-question'></i> SiVrste</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('delovodnik') }}'><i class='nav-icon la la-question'></i> Delovodnik</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('delovodnikorganizacionejedinice') }}'><i class='nav-icon la la-question'></i> Organizacione Jedinice</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('elfinder') }}\"><i class="nav-icon la la-files-o"></i> <span>{{ trans('backpack::crud.file_manager') }}</span></a></li>
+<!-- Users, Roles, Permissions -->
+<li class="nav-item nav-dropdown">
+    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Unesi:</a>
+    <ul class="nav-dropdown-items">
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('unesi/obradizahtevsvecanaforma') }}'><i class='nav-icon la la-question'></i> zahteve za svecanu formu</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('unesinovelicence') }}'><i class='nav-icon la la-question'></i> nove licence</a></li>
+    </ul>
+</li>
 
 @endrole
 @role('admin')
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('elfinder') }}\"><i class="nav-icon la la-files-o"></i> <span>{{ trans('backpack::crud.file_manager') }}</span></a></li>
-<!-- Users, Roles, Permissions -->
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Authentication</a>
     <ul class="nav-dropdown-items">
@@ -30,7 +37,6 @@
 </li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('brojac') }}'><i class='nav-icon la la-question'></i> Brojaci</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('test') }}'><i class='nav-icon la la-question'></i> Test</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('unesi/obradizahtevsvecanaforma') }}'><i class='nav-icon la la-question'></i> Unesi zahteve za svecanu formu</a></li>
 @endrole
 
 
@@ -41,3 +47,5 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('logstatusgrupa') }}'><i class='nav-icon la la-question'></i> LogStatusGrupas</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('zahtevtip') }}'><i class='nav-icon la la-question'></i> Tipovi zahteva</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('zahtev') }}'><i class='nav-icon la la-question'></i> Zahtevi</a></li>
+
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('sikandidat') }}'><i class='nav-icon la la-question'></i> SiKandidats</a></li>
