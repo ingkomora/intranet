@@ -2,8 +2,10 @@
 
 namespace App\Imports;
 
-use App\Models\Zahtev;
+use App\Models\Osoba;
+use App\Models\ZahtevLicenca;
 use App\Models\Licenca;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 
@@ -19,7 +21,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
 
-class ZahteviImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure {
+class ZahteviLicenceImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError, SkipsOnFailure {
     use Importable, SkipsErrors, SkipsFailures;
 
     /**
@@ -31,14 +33,23 @@ class ZahteviImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
         $row = array_map('trim', $row);
 //        dd($row['licenca']);
 
+        $osoba = Osoba::find($row['jmbg']);
+        $zahtev = ZahtevLicenca::find($row['jmbg']);
         $licenca = Licenca::find($row['licenca']);
-        if (!is_null($licenca)) {
+        if (!is_null($licenca) AND !is_null($osoba) ) {
 
 //        dd($licenca->osoba);
-            return new Zahtev([
-//            'osoba_id' => $row['licenca'],
-                'osoba_id' => $licenca->osoba,
-                'zahtev_tip_id' => $row['tip'],
+            return new ZahtevLicenca([
+                'osoba' => $row['jmbg'],
+                'licencatip' => $row['licencatip'],
+                'licenca_broj' => $row['licenca_broj'],
+                'reg_pod_oblast_id' => $row['reg_pod_oblast_id'],
+                'vrsta_posla_id' => $row['vrsta_posla_id'],
+                'licenca_datum_resenja' => $row['licenca_datum_resenja'],
+                'licenca_broj_resenja' => $row['licenca_broj_resenja'],
+                'datum' => date("Y-m-d"),
+//            'prijava_clan_id' => trim($row['prijava_clan_id']),
+                'status' => $row['status']
             ]);
         }
     }
@@ -52,7 +63,7 @@ class ZahteviImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
 
     public function rules(): array {
         return [
-//            'tip' => Rule::notIn([0]),
+            'import' => Rule::notIn([0]),
 //            'licenca_broj' => Rule::unique('tzahtev')->where(function ($query) {
 //                return $query->whereNotNull('licenca_broj');
 //            })

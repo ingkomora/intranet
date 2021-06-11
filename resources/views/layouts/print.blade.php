@@ -6,6 +6,7 @@
 
     <style>
         body {
+            /*color: orangered;*/
             margin: 0.7cm;
             padding: 0;
             font-family: DejaVu Serif;
@@ -21,7 +22,7 @@
         #nadnaslov{
             font-weight: bold;
             font-size: 8.5pt;
-            margin-top: 5.8cm;
+            margin-top: 5.5cm;
         }
 
         #naslov{
@@ -117,17 +118,36 @@
             margin-top: 0.5cm;
             width: 14.2cm;
         }
+        #vrstaposla{
+            font-weight: bold;
+            font-size: 8.5pt;
+            margin: 0 auto;
+            margin-top: -0.1cm;
+            width: 14.2cm;
+        }
         #oblast{
             font-size: 8.5pt;
-            margin-top: 0.5cm;
+            margin-top: 0.2cm;
         }
         #podoblast{
             font-size: 8.5pt;
-            margin-top: 0.3cm;
+            margin-top: 0.2cm;
         }
+
+        #lic-container{
+            margin: 0 auto;
+            position: fixed;
+            left: 1.2cm;
+            bottom: 9cm;
+        }
+
         #licencatekst{
             font-size: 8.5pt;
-            margin-top: 0.6cm;
+            margin-top: 0.3cm;
+        }
+        #resenje{
+            font-size: 8.5pt;
+            margin-top: 0;
         }
         #licencadatum{
             font-size: 8.5pt;
@@ -143,7 +163,7 @@
         #potpis {
             margin: 0 auto;
             position: fixed;
-            left: 0.65cm;
+            left: 1.2cm;
             bottom: 6.2cm;
             width: 14.2cm;
         }

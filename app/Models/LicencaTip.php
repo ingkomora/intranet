@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $opis
  * @property string $generacija
  * @property string $pod_oblast_id
+ * @property VrstaPosla $vrstaPosla
  * @property LicencaVrsta $vrstaLicence
  * @property ZahtevLicenca[] $zahteviLicence
  * @property Licenca[] $licence
@@ -63,6 +64,13 @@ class LicencaTip extends Model
      */
     public function vrstaLicence(): BelongsTo {
         return $this->belongsTo('App\Models\LicencaVrsta', 'sekcija');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function vrstaPosla(): BelongsTo {
+        return $this->belongsTo('App\Models\VrstaPosla', 'sekcija');
     }
 
     /**

@@ -9,7 +9,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 /**
  * Class OsobaCrudController
  * @package App\Http\Controllers\Admin
- * @property-read CrudPanel $crud
+ * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
 class OsobaCrudController extends CrudController {
 

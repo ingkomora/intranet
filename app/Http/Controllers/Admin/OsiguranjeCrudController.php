@@ -67,7 +67,7 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->setColumnDetails('osobaUgovarac', [
             'name' => 'osobaUgovarac',
             'type' => 'select',
-            'label' => 'Ugovarac osiguranja',
+            'label' => 'Ugovarac ind. osiguranja',
             'entity' => 'osobaUgovarac',
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
@@ -95,9 +95,9 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->setColumnDetails('polisaPokrice', [
             'name' => 'polisaPokrice',
             'type' => 'select',
-            'label' => 'Pokriæe polise',
+            'label' => 'PokriÄ‡e polise',
             'entity' => 'polisaPokrice',
-            'attribute' => 'naziv',
+            'attribute' => 'id_naziv',
             'model' => 'App\Models\OsiguranjePolisaPokrice',
         ]);
         $this->crud->setColumnDetails('osiguranjeTip', [

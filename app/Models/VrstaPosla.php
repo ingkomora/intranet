@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property integer $id
  * @property string $naziv
+ * @property string $naziv_gen
  * @property string $created_at
  * @property string $updated_at
  * @property RegOblast[] $oblasti
@@ -18,14 +19,14 @@ class VrstaPosla extends Model
 
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'vrste_poslova';
 
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'integer';
@@ -33,11 +34,11 @@ class VrstaPosla extends Model
     /**
      * @var array
      */
-    protected $fillable = ['naziv', 'created_at', 'updated_at'];
+    protected $fillable = ['naziv', 'naziv_gen', 'created_at', 'updated_at'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = true;

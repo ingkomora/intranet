@@ -9,7 +9,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 /**
  * Class RegOblastCrudController
  * @package App\Http\Controllers\Admin
- * @property-read CrudPanel $crud
+// * @property-read CrudPanel $crud
  */
 class RegOblastCrudController extends CrudController
 {
@@ -21,23 +21,23 @@ class RegOblastCrudController extends CrudController
 
     public function setup()
     {
-        $this->crud->setModel('App\Models\RegOblast');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/regoblast');
-        $this->crud->setEntityNameStrings('regoblast', 'reg_oblasti');
+        CRUD::setModel('App\Models\RegOblast');
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/regoblast');
+        CRUD::setEntityNameStrings('regoblast', 'reg_oblasti');
     }
 
     protected function setupListOperation()
     {
         // TODO: remove setFromDb() and manually define Columns, maybe Filters
-        $this->crud->setFromDb();
+        CRUD::setFromDb();
     }
 
     protected function setupCreateOperation()
     {
-        $this->crud->setValidation(RegOblastRequest::class);
+        CRUD::setValidation(RegOblastRequest::class);
 
         // TODO: remove setFromDb() and manually define Fields
-        $this->crud->setFromDb();
+        CRUD::setFromDb();
     }
 
     protected function setupUpdateOperation()

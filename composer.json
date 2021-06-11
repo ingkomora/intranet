@@ -8,31 +8,32 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.2.5",
+        "php": "^7.3|^8.0",
         "ext-zip": "*",
         "anam/captcha": "^1.0",
         "backpack/crud": "4.1.*",
         "backpack/filemanager": "^1.0",
         "backpack/permissionmanager": "^6.0",
-        "barryvdh/laravel-debugbar": "^3.5",
-        "barryvdh/laravel-dompdf": "^0.8.7",
+        "barryvdh/laravel-dompdf": "^0.9.0",
         "fideloper/proxy": "^4.0",
-        "laravel/framework": "^7.0",
-        "laravel/tinker": "^2.0",
-        "laravel/ui": "^2.2",
+        "laravel/framework": "^8.12",
+        "laravel/tinker": "^2.5",
+        "laravel/ui": "^3.0",
         "maatwebsite/excel": "^3.1",
-        "milon/barcode": "^7.0",
+        "milon/barcode": "^8.0",
         "nesbot/carbon": "^2.40",
-        "tesla-software/jmbg": "^1.0"
+        "tesla-software/jmbg": "*"
     },
     "require-dev": {
+        "laravel/telescope": "^4.4",
+        "barryvdh/laravel-debugbar": "^3.5",
         "backpack/generators": "^3.0",
-        "facade/ignition": "^2.0",
-        "fzaninotto/faker": "^1.4",
-        "laracasts/generators": "^1.1",
-        "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^4.1",
-        "phpunit/phpunit": "^8.5"
+        "facade/ignition": "^2.5",
+        "fakerphp/faker": "^1.9.1",
+        "laracasts/generators": "^2.0.0",
+        "mockery/mockery": "^1.4.2",
+        "nunomaduro/collision": "^5.0",
+        "phpunit/phpunit": "^9.3.3"
     },
     "config": {
         "optimize-autoloader": true,
@@ -42,7 +43,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/telescope"
+            ]
         }
     },
     "autoload": {

@@ -41,6 +41,16 @@ class PrijavaSiStara extends Model
     {
         return $this->belongsTo('App\Models\OsobaSi', 'osoba');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function oblastSiStruka()
+    {
+        return $this->belongsTo('App\Models\StrucniIspitStruka', 'oblast');
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

@@ -24,7 +24,7 @@ class ExcelImport implements WithMultipleSheets
     {
         $this->sheets = [
 //            new OsobeImport(),
-            new ZahteviImport(),
+            new ZahteviLicenceImport(),
 //            new FirmeImport(),
         ];
         return $this->sheets;

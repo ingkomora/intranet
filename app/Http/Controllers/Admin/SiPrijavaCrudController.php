@@ -11,8 +11,9 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read CrudPanel $crud
  */
-class PrijavaCrudController extends CrudController {
+class SiPrijavaCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
@@ -24,28 +25,23 @@ class PrijavaCrudController extends CrudController {
         | CrudPanel Basic Information
         |--------------------------------------------------------------------------
         */
-        $this->crud->setModel('App\Models\Prijava');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/prijava');
-        $this->crud->setEntityNameStrings('prijava', 'prijave');
-        $this->crud->setTitle('some string', 'create'); // set the Title for the create action
-        $this->crud->setHeading('some string', 'create'); // set the Heading for the create action
-        $this->crud->setSubheading('some string', 'create');
+        CRUD::setModel('App\Models\SiPrijava');
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/siprijava');
+        CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
+        CRUD::setTitle('some string', 'create'); // set the Title for the create action
+        CRUD::setHeading('some string', 'create'); // set the Heading for the create action
+        CRUD::setSubheading('some string', 'create');
+        CRUD::enableDetailsRow();
+        CRUD::enableExportButtons();
 
         /*
         |--------------------------------------------------------------------------
         | CrudPanel Configuration
         |--------------------------------------------------------------------------
         */
-        $this->crud->setColumns(['id', 'osoba_id', 'reg_oblast_id', 'reg_pod_oblast_id', 'zvanje_id', 'si_vrsta_id', 'status_prijave', 'strucni_rad', 'barcode']);
+        $this->crud->setColumns(['id', 'osoba', 'reg_oblast_id', 'reg_pod_oblast_id', 'zvanje_id', 'si_vrsta_id', 'status_prijave', 'strucni_rad', 'barcode']);
 
-        $this->crud->setColumnDetails('osoba_id', [
-            'name' => 'osoba_id',
-            'type' => 'select',
-            'label' => 'Osoba',
-            'entity' => 'osoba',
-            'attribute' => 'ime_prezime_jmbg',
-            'model' => 'App\Models\Osoba',
-        ]);
+
         $this->crud->setColumnDetails('reg_oblast_id', [
             'name' => 'reg_oblast_id',
             'type' => 'select',
@@ -54,14 +50,14 @@ class PrijavaCrudController extends CrudController {
             'attribute' => 'naziv',
             'model' => 'App\Models\RegOblast',
         ]);
-        /*        $this->crud->setColumnDetails('reg_pod_oblast_id',[
-                    'name' => 'reg_pod_oblast_id',
-                    'type' => 'select',
-                    'label' => 'Uza Strucna oblast',
-                    'entity' => 'regPodOblast',
-                    'attribute' => 'naziv',
-                    'model' => 'App\Models\RegPodOblast',
-                ]);*/
+        $this->crud->setColumnDetails('reg_pod_oblast_id', [
+            'name' => 'reg_pod_oblast_id',
+            'type' => 'select',
+            'label' => 'Uza Strucna oblast',
+            'entity' => 'regPodOblast',
+            'attribute' => 'naziv',
+            'model' => 'App\Models\RegPodoblast',
+        ]);
 
         $this->crud->setColumnDetails('zvanje_id', [
             'name' => 'zvanje_id',
@@ -82,6 +78,22 @@ class PrijavaCrudController extends CrudController {
     }
 
     protected function setupListOperation() {
+        $this->crud->setColumnDetails('osoba', [
+            'name' => 'osoba',
+            'type' => 'select',
+            'label' => 'Osoba',
+            'entity' => 'osoba',
+//            'attribute' => 'ime',
+            'attribute' => 'ime_prezime_jmbg',
+            'model' => 'App\Models\Osoba',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', '%'.$searchTerm.'%')
+                            ->where('prezime', 'ilike', '%'.$searchTerm.'%');
+                    });
+                }
+
+        ]);
         // TODO: remove setFromDb() and manually define Columns, maybe Filters
         $this->crud->setFromDb();
     }

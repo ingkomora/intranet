@@ -16,7 +16,7 @@ Route::group([
     Route::crud('osoba', 'OsobaCrudController');
     Route::crud('osiguranje', 'OsiguranjeCrudController');
     Route::crud('firma', 'FirmaCrudController');
-    Route::crud('prijava', 'PrijavaCrudController');
+    Route::crud('siprijava', 'SiPrijavaCrudController');
     Route::crud('zvanje', 'ZvanjeCrudController');
     Route::crud('regoblast', 'RegOblastCrudController');
     Route::crud('regpodoblast', 'RegPodOblastCrudController');
@@ -26,20 +26,18 @@ Route::group([
     Route::crud('delovodnikorganizacionejedinice', 'DelovodnikOrganizacioneJediniceCrudController');
     Route::crud('delovodnik', 'DelovodnikCrudController');
     Route::crud('brojac', 'BrojacCrudController');
-Route::get('home', 'HomeController@dashboard');
-Route::get('pdf', 'PdfController@downloadPDF');
-Route::get('test', 'HomeController@test');
+    Route::get('home', 'HomeController@dashboard');
+    Route::get('pdf', 'PdfController@downloadPDF');
+    Route::get('test', 'HomeController@test');
     Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi');
     Route::post('obradizahtevsvecanaforma', 'ZahtevController@obradizahtevsvecanaforma');
     Route::post('preuzimanjesvecanaforma', 'ZahtevController@preuzimanjesvecanaforma');
+    Route::post('downloadzip', 'ZahtevController@downloadZip');
     Route::view('/unesinovelicence', 'unesinovelicence');
     Route::post('/unesinovelicence', 'ZahtevController@unesinovelicence');
-    Route::get('/licencatip/{id}','ZahtevController@getLicencaTip');
-    Route::get('/checkzahtev/{licenca}/{jmbg}','ZahtevController@checkZahtev');
-    Route::get('/checklicencatip','ZahtevController@checkLicencaTip');
-
-
-
+    Route::get('/licencatip/{id}', 'ZahtevController@getLicencaTip');
+    Route::get('/checkzahtev/{licenca}/{jmbg}', 'ZahtevController@checkZahtev');
+    Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
 
 
     Route::crud('prijavasistara', 'PrijavaSiStaraCrudController');
