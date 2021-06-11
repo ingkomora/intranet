@@ -92,6 +92,7 @@ class ZahtevController extends Controller {
         $messageLicencaNOK = 'Licence: ';
         $messageZahtevOK = 'Zahtevi: ';
         $messageZahtevNOK = 'Zahtevi: ';
+        $messageInfo = '';
         $flagOK = false;
         $flagNOK = false;
         $count = 0;
@@ -194,15 +195,15 @@ class ZahtevController extends Controller {
         $ime = array_column($dataPrint['dataOK'], 'osobaImeRPrezime');
 //dd($ime);
         if ($ime != array_unique($ime)) {
-            echo 'There are duplicates in osobaImeRPrezime';
+            $messageInfo .= '<br>There are duplicates in osobaImeRPrezime';
         }
         $lic = array_column($dataPrint['dataOK'], 'licenca');
         if ($lic != array_unique($lic)) {
-            echo 'There are duplicates in licenca';
+            $messageInfo .=  '<br>There are duplicates in licenca';
         }
 
         if ($ime != array_unique($ime) && $lic != array_unique($lic)) {
-            echo 'There are duplicates in both osobaImeRPrezime and licenca';
+            $messageInfo .=   '<br>There are duplicates in both osobaImeRPrezime and licenca';
         }
 
 //        dd(array_column($dataPrint['dataOK'],'osobaImeRPrezime'));
@@ -254,7 +255,7 @@ class ZahtevController extends Controller {
 //                return Storage::download($filename);
 //                ob_end_clean();
 //            return response()->download(public_path($filename), $filename)->deleteFileAfterSend(true);
-                return redirect('admin/unesi/obradizahtevsvecanaforma/' . $filename)->with('status', true)->with('message', "Generisane svečane forme za unete brojeve licenci ($countOK)")->withInput();
+                return redirect('admin/unesi/obradizahtevsvecanaforma/' . $filename)->with('status', true)->with('message', "Generisane svečane forme za unete brojeve licenci ($countOK)" . $messageInfo)->withInput();
 
             }
         } else if ($countOK == 1) {
