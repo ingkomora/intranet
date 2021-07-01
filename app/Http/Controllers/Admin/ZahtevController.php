@@ -9,6 +9,7 @@ use App\Models\LicencaTip;
 use App\Models\Log;
 use App\Models\LogOsoba;
 use App\Models\Osoba;
+use App\Models\SiPrijava;
 use App\Models\ZahtevLicenca;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Illuminate\Support\Facades\Redirect;
@@ -199,11 +200,11 @@ class ZahtevController extends Controller {
         }
         $lic = array_column($dataPrint['dataOK'], 'licenca');
         if ($lic != array_unique($lic)) {
-            $messageInfo .=  '<br>There are duplicates in licenca';
+            $messageInfo .= '<br>There are duplicates in licenca';
         }
 
         if ($ime != array_unique($ime) && $lic != array_unique($lic)) {
-            $messageInfo .=   '<br>There are duplicates in both osobaImeRPrezime and licenca';
+            $messageInfo .= '<br>There are duplicates in both osobaImeRPrezime and licenca';
         }
 
 //        dd(array_column($dataPrint['dataOK'],'osobaImeRPrezime'));
@@ -309,6 +310,10 @@ class ZahtevController extends Controller {
         dd($result);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function unesinovelicence(Request $request) {
         $file = $request->file('upload');
         if (!is_null($file)) {
@@ -346,11 +351,11 @@ class ZahtevController extends Controller {
             ]);
         }
         $messageLicencaOK = 'Licence: ';
-        $messageLicencaNOTOK = 'Licence: ';
+        $messageLicencaNOK = 'Licence: ';
         $flagOK = false;
         $flagNOTOK = false;
         $countOK = 0;
-        $countNOTOK = 0;
+        $countNOK = 0;
         $falseJMBG = [];
 //        LICENCE SPREMNE ZA UNOS U BAZU
         foreach ($licence as $licenca) {
@@ -361,67 +366,106 @@ class ZahtevController extends Controller {
 
             $licenca['broj'] = strtoupper(trim($licenca['broj']));
 
-
-            if (!$this->getOsoba(trim($licenca['jmbg']))) {
-                $falseJMBG[$licenca['jmbg']] = 'Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
-                continue;
-//                return Redirect::back()->withErrors(['Osoba ne postoji!']);
+//            PRONADJI JMBG NA OSNOVU BROJA ZAHTEVA ILI BROJA PRIJAVE
+            if (!empty($licenca['broj_zahteva'])) {
+                $licenca['jmbg'] = $this->getJMBG($licenca['broj_zahteva'], 'zahtev');
+                if (is_null($licenca['jmbg'])) {
+                    $falseJMBG[$licenca['broj_zahteva']] = 'Broj zahteva: ' . $licenca['broj_zahteva'] . ' ne postoji u bazi!';
+                    $messageLicencaNOK .= ' Broj zahteva: ' . $licenca['broj_zahteva'] . ' ne postoji u bazi!';
+                    $countNOK++;
+                } else {
+                    $broj = $licenca['broj_zahteva'];
+                    $tip = 'broj_zahteva';
+                }
+            } else if (!empty($licenca['broj_prijave'])) {
+                $licenca['jmbg'] = $this->getJMBG($licenca['broj_prijave'], 'siprijava');
+                if (is_null($licenca['jmbg'])) {
+                    $falseJMBG[$licenca['broj_prijave']] = 'Broj prijave: ' . $licenca['broj_prijave'] . ' ne postoji u bazi!';
+                    $messageLicencaNOK .= ' Broj prijave: ' . $licenca['broj_prijave'] . ' ne postoji u bazi!';
+                    $countNOK++;
+                } else {
+                    $broj = $licenca['broj_prijave'];
+                    $tip = 'broj_prijave';
+                }
+            } else if (!empty($licenca['jmbg'])) {
+                $broj = $licenca['broj_licence'];
+                $tip = 'broj_licence';
             }
-            $respZ = $this->getZahtevLicenca($licenca['broj']);
+//            dd($licenca['jmbg']);
+            if (!is_null($licenca['jmbg'])) {
+                if (!$this->checkOsoba(trim($licenca['jmbg']))) {
+                    $falseJMBG[$licenca['jmbg']] = 'Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
+                    $messageLicencaNOK .= ' Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
+                    $countNOK++;
+                    continue;
+//                return Redirect::back()->withErrors(['Osoba ne postoji!']);
+                }
+            } else {
+                continue;
+            }
+
+            $respZ = $this->getZahtevLicenca($broj, $tip);
+
 
             if ($respZ->status) {
-                if ($respZ->zahtev->status <= ZAHTEV_LICENCA_GENERISAN) {
+                if ($respZ->zahtev->status <= ZAHTEV_LICENCA_PRIMLJEN) {
 //                  AZURIRAJ ZAHTEV
                     $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
                 } else {
 //                  ZAHTEV JE VEC OBRADJEN
-                    $messageLicencaNOTOK = "Zahtev za broj licence: " . $licenca['broj'] . ' je ' . strtoupper($respZ->zahtev->status);
+                    $messageLicencaNOK .= " Zahtev za broj licence: " . $licenca['broj'] . ' je ' . strtoupper($respZ->zahtev->status) . ",";
+                    $countNOK++;
                 }
             } else {
 //              KREIRAJ ZAHTEV
                 $respZ = $this->kreirajZahtevLicenca($licenca);
             }
-//            dd($respZ->zahtev->id);
-            $this->log($respZ->zahtev, LICENCE, $respZ->message);
-            $respL = $this->getLicenca($respZ->zahtev->licenca_broj);
-            if ($respL->status) {
-                $respL = $this->azurirajLicencu($respL->licenca, $respZ->zahtev);
-            } else {
-                $respL = $this->kreirajLicencu($respZ->zahtev);
-            }
-
 //            TODO prikazati status licence u toasteru i zasto explode!!!
-            if ($respL->status) {
-                $messageLicencaOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
-                $flagOK = true;
-                $countOK++;
+            if ($respZ->status) {
+//            dd($respZ);
+                $this->log($respZ->zahtev, LICENCE, $respZ->message);
+                $respL = $this->getLicenca($respZ->zahtev->licenca_broj);
+                if ($respZ->status) {
+                    if ($respL->status) {
+                        $respL = $this->azurirajLicencu($respL->licenca, $respZ->zahtev);
+                    } else {
+                        $respL = $this->kreirajLicencu($respZ->zahtev);
+                    }
+                }
+                if ($respL->status) {
+                    $messageLicencaOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
+                    $flagOK = true;
+                    $countOK++;
+                } else {
+                    $messageLicencaNOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
+                    $flagNOTOK = true;
+                    $countNOK++;
+                }
+                $result[$licenca['broj']] = [
+                    'status' => $respL->status,
+                    'messageL' => $respL->licenca->id . " " . $respL->licenca->status . " ($respL->message), ",
+                    'messageZ' => $respZ->message,
+                ];
+                $this->logOsoba($respL->licenca, LICENCE, $respL->message);
             } else {
-                $messageLicencaNOTOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
-                $flagNOTOK = true;
-                $countNOTOK++;
+                $countNOK++;
+                $messageLicencaNOK .= $respZ->zahtev->id . " " . $respZ->zahtev->status . " ($respZ->message), ";
             }
-
-            $result[$licenca['broj']] = [
-                'status' => $respL->status,
-                'messageL' => $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ",
-                'messageZ' => $respZ->message,
-            ];
-            $this->logOsoba($respL->licenca, LICENCE, $respL->message);
 
 //            TODO TREBA DODATI SLUCAJ KAD NEMA OSOBE A NIJE PODNEO ZAHTEV ZA CLANSTVO TJ. UPIS NOVE OSOBE U REGISTAR ALI TREBALO BI DA JE IMA IZ SI
         } //end foreach
         $result['falseJMBG'] = array_keys($falseJMBG);
-        dd($result);
+//        dd($result);
         $messageLicencaOK .= "su uspešno sačuvane u bazi ($countOK)";
-        $messageLicencaNOTOK .= "nisu sačuvane u bazi ($countNOTOK)";
+        $messageLicencaNOK .= "nisu sačuvane u bazi ($countNOK)";
 
         info($messageLicencaOK);
-//        $flagNOTOK ? toastr()->error($messageLicencaNOTOK) : toastr()->warning("Nema grešaka");
+//        $flagNOTOK ? toastr()->error($messageLicencaNOK) : toastr()->warning("Nema grešaka");
 //        $flagOK ? toastr()->success($messageLicencaOK) : toastr()->warning("Nema kreiranih licenci");
-        return redirect('/admin/unesinovelicence')->with('message', $messageLicencaOK)->withInput();
+        return redirect('/admin/unesinovelicence')->with('message', $messageLicencaOK)->with('messageNOK', $messageLicencaNOK)->withInput();
     }
 
-    private function getOsoba($jmbg) {
+    private function checkOsoba($jmbg) {
         $osoba = Osoba::find($jmbg);
         if (!is_null($osoba)) {
             return true;
@@ -431,14 +475,54 @@ class ZahtevController extends Controller {
 
     }
 
-    private function getZahtevLicenca($broj_licence) {
+    /**
+     * @param $broj
+     * @param $tip
+     * @return null
+     */
+    private function getJMBG($broj, $tip) {
+        $jmbg = NULL;
+        switch ($tip) {
+            case 'zahtev':
+//            dd($broj);
+                $o = ZahtevLicenca::find($broj);
+                if (!is_null($o)) {
+                    $jmbg = $o->osoba;
+                }
+                break;
+            case 'siprijava':
+                $o = SiPrijava::find($broj);
+                if (!is_null($o)) {
+                    $jmbg = $o->osoba_id;
+                }
+                break;
+        }
+        return $jmbg;
+    }
+
+    /**
+     * @param $broj
+     * @param string $tip
+     * @return \stdClass
+     */
+    private function getZahtevLicenca($broj, $tip = 'broj_licence') {
         $response = new \stdClass();
-        $zahtev = ZahtevLicenca::where(['licenca_broj' => $broj_licence])->get();
+        switch ($tip) {
+            case 'broj_zahteva':
+                $zahtev = ZahtevLicenca::where('id', $broj)->get();
+                break;
+            case 'broj_licence':
+                $zahtev = ZahtevLicenca::where('licenca_broj', $broj)->get();
+                break;
+            case 'broj_prijave':
+                $zahtev = ZahtevLicenca::where('si_prijava_id', $broj)->get();
+                break;
+        }
         if (!$zahtev->isEmpty()) {
             if (count($zahtev) > 1) {
 //                IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE
                 $response->status = false;
-                $response->message = "IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE: $broj_licence";
+                $response->message = "IMA VIŠE ZAHTEVA ZA ISTI BROJ: $broj";
             } else if (count($zahtev) == 1) {
 //                IMA JEDAN ZAHTEV
                 $response->status = true;
@@ -448,15 +532,26 @@ class ZahtevController extends Controller {
         } else {
 //                NEMA ZAHTEVA
             $response->status = false;
-            $response->broj_licence = $broj_licence;
+            $response->broj = $broj;
             $response->zahtev = NULL;
         }
         return $response;
     }
 
+    /**
+     * @param ZahtevLicenca $zahtev
+     * @param $licenca
+     * @return \stdClass
+     */
     private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca) {
         $response = new \stdClass();
         $tipLicence = LicencaTip::find($licenca['tip']);
+        if (is_null($tipLicence)) {
+            $response->zahtev = $zahtev;
+            $response->message = "neispravan tip licence: " . $licenca['tip'];
+            $response->status = false;
+            return $response;
+        }
         $zahtev->osoba = $licenca['jmbg'];
         $zahtev->licenca_broj = $licenca['broj'];
         $zahtev->licenca_broj_resenja = $licenca['broj_resenja'];
@@ -481,15 +576,23 @@ class ZahtevController extends Controller {
         return $response;
     }
 
+    /**
+     * @param $licenca
+     * @return \stdClass
+     */
     private function kreirajZahtevLicenca($licenca) {
         $response = new \stdClass();
 
         $zahtev = new ZahtevLicenca();
-        $response->zahtev = $this->azurirajZahtevLicenca($zahtev, $licenca);
+        $response = $this->azurirajZahtevLicenca($zahtev, $licenca);
         $response->message = "Kreiran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
         return $response;
     }
 
+    /**
+     * @param $broj_licence
+     * @return \stdClass
+     */
     private function getLicenca($broj_licence) {
         $response = new \stdClass();
         $licenca = Licenca::find($broj_licence);
@@ -508,6 +611,11 @@ class ZahtevController extends Controller {
         return $response;
     }
 
+    /**
+     * @param Licenca $licenca
+     * @param ZahtevLicenca $zahtev
+     * @return \stdClass
+     */
     private function azurirajLicencu(Licenca $licenca, ZahtevLicenca $zahtev) {
         $response = new \stdClass();
         $licenca->id = $zahtev->licenca_broj;
@@ -539,6 +647,10 @@ class ZahtevController extends Controller {
         return $response;
     }
 
+    /**
+     * @param ZahtevLicenca $zahtev
+     * @return \stdClass
+     */
     private function kreirajLicencu(ZahtevLicenca $zahtev) {
 //dd($zahtev);
         $licenca = new Licenca();
