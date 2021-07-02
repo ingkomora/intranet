@@ -17,6 +17,9 @@
     @if(!empty(session('message')))
         <div class="alert alert-success mt-3" role="alert">{{ session('message') }}</div>
     @endif
+    @if(!empty(session('messageNOK')))
+        <div class="alert alert-danger mt-3" role="alert">{{ session('messageNOK') }}</div>
+    @endif
     @if($errors->any())
         @foreach($errors->all() as $error)
             <div class="alert alert-danger" role="alert">{{ $error }}</div>
