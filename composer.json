@@ -11,6 +11,7 @@
         "php": "^7.3|^8.0",
         "ext-zip": "*",
         "anam/captcha": "^1.0",
+        "arcanedev/log-viewer": "^8.1",
         "backpack/crud": "4.1.*",
         "backpack/filemanager": "^1.0",
         "backpack/permissionmanager": "^6.0",
