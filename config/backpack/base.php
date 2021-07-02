@@ -64,8 +64,7 @@ return [
     // ------
 
     // Menu logo. You can replace this with an <img> tag if you have a logo.
-    'project_logo'   => '<img class="img-thumbnail " style="height: 2cm; vertical-align: middle" src="/storage/images/iks_grb.png" alt="In�enjerska komora Srbije"/>
-',
+    'project_logo'   => '<img class="img-thumbnail" style="height: 1.5cm; vertical-align: middle; margin: 0 auto" src='.asset("images/iks_grb.png").' alt="Inženjerska komora Srbije"/>',
 
     // Show / hide breadcrumbs on admin panel pages.
     'breadcrumbs' => true,
