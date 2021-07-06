@@ -421,9 +421,7 @@ class ZahtevController extends Controller {
 
             $respZ = $this->getZahtevLicenca($broj, $tip);
 
-
             if ($respZ->status) {
-//                if ($respZ->zahtev->status <= ZAHTEV_LICENCA_ZAVRSEN) {
                 if ($respZ->zahtev->status <= ZAHTEV_LICENCA_PRIMLJEN) {
 //                  AZURIRAJ ZAHTEV
                     $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
@@ -465,7 +463,7 @@ class ZahtevController extends Controller {
                 $this->logOsoba($respL->licenca, LICENCE, $respL->message);
             } else {
                 $countNOK++;
-                $messageLicencaNOK .= $respZ->zahtev->id . " " . $respZ->zahtev->status . " ($respZ->message), ";
+                $messageLicencaNOK .=', Zahtev broj: ' . $respZ->zahtev->id . " status: " . $respZ->zahtev->status . " ($respZ->message), ";
             }
 
 //            TODO TREBA DODATI SLUCAJ KAD NEMA OSOBE A NIJE PODNEO ZAHTEV ZA CLANSTVO TJ. UPIS NOVE OSOBE U REGISTAR ALI TREBALO BI DA JE IMA IZ SI
