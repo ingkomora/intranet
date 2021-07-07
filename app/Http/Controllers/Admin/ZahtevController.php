@@ -366,6 +366,8 @@ class ZahtevController extends Controller {
 
             $licenca['broj'] = strtoupper(trim($licenca['broj']));
 
+            $licenca['datum_resenja'] = Carbon::parse($licenca['datum_resenja'])->format('Y-m-d');
+            $licenca['datum_prijema'] = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
             // VALIDACIJA DATUMA
             if (!$this->checkDate($licenca['datum_resenja'])) {
                 $falseJMBG[$licenca['broj']] = 'Neispravan datum resenja za broj licence: ' . $licenca['broj'];
@@ -463,7 +465,7 @@ class ZahtevController extends Controller {
                 $this->logOsoba($respL->licenca, LICENCE, $respL->message);
             } else {
                 $countNOK++;
-                $messageLicencaNOK .=', Zahtev broj: ' . $respZ->zahtev->id . " status: " . $respZ->zahtev->status . " ($respZ->message), ";
+                $messageLicencaNOK .= ', Zahtev broj: ' . $respZ->zahtev->id . " status: " . $respZ->zahtev->status . " ($respZ->message), ";
             }
 
 //            TODO TREBA DODATI SLUCAJ KAD NEMA OSOBE A NIJE PODNEO ZAHTEV ZA CLANSTVO TJ. UPIS NOVE OSOBE U REGISTAR ALI TREBALO BI DA JE IMA IZ SI
