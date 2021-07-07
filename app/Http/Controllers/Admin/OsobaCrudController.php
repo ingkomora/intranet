@@ -145,6 +145,7 @@ class OsobaCrudController extends CrudController {
     }
 
     protected function setupUpdateOperation() {
+        //TODO samo admin da moze da menja
         $this->crud->addField([
             'name' => 'id',
             'label' => 'JMBG',

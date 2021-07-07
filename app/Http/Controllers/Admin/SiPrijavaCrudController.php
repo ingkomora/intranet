@@ -66,6 +66,12 @@ class SiPrijavaCrudController extends CrudController {
             'entity' => 'zvanje',
             'attribute' => 'naziv',
             'model' => 'App\Models\Zvanje',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->orWhereHas('zvanje', function ($q) use ($column, $searchTerm) {
+                    $q->where('naziv', 'ilike', '%' . $searchTerm . '%');
+                });
+            }
+
         ]);
         $this->crud->setColumnDetails('si_vrsta_id', [
             'name' => 'si_vrsta_id',
@@ -87,11 +93,21 @@ class SiPrijavaCrudController extends CrudController {
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
             'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
                     $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', '%'.$searchTerm.'%')
-                            ->where('prezime', 'ilike', '%'.$searchTerm.'%');
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm[1] . '%')
+                            ->orWhere('ime', 'ilike', $searchTerm[1] . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm[0] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', '%' . $searchTerm . '%')
+                            ->orWhere('prezime', 'ilike', '%' . $searchTerm . '%');
                     });
                 }
+            }
 
         ]);
         // TODO: remove setFromDb() and manually define Columns, maybe Filters
