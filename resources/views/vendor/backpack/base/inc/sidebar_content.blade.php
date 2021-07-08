@@ -3,9 +3,7 @@
 <!-- This file is used to store sidebar items, starting with Backpack\Base 0.9.0 -->
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="nav-icon fas fa-tachometer"></i> {{ trans('backpack::base.dashboard') }}</a></li>
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('firma') }}'><i class='nav-icon fas fa-building'></i> Firme</a></li>
-
-@role('urednik|admin')
+@role('korisnik|urednik|admin')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
@@ -18,21 +16,21 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('urednik|admin')
+@role('korisnik|urednik|admin')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>REGISTAR</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='http://www.ingkomora.rs/clanovi/registar_pretraga.php' target="_blank"> App</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osiguranje') }}'> Osiguranja</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regoblast') }}'> RegOblast</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regpodoblast') }}'> RegPodOblast</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sivrsta') }}'> SiVrste</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('firma') }}'> Firme</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regoblast') }}'> Stručne oblasti</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regpodoblast') }}'> Uže stručne oblasti</a></li>
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('licence|urednik|admin')
+@role('korisnik|urednik|admin')
 <li class="divider">
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-certificate"></i>LICENCE</a>
@@ -46,17 +44,18 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('prijave|urednik|admin')
+@role('korisnik|urednik|admin')
 <li class="nav-item nav-dropdown">
-    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>PRIJAVE SI</a>
+    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>STRUČNI ISPRITI</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('siprijava') }}'> Prijave</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavasistara') }}'> Prijave stare</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sivrsta') }}'> Vrste ispita</a></li>
     </ul>
 </li>
 
 <li class="nav-item nav-dropdown">
-    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>PRIJAVE ČLANSTVO</a>
+    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Prijave</a></li>
     </ul>

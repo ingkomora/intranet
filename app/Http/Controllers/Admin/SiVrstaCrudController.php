@@ -23,7 +23,7 @@ class SiVrstaCrudController extends CrudController
     {
         $this->crud->setModel('App\Models\SiVrsta');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/sivrsta');
-        $this->crud->setEntityNameStrings('sivrsta', 'si_vrste');
+        $this->crud->setEntityNameStrings('sivrsta', 'Vrste ispita');
     }
 
     protected function setupListOperation()
