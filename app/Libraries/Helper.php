@@ -108,13 +108,11 @@ class Helper {
 
     public function getLicenceOsobe($jmbg, $return = 'all') {
         $result = new \stdClass();
-        /*$licence = Licenca::where('osoba', $jmbg)
-            ->whereIn('status', ['A', 'N'])
-            ->get();*/
         $licence = Licenca::join('tlicencatip', 'tlicenca.licencatip', '=', 'tlicencatip.id')
             ->where('tlicenca.osoba', $jmbg)
             ->whereIn('tlicenca.status', ['A', 'N'])
             ->get(['tlicenca.*', 'tlicencatip.oznaka', 'tlicencatip.naziv']);
+        dd($licence);
         if ($licence->isEmpty()) {
             $result = false;
         } else {
