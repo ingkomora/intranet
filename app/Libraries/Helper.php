@@ -112,7 +112,6 @@ class Helper {
             ->where('tlicenca.osoba', $jmbg)
             ->whereIn('tlicenca.status', ['A', 'N'])
             ->get(['tlicenca.*', 'tlicencatip.oznaka', 'tlicencatip.naziv']);
-        dd($licence);
         if ($licence->isEmpty()) {
             $result = false;
         } else {
