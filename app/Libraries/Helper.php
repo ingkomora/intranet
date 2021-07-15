@@ -91,7 +91,7 @@ class Helper {
                     $result->message = "Licence: $lic, ";
                     $result->status = $prijavaClan->status_id;
                 } else {
-                    $result->message = "Nema licence, ";
+                    $result->message = "Osoba: ". $prijavaClan->osoba->ime . " " . $prijavaClan->osoba->prezime . "($prijavaClan->osoba_id) nema unete licence, ";
 
                 }
 //        TODO treba da se obradjuju samo zavedene a to kad se napravi zavodjenje
