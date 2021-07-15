@@ -5,6 +5,22 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $osoba_id
+ * @property int $app_korisnik_id
+ * @property string $datum_prijema
+ * @property string $zavodni_broj
+ * @property string $datum_odluke_uo
+ * @property string $broj_odluke_uo
+ * @property string $barcode
+ * @property string $created_at
+ * @property string $updated_at
+ * @property Osoba $osoba
+ * @property AppKorisnik $appKorisnik
+ * @property Log $log
+ * @property ZahtevLicenca[] $zahtevi
+ */
 class PrijavaClanstvo extends Model
 {
     use CrudTrait;

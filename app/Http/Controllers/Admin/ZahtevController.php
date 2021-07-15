@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Imports\ExcelImport;
 use App\Libraries\Helper;
+use App\Libraries\LibLibrary;
 use App\Libraries\ProveraLibrary;
 use App\Models\LicencaTip;
 use App\Models\Log;
 use App\Models\LogOsoba;
 use App\Models\Osoba;
+use App\Models\PrijavaClanstvo;
 use App\Models\SiPrijava;
 use App\Models\ZahtevLicenca;
 use DateTime;
 use Doctrine\DBAL\Schema\AbstractAsset;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use PDF;
@@ -625,6 +629,7 @@ class ZahtevController extends Controller {
         } else {
 //                NEMA LICENCE
             $response->status = false;
+            $response->message = "Nije Pronadjena licenca";
             $response->licenca = NULL;
 //            dd($response);
         }
@@ -684,6 +689,119 @@ class ZahtevController extends Controller {
 
         $response->message = "Kreirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
         return $response;
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function unesinoveclanove(Request $request) {
+        $messageOK = "";
+        $messageNOK = "";
+        $file = $request->file('upload');
+        if (!is_null($file)) {
+            $import = new ExcelImport();
+            $collection = ($import->toCollection($file));
+            $prijave = $collection[2]->where('import', 1);
+            dd($prijave);
+        } else {
+            $prijave = $request->get('prijave');
+            $validated = $request->validate([
+                'prijave' => [
+                    function ($attribute, $values, $fail) {
+                        $error = false;
+                        foreach ($values as $value) {
+                            $zahtev = PrijavaClanstvo::find($value['broj']);
+                            if (is_null($zahtev)) {
+                                $error = true;
+                                $fail('Prijava: ' . $value['broj'] . ' ne postoji u bazi, proverite unos.');
+                            }
+                        }
+                    }
+                ],
+                'prijave.*.datum-resenja' => 'date_format:d.m.Y.',
+                'prijave.*.datum-prijema' => 'date_format:d.m.Y.',
+                'prijave.*.broj-resenja' => 'unique:prijave_clanstvo,broj_odluke_uo',
+                'prijave.*.zavodni-broj' => 'unique:prijave_clanstvo,zavodni_broj',
+            ]);
+        }
+        foreach ($prijave as $prijava) {
+            $resp = $this->odobrinovogclana($prijava);
+            if ($resp->status) {
+                $messageOK .= $prijava['broj'] . " ($resp->message), ";
+            } else {
+                $messageNOK .= $prijava['broj'] . " ($resp->message), ";
+            }
+        }
+        if (!empty($messageOK)) {
+            $messageOK = trim($messageOK, ", ");
+            $messageOK = 'Uspešno uneti novi članovi: ' . $messageOK;
+        }
+        if (!empty($messageNOK)) {
+            $messageNOK = trim($messageNOK, ", ");
+            $messageNOK = 'Neuspešno: ' . $messageNOK;
+        }
+//        toastr()->success($messageOK);
+//        toastr()->warning($messageNOTOK);
+        session()->flashInput($request->input());
+        return view('clanstvo')->with("message", $messageOK)->with('errormessage', $messageNOK);
+
+
+    }
+
+
+    public function odobrinovogclana($prijava) {
+        $resp = new \stdClass();
+        $prijava_clan = PrijavaClanstvo::find($prijava['broj']);
+
+        if ($prijava_clan->status_id === PRIJAVA_CLAN_KREIRANA) {
+            $resp->message = "Status prijave: " . $prijava['broj'] . " " . $prijava_clan->status->naziv . ", kontaktirajte SIT";
+            $resp->status = false;
+            return $resp;
+        }
+        if ($prijava_clan->status_id === PRIJAVA_CLAN_PRIHVACENA) {
+            $resp->message = "Prijava je već obrađena";
+            $resp->status = false;
+            return $resp;
+        }
+        // TODO napraviti elektronsko zavodjenje
+
+        $zahtevi = $prijava_clan->zahtevi;
+        $osoba = $prijava_clan->osoba;
+
+        $osobaLicence = $osoba->licence;
+        if (!$osobaLicence->isEmpty()) {
+            $lib = new LibLibrary();
+            $lib->dodeliJedinstveniLib($osoba->id, Auth::user()->id);
+            $this->logOsoba($osoba, CLANSTVO, "Ažurirana osoba: $osoba->ime $osoba->prezime ($osoba->id), lib: $osoba->lib, status: $osoba->clan");
+
+            $prijava_clan->datum_prijema = Carbon::parse($prijava['datum-prijema'])->format('Y-m-d');
+            $prijava_clan->zavodni_broj = $prijava['zavodni-broj'];
+            $prijava_clan->datum_odluke_uo = Carbon::parse($prijava['datum-resenja'])->format('Y-m-d');
+            $prijava_clan->broj_odluke_uo = $prijava['broj-resenja'];
+            $prijava_clan->status_id = PRIJAVA_CLAN_PRIHVACENA;
+            $prijava_clan->save();
+            $this->log($prijava_clan, CLANSTVO, "Kreirana prijava za clanstvo osoba: $osoba->ime $osoba->prezime ($osoba->id), status: " . PRIJAVA_CLAN_PRIHVACENA);
+            $clanarina = DB::table('tclanarinaod2006')->updateOrInsert(
+                ['osoba' => $osoba->id, 'rokzanaplatu' => Carbon::parse($prijava['datum-resenja'])->format('Y-m-d')],
+                [
+                    'iznoszanaplatu' => 7500,
+                    'created_at' => now()
+                ]
+            );
+            $osoba->clan = 1;
+            $osoba->save();
+            $resp->message = "Članstvo prema prijavi broj $prijava_clan->id za osobu $osoba->ime_prezime_jmbg je odobreno";
+            $resp->status = true;
+        } else {
+            $resp->message = "Osoba koja želi da postane član Komore nema ni jednu licencu upisanu u Registar. Unesite licence prema Rešenjima u bazu.";
+            $resp->status = false;
+        }
+        return $resp;
+    }
+
+    private function getOsobaLicence($osoba) {
+
     }
 
     /*
