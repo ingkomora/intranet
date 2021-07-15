@@ -46,9 +46,9 @@ $('#prijaveFormular').on("blur", 'input[name*="[broj]"]', function () {
             success: function (data) {
                 if (Object.keys(data).length !== 0) {
                     if (data.status >= 11 && data.status <= 12) {
-                        $(osobaDiv).html('<div class="bg-success">' + data.ime + '(' + data.jmbg + ')</div>');
+                        $(osobaDiv).html('<div class="bg-success">' + data.ime + ' (' + data.jmbg + '), ' + data.message + '</div>');
                     } else {
-                        $(osobaDiv).html('<div class="bg-warning">' + data.status + '</div>');
+                        $(osobaDiv).html('<div class="bg-warning">' + data.message + '</div>');
                     }
                 } else {
                     $(osobaDiv).html('Proverite broj prijave', '');

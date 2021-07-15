@@ -703,7 +703,7 @@ class ZahtevController extends Controller {
             $import = new ExcelImport();
             $collection = ($import->toCollection($file));
             $prijave = $collection[2]->where('import', 1);
-            dd($prijave);
+//            dd($prijave);
         } else {
             $prijave = $request->get('prijave');
             $validated = $request->validate([

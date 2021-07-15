@@ -4,6 +4,7 @@
 namespace App\Libraries;
 
 
+use App\Models\Licenca;
 use App\Models\PrijavaClanstvo;
 use Illuminate\Http\Request;
 
@@ -73,28 +74,66 @@ class Helper {
 
     public function getPrijavaClan($id) {
         $result = new \stdClass();
+        $result->status = false;
         $prijavaClan = PrijavaClanstvo::find($id);
 //        $prijavaClan = PrijavaClanstvo::where('id', $id)->whereBetween('status_id', [PRIJAVA_CLAN_GENERISANA, PRIJAVA_CLAN_ZAVEDENA])->first();
 //        dd($prijavaClan);
         if (is_null($prijavaClan)) {
-            $result->status = "Prijava $id ne postoji";
-            return json_encode($result);
+            $result->message = "Prijava $id ne postoji";
         } else {
             if ($prijavaClan->status_id === PRIJAVA_CLAN_KREIRANA) {
-                $result->status = "Prijava $id još nije obrađena, (status: " . $prijavaClan->status->naziv . "), kontaktirajte SIT";
-                return json_encode($result);
+                $result->message = "Prijava $id još nije obrađena, (status: " . $prijavaClan->status->naziv . "), kontaktirajte SIT";
             } else if ($prijavaClan->status_id === PRIJAVA_CLAN_PRIHVACENA) {
-                $result->status = "Prijava $id je već obrađena, (odluka $prijavaClan->broj_odluke_uo od $prijavaClan->datum_odluke_uo, zavodni broj $prijavaClan->zavodni_broj)";
-                return json_encode($result);
+                $result->message = "Prijava $id je već obrađena, (odluka $prijavaClan->broj_odluke_uo od $prijavaClan->datum_odluke_uo, zavodni broj $prijavaClan->zavodni_broj)";
             } else {
+                $lic = $this->getLicenceOsobe($prijavaClan->osoba->id, 'string');
+                if ($lic) {
+                    $result->message = "Licence: $lic, ";
+                    $result->status = $prijavaClan->status_id;
+                } else {
+                    $result->message = "Nema licence, ";
+
+                }
 //        TODO treba da se obradjuju samo zavedene a to kad se napravi zavodjenje
 //                dd($prijavaClan->status_id);
                 $result->jmbg = $prijavaClan->osoba_id;
                 $result->ime = $prijavaClan->osoba->ime . " " . $prijavaClan->osoba->prezime;
-                $result->status = $prijavaClan->status_id;
-                return json_encode($result);
+                $result->message .= "Prijava $id ima status: $prijavaClan->status_id -" . $prijavaClan->status->naziv;
             }
         }
+//                    dd($result->message);
+//        return $result;
+        return json_encode($result);
+    }
+
+    public function getLicenceOsobe($jmbg, $return = 'all') {
+        $result = new \stdClass();
+        /*$licence = Licenca::where('osoba', $jmbg)
+            ->whereIn('status', ['A', 'N'])
+            ->get();*/
+        $licence = Licenca::join('tlicencatip', 'tlicenca.licencatip', '=', 'tlicencatip.id')
+            ->where('tlicenca.osoba', $jmbg)
+            ->whereIn('tlicenca.status', ['A', 'N'])
+            ->get(['tlicenca.*', 'tlicencatip.oznaka', 'tlicencatip.naziv']);
+        if ($licence->isEmpty()) {
+            $result = false;
+        } else {
+            switch ($return) {
+                case 'all':
+                    //VRACA KOLEKCIJU SVIH LICENCI
+                    $result = $licence;
+                    break;
+                case 'array':
+                    //VRACA NIZ BROJEVA LICENCI
+                    $result = $licence->pluck('id')->toArray();
+                    break;
+                case 'string':
+                    //VRACA BROJEVE LICENCI U STRINGU
+                    $result = implode(",", $licence->pluck('id')->toArray());
+                    break;
+            }
+        }
+        return $result;
     }
 
 }
