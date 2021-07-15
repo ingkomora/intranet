@@ -47,8 +47,10 @@ $('#prijaveFormular').on("blur", 'input[name*="[broj]"]', function () {
                 if (Object.keys(data).length !== 0) {
                     if (data.status >= 11 && data.status <= 12) {
                         $(osobaDiv).html('<div class="bg-success">' + data.ime + ' (' + data.jmbg + '), ' + data.message + '</div>');
+                        $('form button').attr('disabled', false);
                     } else {
                         $(osobaDiv).html('<div class="bg-warning">' + data.message + '</div>');
+                        $('form button').attr('disabled', 'disabled');
                     }
                 } else {
                     $(osobaDiv).html('Proverite broj prijave', '');
