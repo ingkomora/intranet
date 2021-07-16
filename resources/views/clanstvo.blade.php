@@ -27,7 +27,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-3 pr-0 pl-1">
-                    <input type="text" class="form-control form-control-sm " name="prijave[0][broj]" placeholder="broj prijave" value="{{old('prijave[0][broj]')}}" {{--required data-rule-remote="/admin/checkprijavaclan/"--}}>
+                    <input type="text" class="form-control form-control-sm " name="prijave[0][broj]" placeholder="broj prijave" value="{{old('prijave[0][broj]')}}" required {{--data-rule-remote="/admin/checkprijavaclan/"--}}>
                 </div>
                 <div class="col-sm-2 pr-0 pl-1">
                     <input type="text" class="form-control form-control-sm " name="prijave[0][broj-resenja]" placeholder="broj rešenja UO" value="{{old('prijave[0][broj-resenja]')}}" required>
@@ -58,8 +58,5 @@
 @endsection
 
 @section('after_scripts')
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/jquery.validate.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/additional-methods.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.1/dist/localization/messages_sr_lat.min.js"></script>
     <script src="{{ asset('js/clanstvo.js') }}"></script>
 @endsection

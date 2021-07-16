@@ -12,7 +12,7 @@ return [
     */
 
     // Date & Datetime Format Syntax: https://carbon.nesbot.com/docs/#api-localization
-    'default_date_format'     => 'D MMM YYYY',
+    'default_date_format' => 'D MMM YYYY',
     'default_datetime_format' => 'D MMM YYYY, HH:mm',
 
     // Direction, according to language
@@ -69,15 +69,15 @@ return [
     // Menu logo. You can replace this with an <img> tag if you have a logo.
 //    #### ne moze da radi sa helperima (asset(), url()...) ####
 //    'project_logo'   => '<img class="img-thumbnail" style="height: 1.5cm; vertical-align: middle; margin: 0 auto" src='.asset("images/iks_grb.png").' alt="Inženjerska komora Srbije"/>',
-    'project_logo'   => 'IKS',
+    'project_logo' => 'IKS',
 
     // Show / hide breadcrumbs on admin panel pages.
     'breadcrumbs' => true,
 
     // Horizontal navbar classes. Helps make the admin panel look similar to your project's design.
     'header_class' => 'app-header bg-light border-0 navbar',
-        // For background colors use: bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
-        // For links to be visible on different background colors use: "navbar-dark", "navbar-light", "navbar-color"
+    // For background colors use: bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
+    // For links to be visible on different background colors use: "navbar-dark", "navbar-light", "navbar-color"
 
     // ----
     // BODY
@@ -85,13 +85,13 @@ return [
 
     // Body element classes.
     'body_class' => 'app aside-menu-fixed sidebar-lg-show',
-        // Try sidebar-hidden, sidebar-fixed, sidebar-compact, sidebar-lg-show
+    // Try sidebar-hidden, sidebar-fixed, sidebar-compact, sidebar-lg-show
 
     // Sidebar element classes.
     'sidebar_class' => 'sidebar sidebar-pills bg-light',
-        // Remove "sidebar-transparent" for standard sidebar look
-        // Try "sidebar-light" or "sidebar-dark" for dark/light links
-        // You can also add a background class like bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan
+    // Remove "sidebar-transparent" for standard sidebar look
+    // Try "sidebar-light" or "sidebar-dark" for dark/light links
+    // You can also add a background class like bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan
 
     // ------
     // FOOTER
@@ -99,8 +99,8 @@ return [
 
     // Footer element classes.
     'footer_class' => 'app-footer',
-        // hide it with d-none
-        // change background color with bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
+    // hide it with d-none
+    // change background color with bg-dark, bg-primary, bg-secondary, bg-danger, bg-warning, bg-success, bg-info, bg-blue, bg-light-blue, bg-indigo, bg-purple, bg-pink, bg-red, bg-orange, bg-yellow, bg-green, bg-teal, bg-cyan, bg-white
 
     // Developer or company name. Shown in footer.
     'developer_name' => 'Inženjerska komora Srbije - Služba za informacione tehnologije',
@@ -133,6 +133,9 @@ return [
         'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.sr-latin.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.rs-latin.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.rs.min.js',
+        'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js',
+        'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/additional-methods.min.js',
+        'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/localization/messages_sr_lat.min.js',
 
         // examples (VueJS or React)
         // 'https://unpkg.com/vue@2.4.4/dist/vue.min.js',
@@ -215,12 +218,12 @@ return [
     // Username column for authentication
     // The Backpack default is the same as the Laravel default (email)
     // If you need to switch to username, you also need to create that column in your db
-    'authentication_column'      => 'email',
+    'authentication_column' => 'email',
     'authentication_column_name' => 'Email',
 
     // The guard that protects the Backpack admin panel.
     // If null, the config.auth.defaults.guard value will be used.
-    'guard' => null,
+    'guard' => NULL,
 
     // The password reset configuration for Backpack.
     // If null, the config.auth.defaults.passwords value will be used.
