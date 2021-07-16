@@ -16,7 +16,7 @@
     @if(!empty($errormessage))
         <div class="alert alert-warning mt-3 row">{!! $errormessage !!}</div>
     @endif
-    <div class="container pb-3" style="margin-top: 200px">
+    <div class="container py-5 mt-5">
         <form id="prijaveFormular" class="form-horizontal" action="/admin/unesinoveclanove" method="POST" enctype="multipart/form-data" {{--autocomplete="off"--}}>
             @csrf
             <div class="form-group row">
