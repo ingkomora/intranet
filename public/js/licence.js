@@ -1,13 +1,5 @@
-console.log( "ready!" );
 
-$('.resenja-datum').datepicker({
-    format: "dd.mm.yyyy.",
-    weekStart: 1,
-    startView: 1,
-    language: "sr-latin",
-    orientation: "left top",
-    uiLibrary: 'bootstrap4',
-});
+atachDatepicker();
 
 var Form = $('form');
 Form.validate(
@@ -30,6 +22,7 @@ Form.validate(
         },
     }
 );
+
 $('#licenceFormular').on("blur", 'input[name*="[broj]"]', function () {
 
     var licencatip = $(this).val();
@@ -80,7 +73,7 @@ $('#licenceFormular').on("blur", 'input[name*="[broj]"]', function () {
     var prijavaId = $(this).attr('name').replace(/^.*(\d).*$/, '$1');
 
     var jmbg = $('input[name="licence[' + prijavaId + '][jmbg]"]').val();
-    console.log("jmbg: " + jmbg);
+    // console.log("jmbg: " + jmbg);
 
     var licDiv = $('select#licence' + prijavaId + 'tip');
     if (licenca) {
@@ -126,7 +119,7 @@ $('input[name="upload"]').on("blur", function () {
     var file = document.forms['licenceFormular']['upload'].files[0];
 
     if (file !== undefined) {
-        console.log(file.name);
+        // console.log(file.name);
         $('#submitLicence').attr('formnovalidate', '');
     } else {
         $('#submitLicence').removeAttr('formnovalidate');
@@ -139,7 +132,7 @@ var room = 0;
 function additional_fields() {
 
     room = $('div#additional_fields .form-group.row').length;
-    console.log(room);
+    // console.log(room);
     room++;
     var objTo = document.getElementById('additional_fields');
     var divtest = document.createElement("div");
@@ -175,9 +168,21 @@ function additional_fields() {
                 <div class = "clear"></div>';
 
     objTo.appendChild(divtest)
+    atachDatepicker();
 }
 
 function remove_additional_fields(rid) {
     $('.removeclass' + rid).remove();
+}
+
+function atachDatepicker(){
+    $('.resenja-datum').datepicker({
+        format: "dd.mm.yyyy.",
+        weekStart: 1,
+        startView: 1,
+        language: "sr-latin",
+        orientation: "left top",
+        uiLibrary: 'bootstrap4',
+    });
 }
 
