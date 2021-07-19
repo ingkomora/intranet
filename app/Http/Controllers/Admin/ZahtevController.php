@@ -652,12 +652,6 @@ class ZahtevController extends Controller {
         $licenca->datumuo = $zahtev->licenca_datum_resenja;
         $licenca->datumobjave = $zahtev->licenca_datum_resenja;
 
-        $provera = new ProveraLibrary();
-        if ($provera->statusLicence($licenca)) {
-            $licenca->status = LICENCA_AKTIVNA;
-        } else {
-            $licenca->status = LICENCA_NEAKTIVNA;
-        }
         $licenca->preuzeta = 1;
 //            dd(Licenca::where('osoba', $zahtev->osoba)->where('prva', 1)->get()->isEmpty());
         if (Licenca::where('osoba', $zahtev->osoba)->where('prva', 1)->get()->isEmpty()) {
@@ -666,6 +660,13 @@ class ZahtevController extends Controller {
         }
         $licenca->broj_resenja = $zahtev['licenca_broj_resenja'];
 //dd($licenca->wasRecentlyCreated);
+        $licenca->save();
+        $provera = new ProveraLibrary();
+        if ($provera->statusLicence($licenca)) {
+            $licenca->status = LICENCA_AKTIVNA;
+        } else {
+            $licenca->status = LICENCA_NEAKTIVNA;
+        }
         $licenca->save();
         $response->licenca = $licenca;
         $response->message = "Ažurirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";

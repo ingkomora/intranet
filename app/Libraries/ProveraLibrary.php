@@ -131,7 +131,7 @@ class ProveraLibrary {
                 if ($osiguranje) {
                     $message .= "<br>ALI IMA OSIGURANJE (AKTIVNA)";
 //                 ALI IMA OSIGURANJE
-            dd($message);
+//            dd($message);
                     $result = true;
                 } else {
                     $message .= "<br>... I NEMA OSIGURANJE (NEAKTIVNA)";
