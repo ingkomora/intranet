@@ -136,26 +136,11 @@ class OsobaCrudController extends CrudController {
     protected function setupCreateOperation() {
         $this->crud->setValidation(OsobaRequest::class);
 
-        /*$this->crud->addField([
+        $this->crud->addField([
             'name' => 'id',
             'label' => 'JMBG',
             'tab' => 'Licni podaci'
         ], 'create');
-
-        $this->crud->addField([
-            'name' => 'ime',
-            'label' => 'Ime',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');
-
-        $this->crud->addField([
-            'name' => 'prezime',
-            'label' => 'Prezime',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');*/
-
         $this->setupUpdateOperation();
     }
 
@@ -167,35 +152,11 @@ class OsobaCrudController extends CrudController {
             'attributes' => ['readonly' => 'readonly'],
             'tab' => 'Licni podaci'
         ], 'update');
-        $this->crud->addField([
-            'name' => 'ime',
-            'label' => 'Ime',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');
-        $this->crud->addField([
-            'name' => 'prezime',
-            'label' => 'Prezime',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');
-        $this->crud->addField([
-            'name' => 'roditelj',
-            'label' => 'Roditelj',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');
-        $this->crud->field([
-            'name' => 'zvanjeId',
-            'label' => 'Zvanje',
-            'attributes' => ['readonly' => 'readonly'],
-            'tab' => 'Licni podaci'
-        ], 'update');
-//        $this->crud->field('ime')->tab('Licni podaci');
-//        $this->crud->field('prezime')->tab('Licni podaci');
-//        $this->crud->field('roditelj')->tab('Licni podaci');
+        $this->crud->field('ime')->tab('Licni podaci');
+        $this->crud->field('prezime')->tab('Licni podaci');
+        $this->crud->field('roditelj')->tab('Licni podaci');
         $this->crud->field('devojackoprezime')->tab('Licni podaci');
-//        $this->crud->field('zvanjeId')->tab('Licni podaci');
+        $this->crud->field('zvanjeId')->tab('Licni podaci');
         $this->crud->field('rodjenjemesto')->tab('Licni podaci');
         $this->crud->field('rodjenjeopstina')->tab('Licni podaci');
         $this->crud->field('rodjenjedrzava')->tab('Licni podaci');
