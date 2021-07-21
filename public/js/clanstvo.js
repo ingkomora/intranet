@@ -2,15 +2,7 @@
 *  Custom javascript za clanstvo
 */
 
-
-$('.resenja-datum').datepicker({
-    format: "dd.mm.yyyy.",
-    weekStart: 1,
-    startView: 1,
-    language: "sr-latin",
-    orientation: "left top",
-    uiLibrary: 'bootstrap4',
-});
+atachDatepicker();
 
 var Form = $('form');
 Form.validate(
@@ -103,9 +95,22 @@ function additional_fields() {
                 <div class = "clear"></div>';
 
     objTo.appendChild(divtest)
+    atachDatepicker();
 }
 
 function remove_additional_fields(rid) {
 
     $('.removeclass' + rid).remove();
 }
+
+function atachDatepicker(){
+    $('.resenja-datum').datepicker({
+        format: "dd.mm.yyyy.",
+        weekStart: 1,
+        startView: 1,
+        language: "sr-latin",
+        orientation: "left top",
+        uiLibrary: 'bootstrap4',
+    });
+}
+
