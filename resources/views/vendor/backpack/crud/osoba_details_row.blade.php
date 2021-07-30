@@ -9,7 +9,7 @@
                 @endforeach
             </p>
             @if(!empty($entry->clanarine->count()))
-                <h5>Èlanarina:</h5>
+                <h5>ÄŒlanarina:</h5>
                 <table class="table table-sm table-striped">
                     <thead>
                     <tr>

@@ -19,7 +19,7 @@ trait HasCompositePrimaryKey {
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function setKeysForSaveQuery(Builder $query) {
+    protected function setKeysForSaveQuery($query) {
         foreach ($this->getKeyName() as $key) {
             // UPDATE: Added isset() per devflow's comment.
             if (isset($this->$key))
