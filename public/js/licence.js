@@ -1,3 +1,6 @@
+/*
+*  Custom javascript za upis licenci
+*/
 
 atachDatepicker();
 
