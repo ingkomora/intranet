@@ -14,9 +14,11 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class LicencaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
@@ -30,7 +32,7 @@ class LicencaCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/licenca');
         CRUD::setEntityNameStrings('licenca', 'licence');
 
-        $this->crud->setColumns(['id', 'licencatip', 'osoba', 'zahtev', 'datumuo','status', 'broj_resenja','created_at','updated_at']);
+        $this->crud->setColumns(['id', 'licencatip', 'osoba', 'zahtev', 'datumuo', 'status', 'broj_resenja', 'created_at', 'updated_at']);
 
         $this->crud->setColumnDetails('osoba', [
             'name' => 'osoba',
@@ -40,7 +42,6 @@ class LicencaCrudController extends CrudController
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
         ]);
-
     }
 
     /**
@@ -52,7 +53,33 @@ class LicencaCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('osoba');
+        $this->crud->setColumnDetails('osoba', [
+            'name' => 'osoba',
+            'type' => 'select',
+            'label' => 'Osoba',
+            'entity' => 'osobaId',
+            'attribute' => 'ime_prezime_jmbg',
+            'model' => 'App\Models\Osoba',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm[1] . '%')
+                            ->orWhere('ime', 'ilike', $searchTerm[1] . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm[0] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', '%' . $searchTerm . '%')
+                            ->orWhere('prezime', 'ilike', '%' . $searchTerm . '%')
+                            ->orWhere('id', 'ilike', $searchTerm[0] . '%');
+                    });
+                }
+            }
+
+        ]);
+//        CRUD::column('osoba');
         CRUD::column('licencatip');
         CRUD::column('datum');
         CRUD::column('zahtev');
