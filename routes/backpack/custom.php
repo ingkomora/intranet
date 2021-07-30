@@ -31,7 +31,6 @@ Route::group([
     Route::get('test', 'HomeController@test');
     Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi');
     Route::post('obradizahtevsvecanaforma', 'ZahtevController@obradizahtevsvecanaforma');
-    Route::post('preuzimanjesvecanaforma', 'ZahtevController@preuzimanjesvecanaforma');
     Route::post('downloadzip', 'ZahtevController@downloadZip');
     Route::view('/unesinovelicence', 'unesinovelicence');
     Route::post('/unesinovelicence', 'ZahtevController@unesinovelicence');

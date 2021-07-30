@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\UpdateLicencaStatusOperation;
 use App\Http\Requests\OsobaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -16,6 +17,7 @@ class OsobaCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+    use UpdateLicencaStatusOperation;
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
@@ -233,5 +235,4 @@ class OsobaCrudController extends CrudController {
 //        return view('crud.details_row', $this->data);
         return view('crud::osoba_details_row', $this->data);
     }
-
 }

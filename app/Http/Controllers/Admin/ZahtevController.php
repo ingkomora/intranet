@@ -29,11 +29,13 @@ use Session;
 
 class ZahtevController extends Controller {
     protected $data = []; // the information we send to the view
+    protected $h;
 
     /**
      * Create a new controller instance.
      */
     public function __construct() {
+        $this->h = new Helper();
         $this->middleware(backpack_middleware());
     }
 
@@ -118,7 +120,6 @@ class ZahtevController extends Controller {
 //dd($licencaO->tipLicence->vrstaLicence->naziv);
             if (!is_null($licencaO)) {
                 $osoba = $licencaO->osobaId;
-                $h = new Helper();
 
                 $data = new \stdClass();
                 $ss = mb_strtoupper(mb_substr($osoba->roditelj, 0, 2));
@@ -128,10 +129,10 @@ class ZahtevController extends Controller {
                 } else {
                     $osoba->roditelj = mb_ucfirst(mb_substr($osoba->roditelj, 0, 1));
                 }
-                $data->osobaImeRPrezime = $h->iso88592_to_cirUTF($osoba->ime . " " . $osoba->roditelj . ". " . $osoba->prezime);
-                $data->zvanje = $h->iso88592_to_cirUTF($osoba->zvanjeId->naziv);
-                $data->zvanjeskr = $h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
-                $data->licenca = $h->iso88592_to_cirUTF(mb_strtoupper($licenca));
+                $data->osobaImeRPrezime = $this->h->iso88592_to_cirUTF($osoba->ime . " " . $osoba->roditelj . ". " . $osoba->prezime);
+                $data->zvanje = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->naziv);
+                $data->zvanjeskr = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
+                $data->licenca = $this->h->iso88592_to_cirUTF(mb_strtoupper($licenca));
                 $data->licencaTip = $licencaO->tipLicence->id;
                 $gen = $licencaO->tipLicence->generacija;
                 $licencaTipNaziv = $licencaO->tipLicence->naziv;
@@ -152,24 +153,24 @@ class ZahtevController extends Controller {
 //                dd($naziv);
 //                $naziv = $nazivArr[0];
                 $nazivPadez = PROFESIONALNI_NAZIV[$gen][$naziv];
-                $data->vrstaLicenceNaslov = $h->iso88592_to_cirUTF(mb_strtoupper($nazivPadez));
+                $data->vrstaLicenceNaslov = $this->h->iso88592_to_cirUTF(mb_strtoupper($nazivPadez));
                 switch ($gen) {
                     case  1:
-                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaO->tipLicence->naziv)));
+                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($this->h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaO->tipLicence->naziv)));
                         break;
                     case  2:
-                        $data->vrstaLicence = 'ималац лиценце ' . $h->iso88592_to_cirUTF(mb_strtolower($nazivPadez));
+                        $data->vrstaLicence = 'ималац лиценце ' . $this->h->iso88592_to_cirUTF(mb_strtolower($nazivPadez));
                         break;
                     case  3:
-                        $data->vrstaLicence = 'лиценцирани ' . $h->iso88592_to_cirUTF(mb_strtolower($naziv));
-                        $data->vrstaPoslaGen = "за обављање стручних послова " . $h->iso88592_to_cirUTF($licencaO->tipLicence->vrstaPosla->naziv_gen);
+                        $data->vrstaLicence = 'лиценцирани ' . $this->h->iso88592_to_cirUTF(mb_strtolower($naziv));
+                        $data->vrstaPoslaGen = "за обављање стручних послова " . $this->h->iso88592_to_cirUTF($licencaO->tipLicence->vrstaPosla->naziv_gen);
                         break;
                     default:
                         break;
                 }
-                $data->strucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->regOblast->naziv));
+                $data->strucnaOblast = $this->h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->regOblast->naziv));
                 $data->uzaStrucnaOblastId = $licencaO->tipLicence->podOblast->id;
-                $data->uzaStrucnaOblast = $h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->naziv));
+                $data->uzaStrucnaOblast = $this->h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->naziv));
                 $data->brojResenja = $licencaO->broj_resenja;
                 $data->datumResenja = date('d.m.Y.', strtotime($licencaO->datumuo));
                 $data->datumStampe = date('d.m.Y.', strtotime($datumstampe));
@@ -293,26 +294,6 @@ class ZahtevController extends Controller {
         ob_end_clean();
         return response()->download(public_path($request->zipfile), $request->zipfile)->deleteFileAfterSend(true);
 
-    }
-
-    /**
-     * @param Request $request
-     */
-    public function preuzimanjesvecanaforma(Request $request) {
-        $result = new \stdClass();
-        $licence = str_replace(" ", "", $request->request->get('licence'));
-        $licence = explode("\r\n", $licence);
-        dd($licence);
-        foreach ($licence as $licenca_broj) {
-
-            $licenca = \App\Models\Licenca::with("osobaId")->find($licenca_broj)->get();
-            dd($licenca);
-            if (!is_null($licenca)) {
-
-                $osoba = $licenca->osobaId;
-            }
-        }
-        dd($result);
     }
 
     /**
@@ -661,12 +642,7 @@ class ZahtevController extends Controller {
         $licenca->broj_resenja = $zahtev['licenca_broj_resenja'];
 //dd($licenca->wasRecentlyCreated);
         $licenca->save();
-        $provera = new ProveraLibrary();
-        if ($provera->statusLicence($licenca)) {
-            $licenca->status = LICENCA_AKTIVNA;
-        } else {
-            $licenca->status = LICENCA_NEAKTIVNA;
-        }
+        $licenca->status = $this->h->proveriStatusLicence($licenca);
         $licenca->save();
         $response->licenca = $licenca;
         $response->message = "Ažurirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
