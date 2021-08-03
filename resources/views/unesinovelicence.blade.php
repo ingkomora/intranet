@@ -2,9 +2,21 @@
 
 @section('title', 'Unos novih licenci u bazu')
 
-@section('content')
+@php
+    $breadcrumbs = [
+        'Admin' => backpack_url('dashboard'),
+        'Licence' => false,
+        'Unošenje novih licenci' => false,
+    ];
+@endphp
 
-{{--    @toastr_css--}}
+@section('content')
+    <div class="container-fluid">
+        <h2>
+            <span class="text-capitalize">Upisivanje novih licenci</span>
+        </h2>
+    </div>
+
     @if(!empty(session('message')))
         <div class="alert alert-success mt-3" role="alert">{{ session('message') }}</div>
     @endif
@@ -16,17 +28,66 @@
             <div class="alert alert-danger" role="alert">{{ $error }}</div>
         @endforeach
     @endif
-
-    <div class="container py-5 mt-5">
+    <div class="container-fluid animated fadeIn my-5">
         <form id="licenceFormular" name="licenceFormular" class="form-horizontal" action="/admin/unesinovelicence" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="form-group row">
-                <label for="upload" class="col-sm-3 col-form-label col-form-label-sm">Izaberi Excel datoteku</label>
-                <div class="col-sm-5">
-                    <input type="file" class="form-control form-control-sm" id="upload" name="upload"/>
+
+            <div class="row">
+                <div class="input-group mb-3 col-md-5">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Izaberi Excel datoteku</span>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="upload" name="upload" aria-describedby="inputGroupFileAddon01">
+                        <label class="custom-file-label" for="upload"></label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group-prepend">
+                        <a href='{{asset("download/tmpl_upis_licenci_u_registar.xlsx")}}' class="input-group-text btn btn-outline-warning">Preuzmi excel šablon</a>
+                    </div>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="row mb-5">
+                <div class="col-md-8">
+                    <div class="input-group-prepend">
+                        <table class="table table-sm">
+                            <thead class="thead-light">
+                            <tr>
+                                <th colspan="2">UPUTSTVO</th>
+                                <th colspan="2">LEGENDA za excel šablon</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td colspan="2">U polja unosite brojeve i tekst <b>bez razmaka</b></td>
+                                <td class="bg-success"></td>
+                                <td>Obavezna polja</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Koristite <b>latinično</b> pismo</td>
+                                <td class="bg-secondary"></td>
+                                <td>Polja koja program ne koristi prilikom unosa licence</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Datum se unosi u formatu: <b>GGGG-MM-DD</b></td>
+                                <td class="bg-warning"></td>
+                                <td>Polja od kojih je obavezno samo jedno od ponuđenih</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Excel šablon sadrži karticu <code>INFO</code> gde možete dodatno da se informišete.</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="input-group my-5">
                 <div class="col-sm-3 pr-0 pl-1">
                     <input type="text" class="form-control form-control-sm" name="licence[0][jmbg]" value="{{old('licence.0.jmbg')}}" placeholder="Unesite matični broj" data-inputmask="'mask': '9999999999999'" required>
                 </div>
@@ -88,13 +149,13 @@
             @else
                 <div id="additional_fields"></div>
             @endif
-            <div class="col-sm-7 text-right">
+            <div class="col-sm-12 text-left">
                 <button type="submit" id="submitLicence" class="next btn btn-outline-primary px-3">Obradi unete licence</button>
             </div>
         </form>
     </div>
-{{--    @toastr_js--}}
-{{--    @toastr_render--}}
+    {{--    @toastr_js--}}
+    {{--    @toastr_render--}}
 
 @endsection
 
