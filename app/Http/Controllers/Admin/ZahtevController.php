@@ -168,6 +168,8 @@ class ZahtevController extends Controller {
                     default:
                         break;
                 }
+                        $data->nazivLicence = str_replace('урбанисту', 'урбанисте', $data->nazivLicence );
+                        $data->nazivLicence = str_replace('архитекту', 'архитекте', $data->nazivLicence );
                 $data->strucnaOblast = $this->h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->regOblast->naziv));
                 $data->uzaStrucnaOblastId = $licencaO->tipLicence->podOblast->id;
                 $data->uzaStrucnaOblast = $this->h->iso88592_to_cirUTF(mb_strtolower($licencaO->tipLicence->podOblast->naziv));
