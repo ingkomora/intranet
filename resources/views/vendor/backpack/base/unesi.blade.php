@@ -2,8 +2,23 @@
 
 @section('title', 'Unošenje podataka:' . strtoupper($url))
 
+@php
+    $breadcrumbs = [
+        'Admin' => backpack_url('dashboard'),
+        'Licence' => false,
+        'Svečane forme licenci' => false,
+    ];
+@endphp
+
 @section('content')
-    <div class="container pb-3">
+
+    <div class="container-fluid">
+        <h2>
+            <span class="text-capitalize">Generisanje svečanih formi licenci</span>
+        </h2>
+    </div>
+
+    <div class="container-fluid animated fadeIn my-5">
         @if(!empty($message))
             <div class="alert alert-success mt-3 row">
                 <div class="col-6" role="alert">{!! $message !!}</div>
@@ -23,44 +38,42 @@
                 <div class="alert alert-danger" role="alert">{!! $error !!}</div>
             @endforeach
         @endif
-        @if(!empty($url))
-            <form id="jmbgFormular" class="form-horizontal" action="/admin/{{$action}}/{{$url}}" method="POST" enctype="multipart/form-data">
-                @else
-                    <form id="jmbgFormular" class="form-horizontal" action="/admin/{{$action}}" method="POST" enctype="multipart/form-data">
-                        @endif
-                        @csrf
-                        <div class="form-group row">
-                            <label for="upload" class="col-sm-3 col-form-label col-form-label-sm">Izaberi Excel datoteku</label>
-                            <div class="col-sm-9">
-                                <input type="file" class="form-control form-control-sm" id="upload" name="upload"/>
-                            </div>
 
-                        </div>
-                        <div class="form-group row">
-                            <label for="datum" class="col-sm-3 col-form-label col-form-label-sm">Datum</label>
-                            <div class="col-sm-9">
-                                <input type="date" class="form-control form-control-sm" id="datum" name="datum"/>
-                            </div>
+        <form id="jmbgFormular" class="form-horizontal" action="/admin/{{$form_action}}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group row">
+                <label for="upload" class="col-sm-2 col-form-label col-form-label-sm">Izaberi Excel datoteku</label>
+                <div class="col-sm-10">
+                    <input type="file" class="form-control form-control-sm" id="upload" name="upload"/>
+                </div>
 
-                        </div>
-                        <div class="form-group row">
-                            <label for="licence" class="col-sm-3 col-form-label col-form-label-sm">LICENCE:</label>
-                            <div class="col-sm-9">
-                                <textarea class="form-control form-control-sm" id="licence" name="licence" rows="10"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="jmbgs" class="col-sm-3 col-form-label col-form-label-sm">JMBG-ovi:</label>
-                            <div class="col-sm-9">
-                                <textarea class="form-control form-control-sm" id="jmbgs" name="jmbgs" rows="10"></textarea>
-                            </div>
-                        </div>
+            </div>
+            <div class="form-group row">
+                <label for="datum" class="col-sm-2 col-form-label col-form-label-sm">Datum</label>
+                <div class="col-sm-10">
+                    <input type="date" class="form-control form-control-sm" id="datum" name="datum"/>
+                </div>
 
-                        <div class="col-sm-7 text-right">
-                            <button id="obradi" type="submit" class="next btn btn-outline-primary px-3">{{$action}}</button>
-                        </div>
+            </div>
+            <div class="form-group row">
+                <label for="licence" class="col-sm-2 col-form-label col-form-label-sm">LICENCE:</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control form-control-sm" id="licence" name="licence" rows="10"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="jmbgs" class="col-sm-2 col-form-label col-form-label-sm">JMBG-ovi:</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control form-control-sm" id="jmbgs" name="jmbgs" rows="10"></textarea>
+                </div>
+            </div>
 
-                    </form>
+            <div class="form-group row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-10 text-left">
+                    <button id="obradi" type="submit" class="next btn btn-outline-primary px-3">{{$form_action}}</button>
+                </div>
+            </div>
+        </form>
     </div>
-
 @endsection
