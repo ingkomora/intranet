@@ -65,7 +65,7 @@
 @role('admin')
 <li class="divider">
 <li class="nav-title">ADMIN</li>
-<li class='nav-item'><a class='nav-link' href='/admin/log-viewer' target="_blank"><i class="nav-icon fas fa-chart-pie"></i> APP LOG</a></li>
+<li class='nav-item'><a class='nav-link' href='/admin/log-viewer/logs'><i class="nav-icon fas fa-chart-pie"></i> APP LOG</a></li>
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-tools"></i> RAZNO</a>
     <ul class="nav-dropdown-items">

@@ -1,12 +1,30 @@
 <div class="m-t-10 m-b-10 p-l-10 p-r-10 p-t-10 p-b-10">
     <div class="row">
         <div class="col-md-12">
-            {{--			{{ trans('backpack::crud.details_row') }}--}}
-            <p>JMBG:{{$entry->id}}, LIB:{{$entry->lib}}, <strong>{{$entry->ime}} {{$entry->prezime}}</strong>, {{$entry->zvanjeId->naziv}}</p>
+            <p>JMBG: {{$entry->id}}, LIB: {{$entry->lib}}, <strong>{{$entry->ime}} {{$entry->prezime}}</strong>, {{$entry->zvanjeId->naziv}}</p>
             <p>Licence:<br>
-                @foreach($entry->licence as $licenca)
-                    <strong>{{$licenca->id}} ({{$licenca->status}})</strong>, tip:<strong>{{$licenca->tipLicence->idn}}</strong>, zahtev: {{$licenca->zahtev}}, {{$licenca->broj_resenja}}, {{$licenca->datumuo}}, {{$licenca->tipLicence->naziv}}<br>
-                @endforeach
+                @if($entry->licence->isNotEmpty())
+                    @foreach($entry->licence as $item)
+                        <strong>{{$item->id}} ({{$item->status}})</strong>, tip: <strong>{{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}})</strong>, zahtev: {{$item->zahtev}}, {{$item->broj_resenja}}, {{$item->datumuo}}<br>
+                    @endforeach
+                @else Nema podataka o licencama
+                @endif
+            </p>
+            <p>Zahtevi za licence:<br>
+                @if($entry->zahteviLicence->isNotEmpty())
+                    @foreach($entry->zahteviLicence as $item)
+                        <strong>{{$item->id}} ({{$item->statusId->naziv}})</strong>, tip: <strong>{{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}})</strong>, datum prijema: {{$item->prijem}}<br>
+                    @endforeach
+                @else Nema podataka o zahtevima za izdavanje licence
+                @endif
+            </p>
+            <p>Stručni ispit:<br>
+                @if($entry->siPrijave->isNotEmpty())
+                    @foreach($entry->siPrijave as $item)
+                        <strong>{{$item->id}} ({{$item->status->naziv}})</strong>, vrsta posla:<strong> {{$item->vrstaPosla->naziv}}</strong>, zahtev: {{$item->regOblast->naziv}}, {{$item->regPodOblast->naziv}}, {{$item->datum_prijema}}, {{$item->zavodni_broj}}<br>
+                    @endforeach
+                @else Nema podataka o stručnom ispitu
+                @endif
             </p>
             @if(!empty($entry->clanarine->count()))
                 <h5>Članarina:</h5>

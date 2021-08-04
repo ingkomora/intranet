@@ -134,7 +134,7 @@ class Osoba extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function zahtevi()
+    public function zahteviLicence()
     {
         return $this->hasMany('App\Models\ZahtevLicenca', 'osoba');
     }

@@ -151,6 +151,14 @@ class SiPrijava extends Model
             ]);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function status()
+    {
+        return $this->belongsTo('App\Models\Status', 'status_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
