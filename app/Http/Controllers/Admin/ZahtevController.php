@@ -51,11 +51,6 @@ class ZahtevController extends Controller
         }
         $data['action'] = $action;
         $data['url'] = $url;
-        if (!empty($url)) {
-            $data['form_action'] = "$action/$url";
-        } else {
-            $data['form_action'] = "$action";
-        }
 
 //        return view('unesi', $data);
         return view(backpack_view('unesi'), $data);
@@ -255,6 +250,7 @@ class ZahtevController extends Controller
 //        dd($dataPrint['dataNOK']);
 
         $path = 'public/pdf';
+//        $temp = 'temp/';
 
         if ($countOK > 1) {
             $pdfFiles = Storage::files($path);
@@ -267,29 +263,35 @@ class ZahtevController extends Controller
                 foreach ($pdfFiles as $file) {
 //                    $file = Storage::get($name);
                     $name = basename($file);
+//                    TODO: lokacija snimanja fajla
                     $zip->addFile(public_path('storage/pdf/' . $name), $name);
+//                    $zip->addFile(public_path($temp . $name), $name);
                 }
 //            dd($zip);
                 $zip->close();
                 Storage::delete($pdfFiles);
-//            TODO dobro snimi lose downloaduje
-//                return Storage::download($filename);
-//                ob_end_clean();
-//            return response()->download(public_path($filename), $filename)->deleteFileAfterSend(true);
-                return redirect('admin/unesi/obradizahtevsvecanaforma/' . $filename)->with('status', true)->with('message', "Generisane svečane forme za unete brojeve licenci ($countOK)" . $messageInfo)->withInput();
 
+                $dataZip['message'] = "Generisane svečane forme za unete brojeve licenci ($countOK)" . $messageInfo;
+                $dataZip['status'] = true;
+                $dataZip['filename'] = $filename;
+                $dataZip['action'] = 'obradizahtevsvecanaforma';
+//            return response()->download(public_path($filename), $filename)->deleteFileAfterSend(true);
+//                return redirect('admin/unesi/obradizahtevsvecanaforma/' . $filename)->with('status', true)->with('message', "Generisane svečane forme za unete brojeve licenci ($countOK)" . $messageInfo)->withInput();
+                return view(backpack_view('unesi'), $dataZip);
             }
         } else if ($countOK == 1) {
             //download one file
+            //TODO: lokacija sa koje se fajl preuzima
             return response()->download(public_path("storage/pdf/$data->filename.pdf"))->deleteFileAfterSend(true);
+//            return response()->download(public_path($temp . $data->filename . "pdf"))->deleteFileAfterSend(true);
         } else {
             //nema fajlova za download
             dd("kraj nema nista");
 
         }
 
-        $messageLicencaOK .= "su uspešno sačuvane u bazi ($countOK)";
-        $messageLicencaNOK .= "nisu sačuvane u bazi ($countNOK)";
+        $messageLicencaOK .= "su uspešno sačuvane u bazi($countOK)";
+        $messageLicencaNOK .= "nisu sačuvane u bazi($countNOK)";
 
         info($messageLicencaOK);
         $flagNOK ? toastr()->error($messageLicencaNOK) : toastr()->warning("Nema grešaka");
@@ -308,7 +310,9 @@ class ZahtevController extends Controller
     {
 //        dd($request->zipfile);
         ob_end_clean();
+        //TODO: lokacija sa koje se fajl preuzima
         return response()->download(public_path($request->zipfile), $request->zipfile)->deleteFileAfterSend(true);
+//        return response()->download(public_path('temp/' . $request->zipfile), $request->zipfile)->deleteFileAfterSend(true);
 
     }
 
@@ -474,8 +478,8 @@ class ZahtevController extends Controller
         } //end foreach
         $result['falseJMBG'] = array_keys($falseJMBG);
 //        dd($result);
-        $messageLicencaOK .= ". Uspešno sačuvano u bazi ($countOK)";
-        $messageLicencaNOK .= ". Nije sačuvano u bazi ($countNOK)";
+        $messageLicencaOK .= ". Uspešno sačuvano u bazi($countOK)";
+        $messageLicencaNOK .= " . Nije sačuvano u bazi($countNOK)";
 
         info($messageLicencaOK);
 //        $flagNOTOK ? toastr()->error($messageLicencaNOK) : toastr()->warning("Nema grešaka");
@@ -485,7 +489,7 @@ class ZahtevController extends Controller
 
     private function checkDate($date)
     {
-        $dt = DateTime::createFromFormat("Y-m-d", $date);
+        $dt = DateTime::createFromFormat("Y - m - d", $date);
         return $dt !== false && !array_sum($dt::getLastErrors());
     }
 
@@ -591,7 +595,7 @@ class ZahtevController extends Controller
         //todo treba zahtev status da bude zavrsen ako je kreirana licenca => azurira se prilikom azuriranja licence
         $zahtev->status = ZAHTEV_LICENCA_GENERISAN;
         $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
-        $zahtev->datum = date("Y-m-d");
+        $zahtev->datum = date("Y - m - d");
         if ($zahtev->isDirty()) {
             $zahtev->save();
             $response->message = "Ažuriran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
@@ -670,7 +674,7 @@ class ZahtevController extends Controller
         $licenca->status = $this->h->proveriStatusLicence($licenca);
         $licenca->save();
         $response->licenca = $licenca;
-        $response->message = "Ažurirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
+        $response->message = "Ažurirana licenca: $licenca->id($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
         $response->status = true;
         return $response;
     }
@@ -690,7 +694,7 @@ class ZahtevController extends Controller
         $zahtev->save();
         $this->log($zahtev, LICENCE, "Ažuriran datum prijema zahteva: $zahtev->prijem, status: " . ZAHTEV_LICENCA_ZAVRSEN);
 
-        $response->message = "Kreirana licenca: $licenca->id ($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
+        $response->message = "Kreirana licenca: $licenca->id($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
         return $response;
     }
 
@@ -778,17 +782,17 @@ class ZahtevController extends Controller
         if (!$osobaLicence->isEmpty()) {
             $lib = new LibLibrary();
             $lib->dodeliJedinstveniLib($osoba->id, Auth::user()->id);
-            $this->logOsoba($osoba, CLANSTVO, "Ažurirana osoba: $osoba->ime $osoba->prezime ($osoba->id), lib: $osoba->lib, status: $osoba->clan");
+            $this->logOsoba($osoba, CLANSTVO, "Ažurirana osoba: $osoba->ime $osoba->prezime($osoba->id), lib: $osoba->lib, status: $osoba->clan");
 
-            $prijava_clan->datum_prijema = Carbon::parse($prijava['datum-prijema'])->format('Y-m-d');
-            $prijava_clan->zavodni_broj = $prijava['zavodni-broj'];
-            $prijava_clan->datum_odluke_uo = Carbon::parse($prijava['datum-resenja'])->format('Y-m-d');
-            $prijava_clan->broj_odluke_uo = $prijava['broj-resenja'];
+            $prijava_clan->datum_prijema = Carbon::parse($prijava['datum - prijema'])->format('Y-m-d');
+            $prijava_clan->zavodni_broj = $prijava['zavodni - broj'];
+            $prijava_clan->datum_odluke_uo = Carbon::parse($prijava['datum - resenja'])->format('Y-m-d');
+            $prijava_clan->broj_odluke_uo = $prijava['broj - resenja'];
             $prijava_clan->status_id = PRIJAVA_CLAN_PRIHVACENA;
             $prijava_clan->save();
-            $this->log($prijava_clan, CLANSTVO, "Kreirana prijava za clanstvo osoba: $osoba->ime $osoba->prezime ($osoba->id), status: " . PRIJAVA_CLAN_PRIHVACENA);
+            $this->log($prijava_clan, CLANSTVO, "Kreirana prijava za clanstvo osoba: $osoba->ime $osoba->prezime($osoba->id), status: " . PRIJAVA_CLAN_PRIHVACENA);
             $clanarina = DB::table('tclanarinaod2006')->updateOrInsert(
-                ['osoba' => $osoba->id, 'rokzanaplatu' => Carbon::parse($prijava['datum-resenja'])->format('Y-m-d')],
+                ['osoba' => $osoba->id, 'rokzanaplatu' => Carbon::parse($prijava['datum - resenja'])->format('Y-m-d')],
                 [
                     'iznoszanaplatu' => 7500,
                     'created_at' => now()
@@ -799,7 +803,7 @@ class ZahtevController extends Controller
             $resp->message = "Članstvo prema prijavi broj $prijava_clan->id za osobu $osoba->ime_prezime_jmbg je odobreno";
             $resp->status = true;
         } else {
-            $resp->message = "Osoba koja želi da postane član Komore nema ni jednu licencu upisanu u Registar. Unesite licence prema Rešenjima u bazu.";
+            $resp->message = "Osoba koja želi da postane član Komore nema ni jednu licencu upisanu u Registar . Unesite licence prema Rešenjima u bazu . ";
             $resp->status = false;
         }
         return $resp;
