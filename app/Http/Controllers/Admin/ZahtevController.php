@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use App\Models\Licenca;
+use Prologue\Alerts\Facades\Alert;
 use Session;
 
 
@@ -62,7 +63,6 @@ class ZahtevController extends Controller
      */
     public function obradizahtevsvecanaforma(Request $request)
     {
-//        TODO U TABELU
 
         $file = $request->file('upload');
 
@@ -72,6 +72,7 @@ class ZahtevController extends Controller
             'jmbgs' => 'required_without_all:file,licence',
             'datum' => 'required_without:file',
         ]);
+        $request->datum = Carbon::parse($request->datum)->format('Y-m-d');
         if (!is_null($file)) {
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
@@ -113,6 +114,7 @@ class ZahtevController extends Controller
         $dataPrint = ['dataOK' => [], 'dataNOK' => []];
         foreach ($licence as $licenca => $datumstampe) {
             $count++;
+            $licenca = $this->h->cirUTF_to_iso88592(mb_strtoupper(str_replace(' ', '', $licenca)));
 //                IMPORTUJU SE SAMO ZAHTEVI KAD VEC POSTOJI OSOBA SA LICENCAMA
 //                ZA SADA SU SVE DODATE LICENCE AKTIVNE
 //            UBUDUCE CE SE UBACIVATI I LICENCE AUTOMATSKI DOBIJENE NAKON POLOZENOG STRUCNOG ISPITA
@@ -133,13 +135,17 @@ class ZahtevController extends Controller
                 } else {
                     $osoba->roditelj = mb_ucfirst(mb_substr($osoba->roditelj, 0, 1));
                 }
+                $licencaTip = $this->h->getLicencaTipFromLicencaBroj($licencaO);
                 $data->osobaImeRPrezime = $this->h->iso88592_to_cirUTF($osoba->ime . " " . $osoba->roditelj . ". " . $osoba->prezime);
                 $data->zvanje = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->naziv);
                 $data->zvanjeskr = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
                 $data->licenca = $this->h->iso88592_to_cirUTF(mb_strtoupper($licenca));
-                $data->licencaTip = $licencaO->tipLicence->id;
-                $gen = $licencaO->tipLicence->generacija;
-                $licencaTipNaziv = $licencaO->tipLicence->naziv;
+//                $data->licencaTip = $licencaO->tipLicence->id;
+                $data->licencaTip = $licencaTip->id;
+//                $gen = $licencaO->tipLicence->generacija;
+                $gen = $licencaTip->generacija;
+//                $licencaTipNaziv = $licencaO->tipLicence->naziv;
+                $licencaTipNaziv = $licencaTip->naziv;
                 $temp = '';
                 $nazivArr = array_filter(array_keys(PROFESIONALNI_NAZIV[$gen]), function ($value) use ($licencaTipNaziv, $temp) {
                     return strpos($licencaTipNaziv, $value) !== false;
@@ -158,9 +164,11 @@ class ZahtevController extends Controller
 //                $naziv = $nazivArr[0];
                 $nazivPadez = PROFESIONALNI_NAZIV[$gen][$naziv];
                 $data->vrstaLicenceNaslov = $this->h->iso88592_to_cirUTF(mb_strtoupper($nazivPadez));
+                $data->gen = $gen;
                 switch ($gen) {
                     case  1:
-                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($this->h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaO->tipLicence->naziv)));
+//                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($this->h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaO->tipLicence->naziv)));
+                        $data->nazivLicence = 'ималац лиценце ' . mb_strtolower($this->h->iso88592_to_cirUTF(str_replace($naziv, $nazivPadez, $licencaTip->naziv)));
                         $data->nazivLicence = str_replace('урбанисту', 'урбанисте', $data->nazivLicence);
                         $data->nazivLicence = str_replace('архитекту', 'архитекте', $data->nazivLicence);
                         break;
@@ -296,7 +304,10 @@ class ZahtevController extends Controller
         info($messageLicencaOK);
         $flagNOK ? toastr()->error($messageLicencaNOK) : toastr()->warning("Nema grešaka");
         $flagOK ? toastr()->success($messageLicencaOK) : toastr()->warning("Nema kreiranih licenci");
-//        return redirect('/unesinovelicence')->with('message', $messageLicencaOK)->withInput();
+
+//        Alert::error($messageLicencaNOK);
+//        Alert::success($messageLicencaOK);
+//        return view(backpack_view('obradizahtevsvecanaforma'), $this->data)->with('alert', Alert::all());
         return view(backpack_view('obradizahtevsvecanaforma'), $this->data);
 
     }
@@ -489,7 +500,7 @@ class ZahtevController extends Controller
 
     private function checkDate($date)
     {
-        $dt = DateTime::createFromFormat("Y - m - d", $date);
+        $dt = DateTime::createFromFormat("Y-m-d", $date);
         return $dt !== false && !array_sum($dt::getLastErrors());
     }
 
@@ -595,7 +606,7 @@ class ZahtevController extends Controller
         //todo treba zahtev status da bude zavrsen ako je kreirana licenca => azurira se prilikom azuriranja licence
         $zahtev->status = ZAHTEV_LICENCA_GENERISAN;
         $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
-        $zahtev->datum = date("Y - m - d");
+        $zahtev->datum = date("Y-m-d");
         if ($zahtev->isDirty()) {
             $zahtev->save();
             $response->message = "Ažuriran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;

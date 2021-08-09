@@ -5,6 +5,7 @@ namespace App\Libraries;
 
 
 use App\Models\Licenca;
+use App\Models\LicencaTip;
 use App\Models\Osoba;
 use App\Models\PrijavaClanstvo;
 use Carbon\Carbon;
@@ -14,7 +15,8 @@ use Illuminate\Http\Request;
  * Class Helper
  * @package App\Libraries
  */
-class Helper {
+class Helper
+{
 
     protected $o;       //osobe
     protected $l;       //licence
@@ -36,7 +38,8 @@ class Helper {
      * @param $text
      * @return string
      */
-    public function iso88592_to_cirUTF($text) {
+    public function iso88592_to_cirUTF($text)
+    {
         $map = array(
             'A' => 'А', 'a' => 'а',
             'B' => 'Б', 'b' => 'б',
@@ -77,12 +80,56 @@ class Helper {
     }
 
     /**
+     * @param $text
+     * @return string
+     */
+    public function cirUTF_to_iso88592($text)
+    {
+        $map = array(
+            'А' => 'A', 'а' => 'a',
+            'Б' => 'B', 'б' => 'b',
+            'В' => 'V', 'в' => 'v',
+            'Г' => 'G', 'г' => 'g',
+            'Д' => 'D', 'д' => 'd',
+            'Ђ' => 'Đ', 'ђ' => 'đ',
+            'Е' => 'E', 'е' => 'e',
+            'Ж' => 'Ž', 'ж' => 'ž',
+            'З' => 'Z', 'з' => 'z',
+            'И' => 'I', 'и' => 'i',
+            'Ј' => 'J', 'ј' => 'j',
+            'К' => 'K', 'к' => 'k',
+            'Л' => 'L', 'л' => 'l',
+            'Љ' => 'LJ', 'љ' => 'lj',
+            'М' => 'M', 'м' => 'm',
+            'Н' => 'N', 'н' => 'n',
+            'Њ' => 'NJ', 'њ' => 'nj',
+            'О' => 'O', 'о' => 'o',
+            'П' => 'P', 'п' => 'p',
+            'Р' => 'R', 'р' => 'r',
+            'С' => 'S', 'с' => 's',
+            'Т' => 'T', 'т' => 't',
+            'Ћ' => 'Ć', 'ћ' => 'ć',
+            'У' => 'U', 'у' => 'u',
+            'Ф' => 'F', 'ф' => 'f',
+            'Х' => 'H', 'х' => 'h',
+            'Ц' => 'C', 'ц' => 'c',
+            'Ч' => 'Č', 'ч' => 'č',
+            'Џ' => 'Dž', 'џ' => 'dž',
+            'Ш' => 'Š', 'ш' => 'š'
+        );
+
+        //echo iconv("cp1251", "UTF-8", strtr($text, $map));
+        return strtr($text, $map);
+    }
+
+    /**
      * @param $needle
      * @param array $haystack
      * @param string $attribute
      * @return bool
      */
-    public function in_array_recursive($needle, array $haystack, string $attribute) {
+    public function in_array_recursive($needle, array $haystack, string $attribute)
+    {
 //        echo "<br>test";
 //        var_dump($haystack);
         if (!empty($haystack) and is_array($haystack)) {
@@ -109,7 +156,8 @@ class Helper {
      * @param $id
      * @return false|string
      */
-    public function getPrijavaClan($id) {
+    public function getPrijavaClan($id)
+    {
         $result = new \stdClass();
         $result->status = false;
         $prijavaClan = PrijavaClanstvo::find($id);
@@ -148,7 +196,8 @@ class Helper {
      * @param string $return
      * @return false|\stdClass|string
      */
-    public function getLicenceOsobe($jmbg, $return = 'all') {
+    public function getLicenceOsobe($jmbg, $return = 'all')
+    {
         $result = new \stdClass();
         $licence = Licenca::join('tlicencatip', 'tlicenca.licencatip', '=', 'tlicencatip.id')
             ->where('tlicenca.osoba', $jmbg)
@@ -179,7 +228,8 @@ class Helper {
      * @param $jmbg
      * @return \stdClass
      */
-    public function azurirajLicenceOsobe($jmbg) {
+    public function azurirajLicenceOsobe($jmbg)
+    {
         $result = new \stdClass();
         $result->osiguranje = new \stdClass();
         $result->licence = new \stdClass();
@@ -230,7 +280,8 @@ class Helper {
     /**
      * @param Licenca $licenca
      */
-    protected function proveriLicencu(Licenca $licenca) {
+    protected function proveriLicencu(Licenca $licenca)
+    {
         if ($licenca->status == LICENCA_NEAKTIVIRANA) {
             $now = Carbon::now()->toDateString();
             if (!is_null($licenca->datumobjave)) {
@@ -280,11 +331,45 @@ class Helper {
         }
     }
 
+    public function getLicencaTipFromLicencaBroj(Licenca $licenca)
+    {
+        $licTip4 = strtoupper(substr(trim($licenca->id), 0, 4));
+        if ($licenca->datumuo >= '2021-01-21') {
+            $gen = 3;
+        } else {
+            if (strstr($licTip4, '381')) {
+                $licTip4 = '381';
+                $gen = 1;
+            } else {
+                $gen = 2;
+            }
+        }
+        $licencaTipO = LicencaTip::find($licTip4);
+        if (!empty($licencaTipO)) {
+            $licencaTip = $licencaTipO->where('idn', $licencaTipO->idn)->where('generacija', $gen)->first();
+//            dd($licencaTip);
+            if (!empty($licencaTip)) {
+                return $licencaTip;
+            }
+        }
+        if (empty($licencaTipO)) {
+            $licTip3 = strtoupper(substr(trim($licenca->id), 0, 3));
+            $licencaTip = LicencaTip::where("id", $licTip3)->first();
+            if (!is_null($licencaTip)) {
+                return $licencaTip;
+            } else {
+//                return false;
+                dd($licenca);
+            }
+        }
+    }
+
     /**
      * @param Licenca $licenca
      * @return string
      */
-    public function proveriStatusLicence(Licenca $licenca) {
+    public function proveriStatusLicence(Licenca $licenca)
+    {
         $provera = new ProveraLibrary();
         if ($provera->statusLicence($licenca)) {
             return LICENCA_AKTIVNA;
@@ -297,7 +382,8 @@ class Helper {
      * @param $size
      * @return string
      */
-    protected function convert($size) {
+    protected function convert($size)
+    {
         $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
         return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
@@ -306,7 +392,8 @@ class Helper {
      * @param bool $start
      * @return int
      */
-    public function measureTime($start = false) {
+    public function measureTime($start = false)
+    {
         if ($start === false) {
             //start
             return (int)microtime(true);

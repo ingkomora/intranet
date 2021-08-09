@@ -55,14 +55,14 @@
                         <div class="form-group row">
                             <label for="datum" class="col-sm-2 col-form-label col-form-label-sm">Datum</label>
                             <div class="col-sm-10">
-                                <input type="date" class="form-control form-control-sm" id="datum" name="datum"/>
+                                <input type="text" class="form-control form-control-sm" data-provide="datepicker" id="datum" name="datum" placeholder="Unesite datum"/>
                             </div>
 
                         </div>
                         <div class="form-group row">
                             <label for="licence" class="col-sm-2 col-form-label col-form-label-sm">LICENCE:</label>
                             <div class="col-sm-10">
-                                <textarea class="form-control form-control-sm" id="licence" name="licence" rows="10"></textarea>
+                                <textarea class="form-control form-control-sm" id="licence" name="licence" rows="10" placeholder='Unesite brojeve licenci (koristite "enter" kao separator'></textarea>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -80,4 +80,21 @@
                         </div>
                     </form>
     </div>
+@endsection
+
+@section('after_scripts')
+    <script>
+        atachDatepicker();
+
+        function atachDatepicker(){
+            $('#datum').datepicker({
+                format: "dd.mm.yyyy.",
+                weekStart: 1,
+                startView: 1,
+                language: "sr-latin",
+                orientation: "left top",
+                uiLibrary: 'bootstrap4',
+            });
+        }
+    </script>
 @endsection
