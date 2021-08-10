@@ -1,6 +1,12 @@
 {{--@extends('log-viewer::bootstrap-4._master')--}}
 @extends(backpack_view('blank'))
 
+@php
+    $breadcrumbs = [
+        'Admin' => backpack_url('dashboard'),
+        'logs' => false,
+    ];
+@endphp
 
 <?php /** @var  Illuminate\Pagination\LengthAwarePaginator $rows */ ?>
 

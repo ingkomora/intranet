@@ -5,7 +5,12 @@
  * @var  string|null                                 $query
  */
 ?>
-
+@php
+    $breadcrumbs = [
+        'Admin' => backpack_url('dashboard'),
+        'logs' => false,
+    ];
+@endphp
 {{--@extends('log-viewer::bootstrap-4._master')--}}
 @extends(backpack_view('blank'))
 
