@@ -45,7 +45,7 @@ class ZavodjenjeController extends Controller
 //        generisi zavodni broj i datum prijema
                 $prijava->zavodni_broj = $zavodnibroj->zavodnibrojprefiks . $zavodnibroj->zavodnibrojbrojcanik;
                 $prijava->datum_prijema = (!empty($request->datum_prijema)) ? Carbon::parse($request->datum_prijema)->format('Y-m-d') : now()->toDateString();
-                $prijava->app_korisnik_id = Auth::id();
+                $prijava->app_korisnik_id = 44;
 //            STATUS PRIJAVE ZAVEDENA = 3
                 $prijava->status_prijave = PRIJAVA_ZAVEDENA;
                 $prijava->save();
@@ -70,7 +70,6 @@ class ZavodjenjeController extends Controller
      */
     public function nalepnicePDF()
     {
-
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         $data['result'] = $prijave->map(function ($prijava) {
             $this->result['oblast'] = $prijava->regOblast->naziv;

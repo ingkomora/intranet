@@ -62,16 +62,16 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-{{--@role('delovodja|admin')
+@role('delovodja|admin')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavedi') }}'> Prijave za stručni ispit</a></li>
---}}{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}{{--
+{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->
-@endrole--}}
+@endrole
 
 @role('admin')
 <li class="divider">
@@ -102,6 +102,5 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('delovodnik') }}'> Delovodnik</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('delovodnikorganizacionejedinice') }}'> Organizacione Jedinice</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavedi') }}'> Zavođenje prijava za stručni ispit</a></li>
 <!-- Users, Roles, Permissions -->
 @endrole
