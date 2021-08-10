@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mb-5">
+            <div class="row">
                 <div class="col-md-8">
                     <div class="input-group-prepend">
                         <table class="table table-sm">

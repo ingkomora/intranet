@@ -29,7 +29,7 @@ Route::group([
     Route::get('home', 'HomeController@dashboard');
     Route::get('pdf', 'PdfController@downloadPDF');
     Route::get('test', 'HomeController@test');
-    Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi');
+    Route::get('unesi/{action}/{url?}', 'ZahtevController@unesi')->name('unesi');
     Route::post('obradizahtevsvecanaforma', 'ZahtevController@obradizahtevsvecanaforma');
     Route::post('downloadzip', 'ZahtevController@downloadZip');
     Route::view('/unesinovelicence', 'unesinovelicence');
@@ -39,7 +39,11 @@ Route::group([
     Route::get('/licencatip/{id}', 'ZahtevController@getLicencaTip');
     Route::get('/checkzahtev/{licenca}/{jmbg}', 'ZahtevController@checkZahtev');
     Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
+    Route::get('/zavedi', 'ZavodjenjeController@show');
+    Route::post('zavedi', 'ZavodjenjeController@store');
 
+    Route::get('/prijava/si/{prijava_id}/{type?}', 'ZavodjenjeController@prijavaPDF');
+//    Route::get('/prijava/si/{prijava_id}', 'ZavodjenjeController@prijavaPDF');
 
     Route::crud('prijavasistara', 'PrijavaSiStaraCrudController');
     Route::crud('prijavaclanstvo', 'PrijavaClanstvoCrudController');
