@@ -13,24 +13,27 @@ use Backpack\PermissionManager\app\Models\Role;
  * @package App\Http\Controllers\Admin
  * @property-read CrudPanel $crud
  */
-class OsiguranjeCrudController extends CrudController {
+class OsiguranjeCrudController extends CrudController
+{
 
 //if(backpack_user()->can('edit articles'))
 //backpack_user()->hasPermissionTo('edit')
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
-    public function setup() {
+    public function setup()
+    {
         $this->crud->setModel('App\Models\Osiguranje');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osiguranje');
         $this->crud->setEntityNameStrings('osiguranje', 'osiguranja');
 
-        $this->crud->setColumns(['id', 'firmaOsiguravajucaKuca', 'firmaUgovarac', 'osobaUgovarac', 'polisa_broj', 'polisaPokrice', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena','osiguravajuca_kuca_mb','ugovarac_osiguranja_mb']);
+        $this->crud->setColumns(['id', 'firmaOsiguravajucaKuca', 'firmaUgovarac', 'osobaUgovarac', 'polisa_broj', 'polisaPokrice', 'polisa_datum_zavrsetka', 'statusPolise', 'statusDokumenta', 'napomena', 'osiguravajuca_kuca_mb', 'ugovarac_osiguranja_mb']);
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
@@ -38,18 +41,18 @@ class OsiguranjeCrudController extends CrudController {
         $permissionNames = backpack_user()->getPermissionNames(); // collection of name strings
         $permissions = backpack_user()->permissions; // collection of permission objects
         $this->crud->denyAccess('all');
-        if(backpack_user()->hasPermissionTo('update')){
+        if (backpack_user()->hasPermissionTo('update')) {
 
         }
 
     }
 
-    protected function setupListOperation() {
-
+    protected function setupListOperation()
+    {
         $this->crud->setColumnDetails('firmaOsiguravajucaKuca', [
             'name' => 'firmaOsiguravajucaKuca',
             'type' => 'select',
-            'label' => 'Osiguravajuca kuca',
+            'label' => 'Osiguravajuća kuća',
             'entity' => 'firmaOsiguravajucaKuca',
             'attribute' => 'naziv_mb',
             'model' => 'App\Models\Firma',
@@ -58,7 +61,7 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->setColumnDetails('firmaUgovarac', [
             'name' => 'firmaUgovarac',
             'type' => 'select',
-            'label' => 'Ugovarac osiguranja',
+            'label' => 'Ugovarač osiguranja',
             'entity' => 'firmaUgovarac',
             'attribute' => 'naziv_mb',
             'model' => 'App\Models\Firma',
@@ -67,7 +70,7 @@ class OsiguranjeCrudController extends CrudController {
         $this->crud->setColumnDetails('osobaUgovarac', [
             'name' => 'osobaUgovarac',
             'type' => 'select',
-            'label' => 'Ugovarac ind. osiguranja',
+            'label' => 'Ugovarač ind. osiguranja',
             'entity' => 'osobaUgovarac',
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
@@ -108,9 +111,6 @@ class OsiguranjeCrudController extends CrudController {
             'model' => 'App\Models\OsiguranjeTip',
         ]);
 
-        //vrsta osiguranja da default bude ono prvo
-
-
         $this->crud->addFilter([
             'type' => 'select2',
             'name' => 'status_polise_id',
@@ -127,7 +127,8 @@ class OsiguranjeCrudController extends CrudController {
 
     }
 
-    protected function setupCreateOperation() {
+    protected function setupCreateOperation()
+    {
 //        $this->crud->setColumns(['osiguravajuca_kuca_mb', 'ugovarac_osiguranja_mb', 'polisa_broj', 'polisaPokrice', 'polisa_pokrice_id', 'polisa_datum_zavrsetka', 'status_polise_id', 'statusDokumenta', 'napomena']);
 
         $this->crud->setValidation(OsiguranjeRequest::class);
@@ -148,50 +149,69 @@ class OsiguranjeCrudController extends CrudController {
             'name' => 'osobe',
             'label' => 'Osobe',
             'ajax' => true,
-            'attribute' => 'id',  //accessor u Osoba modelu
-            'pivot'     => true
+            'attribute' => 'ime_prezime_licence',  //accessor u Osoba modelu
+            'pivot' => true
         ]);
 
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firmaOsiguravajucaKuca',
-            'label' => 'Osiguravajuca kuca (pretrazi po MB ili Nazivu, case sensitive)',
+            'label' => 'Osiguravajuća kuća (pretraži po nazivu ili mb)',
             'ajax' => true,
-//            'inline_create' => true
+            'attribute' => 'naziv_mb',  //accessor u Osoba modelu
+            'inline_create' =>
+                [ // specify the entity in singular
+                    'entity' => 'firma', // the entity in singular
+                    // OPTIONALS
+                    //                'force_select' => true, // should the inline-created entry be immediately selected?
+                    //                'modal_class' => 'modal-dialog modal-xl', // use modal-sm, modal-lg to change width
+                    //                'modal_route' => route('firma-inline-create'), // InlineCreate::getInlineCreateModal()
+                    //                'create_route' =>  route('firma-inline-create-save'), // InlineCreate::storeInlineCreate()
+                ]
         ]);
 //        $this->crud->field('firmaOsiguravajucaKuca');
 
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firmaUgovarac',
-            'label' => 'Ugovarac osiguranja (pretrazi po MB ili Nazivu, case sensitive)',
+            'label' => 'Ugovarač osiguranja (pretraži po nazivu ili mb)',
             'ajax' => true,
-//            'inline_create' => true
+            'attribute' => 'naziv_mb',  //accessor u Osoba modelu
+            'inline_create' =>
+                [ // specify the entity in singular
+                    'entity' => 'firma', // the entity in singular
+                    // OPTIONALS
+                    //                'force_select' => true, // should the inline-created entry be immediately selected?
+                    //                'modal_class' => 'modal-dialog modal-xl', // use modal-sm, modal-lg to change width
+                    //                'modal_route' => route('firma-inline-create'), // InlineCreate::getInlineCreateModal()
+                    //                'create_route' =>  route('firma-inline-create-save'), // InlineCreate::storeInlineCreate()
+                ]
         ]);
 //        $this->crud->field('firmaUgovarac');
 
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'osobaUgovarac',
-            'label' => 'Ugovarac osiguranja (osoba jmbg)',
+            'label' => 'Ugovarač osiguranja (pretraži po imenu, prezimenu ili jmbg)',
             'ajax' => true,
+            'attribute' => 'ime_prezime_jmbg',
         ]);
 
         $this->crud->addField([
             'name' => 'polisa_pokrice_id',
             'type' => 'relationship',
-            'label' => 'Pokrice polise',
+            'label' => 'Pokriće polise',
             'attribute' => 'naziv',
             'entity' => 'polisaPokrice',
             'model' => 'App\Models\OsiguranjePolisaPokrice'
         ]);
 
         $this->crud->field('polisa_predmet');
-        $this->crud->field('polisa_iskljucenost');
+        $this->crud->field('polisa_iskljucenost')->label('Polisa isključenost');
         $this->crud->field('polisa_teritorijalni_limit');
         $this->crud->field('polisa_datum_izdavanja');
-        $this->crud->field('polisa_datum_pocetka');
-        $this->crud->field('polisa_datum_zavrsetka');
+        $this->crud->field('polisa_datum_pocetka')->label('Polisa datum početka');
+        $this->crud->field('polisa_datum_zavrsetka')->label('Polisa datum završetka');
 
         $this->crud->addField([
             'name' => 'status_polise_id',
@@ -200,7 +220,7 @@ class OsiguranjeCrudController extends CrudController {
             'entity' => 'statusPolise',
             'attribute' => 'naziv',
             'default' => '-',
-            'options'   => (function ($query) {
+            'options' => (function ($query) {
                 return $query->where('log_status_grupa_id', 1)->get();
             }),
         ]);
@@ -212,7 +232,7 @@ class OsiguranjeCrudController extends CrudController {
             'entity' => 'statusDokumenta',
             'attribute' => 'naziv',
             'default' => '-',
-            'options'   => (function ($query) {
+            'options' => (function ($query) {
                 return $query->where('log_status_grupa_id', 6)->get();
             }),
         ]);
@@ -221,62 +241,113 @@ class OsiguranjeCrudController extends CrudController {
 
     }
 
-    protected function setupUpdateOperation() {
+    protected function setupUpdateOperation()
+    {
         $this->setupCreateOperation();
     }
 
-    public function fetchOsobe() {
+    public function fetchOsobe()
+    {
         return $this->fetch([
             'model' => \App\Models\Osoba::class, // required
-            'searchable_attributes' => ['id'],
+//            'searchable_attributes' => ['id', 'ime', 'prezime'],
+            'searchable_attributes' => [],
             'paginate' => 10, // items to show per page
-//            'query' => function($model) {
-//                return $model->active();
-//            } // to filter the results that are returned
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? false;
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    return $model->where('ime', 'ilike', $searchTerm[0] . '%')
+                        ->where('prezime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('ime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('prezime', 'ilike', $searchTerm[0] . '%')
+                        ->whereHas('licence', function ($query) use ($model) {
+                            $query->where('status', '<>', 'D');
+                        });
+                } else {
+                    return $model->whereHas('licence', function ($q) use ($searchTerm) {
+                        $q->where('id', 'ilike', $searchTerm . '%');
+                    })->orWhere('ime', 'ilike', $searchTerm . '%')
+                        ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                }
+            } // to filter the results that are returned
         ]);
 
     }
 
-    public function fetchFirmaOsiguravajucaKuca() {
+    public function fetchFirmaOsiguravajucaKuca()
+    {
         return $this->fetch([
             'model' => \App\Models\Firma::class, // required
-//            'searchable_attributes' => ['mb'],
-            'searchable_attributes' => ['mb', 'naziv'],
+//            'searchable_attributes' => ['mb', 'naziv'],
+            'searchable_attributes' => [],
             'paginate' => 10, // items to show per page
-/*            'query' => function($model) {
-                return $model->select('mb', 'mb as id', 'naziv');
-            }*/
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? false;
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    return $model->where('naziv', 'ilike', '%' . $searchTerm[0] . '%')
+                        ->where('naziv', 'ilike', '%' . $searchTerm[1] . '%');
+                } else {
+                    return $model->where('id', 'ilike', $searchTerm . '%');
+                }
+            } // to filter the results that are returned
         ]);
     }
 
-    public function fetchFirmaUgovarac() {
+    public function fetchFirmaUgovarac()
+    {
         return $this->fetch([
             'model' => \App\Models\Firma::class, // required
 //            'searchable_attributes' => ['mb'],
-            'searchable_attributes' => ['mb', 'naziv'],
+            'searchable_attributes' => [],
 //            'routeSegment' => 'mb', // falls back to the key of this array if not specified ("category")
             'paginate' => 10, // items to show per page
-/*            'query' => function($model) {
-                return $model->select('mb', 'mb as id', 'naziv');
-//                return $model->select('mb', 'naziv');
-            }*/
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? false;
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    return $model->where('naziv', 'ilike', '%' . $searchTerm[0] . '%')
+                        ->where('naziv', 'ilike', '%' . $searchTerm[1] . '%');
+                } else {
+                    return $model->where('id', 'ilike', $searchTerm . '%');
+                }
+            } // to filter the results that are returned
         ]);
     }
 
-    public function fetchOsobaUgovarac() {
+    public function fetchOsobaUgovarac()
+    {
         return $this->fetch([
             'model' => \App\Models\Osoba::class, // required
-            'searchable_attributes' => ['id'],
+            'searchable_attributes' => [],
 //            'searchable_attributes' => ['id', 'ime', 'prezime'],
 //            'routeSegment' => 'mb', // falls back to the key of this array if not specified ("category")
             'paginate' => 10, // items to show per page
-            'query' => function($model) {
-                return $model->select('id'/*, 'ime','prezime'*/);
-            }
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? false;
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    return $model->where('ime', 'ilike', $searchTerm[0] . '%')
+                        ->where('prezime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('ime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('prezime', 'ilike', $searchTerm[0] . '%')
+                        ->whereHas('licence', function ($query) use ($model) {
+                            $query->where('status', '<>', 'D');
+                        });
+                } else {
+                    return $model->whereHas('licence', function ($q) use ($searchTerm) {
+                        $q->where('id', 'ilike', $searchTerm . '%');
+                    })->orWhere('ime', 'ilike', $searchTerm . '%')
+                        ->orWhere('prezime', 'ilike', $searchTerm . '%')
+                        ->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            } // to filter the results that are returned
         ]);
     }
 
-    protected function showDetailsRow($id) {
+    protected function showDetailsRow($id)
+    {
 //        $this->crud->hasAccessOrFail('details_row');//???
 
         $this->data['entry'] = $this->crud->getEntry($id);

@@ -23,6 +23,12 @@ class Osoba extends Model
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['ime_prezime_jmbg', 'full_name', 'ime_prezime_licence'];
 
     protected $keyType = 'string';
 
@@ -205,6 +211,18 @@ class Osoba extends Model
      */
     public function getImePrezimeJmbgAttribute() {
         return "{$this->ime} {$this->prezime} ($this->id)";
+    }
+
+    /**
+     * Get the user's Full name with licence.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getImePrezimeLicenceAttribute() {
+        $licenceArray = $this->licence->where('status', '<>', 'D')->pluck('id')->toArray();
+        $licence = implode(', ', $licenceArray);
+        return "{$this->ime} {$this->prezime} ($licence)";
     }
 
 

@@ -55,7 +55,7 @@ class FirmaCrudController extends CrudController {
         $this->crud->field('naziv');
         $this->crud->field('drzava');
         $this->crud->field('mesto');
-        $this->crud->field('pb');
+        $this->crud->field('pb')->label('Poštanski broj');
         $this->crud->field('adresa');
         $this->crud->addField([
             'type' => 'relationship',

@@ -36,6 +36,13 @@ class Firma extends Model {
     protected $table = 'firme';
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['naziv_mb'];
+
+    /**
      * The "type" of the auto-incrementing ID.
      *
      * @var string
