@@ -71,7 +71,6 @@ class Firma extends Model {
         return $this->belongsTo('App\Models\Opstina', 'opstina_id');
     }
 
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -84,6 +83,13 @@ class Firma extends Model {
      */
     public function ugovaracOsiguranja() {
         return $this->hasMany('App\Models\Osiguranje', 'ugovarac_osiguranja_mb', 'mb');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function osobe() {
+        return $this->hasMany('App\Models\Osoba', 'firma_mb', 'mb');
     }
 
     /*
