@@ -12,7 +12,8 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class OsobaCrudController extends CrudController {
+class OsobaCrudController extends CrudController
+{
 
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -25,19 +26,48 @@ class OsobaCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
 
-    public function setup() {
+    public function setup()
+    {
         $this->crud->setModel('App\Models\Osoba');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
         $this->crud->setEntityNameStrings('osoba', 'osobe');
 
-        $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanjeId', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firma_mb', 'firma', 'lib', 'clan', 'created_at', 'updated_at']);
+        $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanjeId', 'lib', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firma_mb', 'firma', 'clan', 'created_at', 'updated_at']);
+
+//        prikazuje samo osobe sa maticnim brojem od 13 karaktera
+        $this->crud->addClause('whereRaw', 'length(id) = 13');
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
 
     }
 
-    protected function setupListOperation() {
+    protected function setupListOperation()
+    {
+        $request = $this->crud->getRequest();
+        if (!$request->has('order')) {
+            $request->merge(['order' => [
+                [
+                    'column' => 'id',
+                    'dir' => 'asc'
+                ]
+            ]]);
+        }
+
+        $this->crud->setColumnDetails('id', [
+            'name' => 'id',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->where('ime', 'ilike', $searchTerm[0] . '%')
+                        ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                } else {
+                    $query->where('ime', 'ilike', $searchTerm . '%')
+                        ->orWhere('prezime', 'ilike', $searchTerm . '%')
+                        ->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            },
+        ]);
 
         $this->crud->setColumnDetails('zvanjeId', [
             'name' => 'zvanjeId',
@@ -66,14 +96,21 @@ class OsobaCrudController extends CrudController {
             'model' => 'App\Models\Opstina',
         ]);
 
+        $this->crud->setColumnDetails('clan', [
+            'name' => 'clan',
+            'label' => 'Članstvo',
+            'type' => 'select_from_array',
+            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član'],
+        ]);
+
         $this->crud->addFilter([
             'type' => 'select2',
             'name' => 'clan',
-            'label' => 'Clan'
+            'label' => 'Član'
         ], function () {
             return [
-                0 => 'Nije clan',
-                1 => 'Clan je'
+                0 => 'Nije član',
+                1 => 'Član je'
             ];
         }, function ($value) {
             $this->crud->addClause('where', 'clan', $value);
@@ -98,7 +135,7 @@ class OsobaCrudController extends CrudController {
         ],
             false,
             function ($value) {
-                $this->crud->addClause('where', 'ime', 'LIKE', "%$value%");
+                $this->crud->addClause('where', 'ime', 'ILIKE', "%$value%");
             }
         );
 
@@ -135,7 +172,8 @@ class OsobaCrudController extends CrudController {
             });
     }
 
-    protected function setupCreateOperation() {
+    protected function setupCreateOperation()
+    {
         $this->crud->setValidation(OsobaRequest::class);
 
         $this->crud->addField([
@@ -146,7 +184,8 @@ class OsobaCrudController extends CrudController {
         $this->setupUpdateOperation();
     }
 
-    protected function setupUpdateOperation() {
+    protected function setupUpdateOperation()
+    {
         //TODO samo admin da moze da menja
         $this->crud->addField([
             'name' => 'id',
@@ -212,7 +251,8 @@ class OsobaCrudController extends CrudController {
 
     }
 
-    public function fetchFirma() {
+    public function fetchFirma()
+    {
         return $this->fetch([
             'model' => \App\Models\Firma::class, // required
 //            'searchable_attributes' => ['mb'],
@@ -225,7 +265,8 @@ class OsobaCrudController extends CrudController {
 
     }
 
-    protected function showDetailsRow($id) {
+    protected function showDetailsRow($id)
+    {
 //        $this->crud->hasAccessOrFail('details_row');//???
 
         $this->data['entry'] = $this->crud->getEntry($id);
