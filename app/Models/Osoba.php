@@ -214,6 +214,16 @@ class Osoba extends Model
     }
 
     /**
+     * Get the user's Full name with roditelj.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getImePrezimeRoditeljAttribute() {
+        return "{$this->ime} {$this->prezime} ($this->roditelj)";
+    }
+
+    /**
      * Get the user's Full name with licence.
      *
      * @param string $value

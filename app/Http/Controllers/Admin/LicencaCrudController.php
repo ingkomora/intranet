@@ -53,6 +53,7 @@ class LicencaCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
+
         $this->crud->setColumnDetails('osoba', [
             'name' => 'osoba',
             'type' => 'select',
@@ -65,20 +66,17 @@ class LicencaCrudController extends CrudController
                     $searchTerm = explode(" ", $searchTerm);
                     $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
                         $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->orWhere('prezime', 'ilike', $searchTerm[1] . '%')
-                            /*->orWhere('ime', 'ilike', $searchTerm[1] . '%')
-                            ->orWhere('prezime', 'ilike', $searchTerm[0] . '%')*/
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%')
                         ;
                     });
                 } else {
                     $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', '%' . $searchTerm . '%')
-                            ->orWhere('prezime', 'ilike', '%' . $searchTerm . '%')
+                        $q->where('ime', 'ilike', $searchTerm . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm . '%')
                             ->orWhere('id', 'ilike', $searchTerm . '%');
                     });
                 }
             }
-
         ]);
 //        CRUD::column('osoba');
         CRUD::column('licencatip');

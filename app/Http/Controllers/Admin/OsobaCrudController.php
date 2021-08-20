@@ -32,14 +32,13 @@ class OsobaCrudController extends CrudController
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
         $this->crud->setEntityNameStrings('osoba', 'osobe');
 
-        $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanjeId', 'lib', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firma_mb', 'firma', 'clan', 'created_at', 'updated_at']);
+        $this->crud->setColumns(['id', 'ime_prezime_roditelj', 'zvanjeId', 'lib', 'clan', 'kontaktemail', 'mobilnitel', 'firmanaziv', 'opstinaId', 'firma_mb', 'firma', 'created_at', 'updated_at']);
 
 //        prikazuje samo osobe sa maticnim brojem od 13 karaktera
         $this->crud->addClause('whereRaw', 'length(id) = 13');
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
-
     }
 
     protected function setupListOperation()
@@ -56,6 +55,7 @@ class OsobaCrudController extends CrudController
 
         $this->crud->setColumnDetails('id', [
             'name' => 'id',
+            'label' => 'JMBG',
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
@@ -67,6 +67,12 @@ class OsobaCrudController extends CrudController
                         ->orWhere('id', 'ilike', $searchTerm . '%');
                 }
             },
+        ]);
+
+        $this->crud->setColumnDetails('ime_prezime_roditelj', [
+            'name' => 'ime_prezime_roditelj',
+            'type' => 'text',
+            'label' => 'Ime prezime (roditelj)',
         ]);
 
         $this->crud->setColumnDetails('zvanjeId', [
@@ -116,19 +122,19 @@ class OsobaCrudController extends CrudController
             $this->crud->addClause('where', 'clan', $value);
         });
 
-        $this->crud->addFilter([
+        /*$this->crud->addFilter([
             'type' => 'simple',
             'name' => 'firma_mb',
-            'label' => 'MB'
+            'label' => 'MB firme'
         ],
             false,
             function () {
                 $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
                 $this->crud->addClause('where', 'firma_mb', '<>', 0);
             }
-        );
+        );*/
 
-        $this->crud->addFilter([
+/*        $this->crud->addFilter([
             'type' => 'text',
             'name' => 'ime',
             'label' => 'Ime'
@@ -137,9 +143,9 @@ class OsobaCrudController extends CrudController
             function ($value) {
                 $this->crud->addClause('where', 'ime', 'ILIKE', "%$value%");
             }
-        );
+        );*/
 
-        $this->crud->addFilter([
+/*        $this->crud->addFilter([
             'type' => 'text',
             'name' => 'prezime',
             'label' => 'Prezime'
@@ -148,7 +154,7 @@ class OsobaCrudController extends CrudController
             function ($value) {
                 $this->crud->addClause('where', 'prezime', 'LIKE', "%$value%");
             }
-        );
+        );*/
 
         $this->crud->addFilter([
             'type' => 'simple',
@@ -161,15 +167,15 @@ class OsobaCrudController extends CrudController
             }
         );
 
-        $this->crud->addFilter([
+        /*$this->crud->addFilter([
             'type' => 'date',
             'name' => 'updated_at',
-            'label' => 'Datum azuriranja'
+            'label' => 'Ažuriran'
         ],
             false,
             function ($value) { // if the filter is active, apply these constraints
                 $this->crud->addClause('where', 'updated_at', $value);
-            });
+            });*/
     }
 
     protected function setupCreateOperation()

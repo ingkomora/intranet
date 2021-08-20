@@ -27,7 +27,7 @@ class ZvanjeCrudController extends CrudController
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/zvanje');
         $this->crud->setEntityNameStrings('zvanje', 'zvanja');
 
-        $this->crud->setColumns(['naziv', 'skrnaziv', 'sekcija', 'regSekcija']);
+        $this->crud->setColumns(['id','naziv', 'skrnaziv', 'sekcija', 'regSekcija']);
     }
 
     protected function setupListOperation()
