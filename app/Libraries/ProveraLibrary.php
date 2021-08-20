@@ -263,10 +263,11 @@ class ProveraLibrary {
 
 //                    VRSTA LICENCE I OSIGURANJE POLISA POKRICE
                     $vrsta = array(
-                        1 => array(0, 1, 6),
-                        2 => array(0, 2, 6),
-                        3 => array(0, 3, 5, 6),
-                        4 => array(0, 4, 5),
+                        1 => array(7, 1, 6),
+                        2 => array(7, 2, 6),
+                        3 => array(7, 3, 5, 6),
+                        4 => array(7, 4, 5),
+                        5 => array(7, 3, 5, 6)
                     );
 //                    dd($this->licenca);
                     if (is_null($this->licenca)) {
