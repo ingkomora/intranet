@@ -18,14 +18,14 @@ class OsiguranjePolisaPokrice extends Model
 
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'osiguranja_polise_pokrica';
 
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'integer';
@@ -37,7 +37,7 @@ class OsiguranjePolisaPokrice extends Model
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = false;
@@ -63,7 +63,7 @@ class OsiguranjePolisaPokrice extends Model
      * @param string $value
      * @return string
      */
-    public function getIdNazivAttribute() {
-        return "{$this->id} {$this->naziv}";
+    public function getNazivIdAttribute() {
+        return "{$this->naziv} ({$this->id})";
     }
 }

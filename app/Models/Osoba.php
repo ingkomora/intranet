@@ -6,6 +6,24 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 use Tesla\JMBG\JMBG;
 
+/**
+ * @property string $id
+ * @property string $ime
+ * @property string $prezime
+ * @property string $roditelj
+ * @property string $rodjenjemesto
+ * @property int $zvanje
+ * @property string $prebivalistebroj
+ * @property string $prebivalistemesto
+ * @property string $prebivalistedrzava
+ * @property string $prebivalisteadresa
+ * @property string $kontaktetel
+ * @property string $mobilnitel
+ * @property string $kontaktemail
+ * @property int $clan
+ * @property string $lib
+ * @property Zvanje $zvanjeId
+ */
 class Osoba extends Model
 {
     use CrudTrait;
@@ -42,7 +60,7 @@ class Osoba extends Model
     /**
      * @var array
      */
-    protected $fillable = ['id', 'zvanje', 'titula', 'funkcija', 'ime', 'prezime', 'roditelj', 'devojackoprezime', 'rodjenjemesto', 'rodjenjeopstina', 'rodjenjedrzava', 'prebivalistebroj', 'prebivalistemesto', 'prebivalisteopstina', 'prebivalisteadresa', 'kontakttel', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firmamesto', 'firmaopstina', 'firmaweb', 'firmatel', 'firmaemail', 'diplfakultet', 'diplmesto', 'dipldrzava', 'diplodsek', 'diplsmer', 'diplgodina', 'mrfakultet', 'mrmesto', 'mrdrzava', 'mrodsek', 'mrsmer', 'mrgodina', 'drfakultet', 'drmesto', 'drdrzava', 'drodsek', 'drsmer', 'drgodina', 'lozinka', 'biografija', 'diplbroj', 'mrbroj', 'drbroj', 'pol', 'rodjenjedan', 'rodjenjemesec', 'rodjenjegodina', 'rodjenjeopstinaid', 'rodjenjeinodrzava', 'rodjenjeinomesto', 'diplfakultetid', 'diplsmerid', 'diplunetfakultet', 'diplunetsmer', 'specfakultetid', 'specunetfakultet', 'specsmerid', 'specunetsmer', 'specgodina', 'magfakultetid', 'magunetfakultet', 'magsmerid', 'magunetsmer', 'docfakultetid', 'docunetfakultet', 'docsmerid', 'docunetsmer', 'prebivalisteopstinaid', 'kontaktfax', 'licniweb', 'adresaprikazi', 'telefonprikazi', 'mobilniprikazi', 'faxprikazi', 'mailprikazi', 'prikazisliku', 'firmaopstinaid', 'firmafax', 'imalp', 'zaposlen', 'st_drzavljanstvoscg', 'clanskupstine', 'dozvolareklamnimail', 'lib', 'temp_dms_password', 'prezime_staro', 'primary_serial', 'ranije_deaktivirao_clanstvo', 'clan','datumrodjenja','prebivalistedrzava','vrsta_poslova','godine_radnog_iskustva','bolonja','firma_mb','created_at','updated_at'];
+    protected $fillable = ['id', 'zvanje', 'titula', 'funkcija', 'ime', 'prezime', 'roditelj', 'devojackoprezime', 'rodjenjemesto', 'rodjenjeopstina', 'rodjenjedrzava', 'prebivalistebroj', 'prebivalistemesto', 'prebivalisteopstina', 'prebivalisteadresa', 'kontakttel', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firmamesto', 'firmaopstina', 'firmaweb', 'firmatel', 'firmaemail', 'diplfakultet', 'diplmesto', 'dipldrzava', 'diplodsek', 'diplsmer', 'diplgodina', 'mrfakultet', 'mrmesto', 'mrdrzava', 'mrodsek', 'mrsmer', 'mrgodina', 'drfakultet', 'drmesto', 'drdrzava', 'drodsek', 'drsmer', 'drgodina', 'lozinka', 'biografija', 'diplbroj', 'mrbroj', 'drbroj', 'pol', 'rodjenjedan', 'rodjenjemesec', 'rodjenjegodina', 'rodjenjeopstinaid', 'rodjenjeinodrzava', 'rodjenjeinomesto', 'diplfakultetid', 'diplsmerid', 'diplunetfakultet', 'diplunetsmer', 'specfakultetid', 'specunetfakultet', 'specsmerid', 'specunetsmer', 'specgodina', 'magfakultetid', 'magunetfakultet', 'magsmerid', 'magunetsmer', 'docfakultetid', 'docunetfakultet', 'docsmerid', 'docunetsmer', 'prebivalisteopstinaid', 'kontaktfax', 'licniweb', 'adresaprikazi', 'telefonprikazi', 'mobilniprikazi', 'faxprikazi', 'mailprikazi', 'prikazisliku', 'firmaopstinaid', 'firmafax', 'imalp', 'zaposlen', 'st_drzavljanstvoscg', 'clanskupstine', 'dozvolareklamnimail', 'lib', 'temp_dms_password', 'prezime_staro', 'primary_serial', 'ranije_deaktivirao_clanstvo', 'clan', 'datumrodjenja', 'prebivalistedrzava', 'vrsta_poslova', 'godine_radnog_iskustva', 'bolonja', 'firma_mb', 'created_at', 'updated_at'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -59,10 +77,11 @@ class Osoba extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-    public function validanJmbg(){
-        if(JMBG::for($this->id)->isValid()){
+    public function validanJmbg()
+    {
+        if (JMBG::for($this->id)->isValid()) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -86,7 +105,7 @@ class Osoba extends Model
      */
     public function firma()
     {
-        return $this->belongsTo('App\Models\Firma', 'firma_mb','mb');
+        return $this->belongsTo('App\Models\Firma', 'firma_mb', 'mb');
     }
 
     /**
@@ -173,7 +192,8 @@ class Osoba extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function osiguranja() {
+    public function osiguranja()
+    {
         return $this->belongsToMany('App\Models\Osiguranje', 'osiguranje_osoba', 'osoba_id', 'osiguranja_id')
             ->using('App\Models\OsiguranjeOsoba')
             ->withPivot([
@@ -199,7 +219,8 @@ class Osoba extends Model
      * @param string $value
      * @return string
      */
-    public function getFullNameAttribute() {
+    public function getFullNameAttribute()
+    {
         return "{$this->ime} {$this->prezime}";
     }
 
@@ -209,7 +230,8 @@ class Osoba extends Model
      * @param string $value
      * @return string
      */
-    public function getImePrezimeJmbgAttribute() {
+    public function getImePrezimeJmbgAttribute()
+    {
         return "{$this->ime} {$this->prezime} ($this->id)";
     }
 
@@ -219,7 +241,8 @@ class Osoba extends Model
      * @param string $value
      * @return string
      */
-    public function getImePrezimeRoditeljAttribute() {
+    public function getImePrezimeRoditeljAttribute()
+    {
         return "{$this->ime} {$this->prezime} ($this->roditelj)";
     }
 
@@ -229,12 +252,12 @@ class Osoba extends Model
      * @param string $value
      * @return string
      */
-    public function getImePrezimeLicenceAttribute() {
+    public function getImePrezimeLicenceAttribute()
+    {
         $licenceArray = $this->licence->where('status', '<>', 'D')->pluck('id')->toArray();
         $licence = implode(', ', $licenceArray);
         return "{$this->ime} {$this->prezime} ($licence)";
     }
-
 
 
     /*

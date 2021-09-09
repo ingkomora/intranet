@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $created_at
  * @property string $updated_at
  * @property Opstina $opstina
- * @property Osiguranje[] $osiguravajucaKuca
+ * @property Osiguranje[] $osiguravajuceKuce
  * @property Osiguranje[] $ugovaracOsiguranja
  */
 class Firma extends Model {
@@ -74,7 +74,7 @@ class Firma extends Model {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function osiguravajucaKuca() {
+    public function osiguravajuceKuce() {
         return $this->hasMany('App\Models\Osiguranje', 'osiguravajuca_kuca_mb', 'mb');
     }
 

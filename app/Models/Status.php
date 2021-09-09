@@ -73,7 +73,7 @@ class Status extends Model {
     |--------------------------------------------------------------------------
     */
     /**
-     * Get the user's Full name with jmbg.
+     * Get the status name with id.
      *
      * @param string $value
      * @return string

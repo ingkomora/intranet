@@ -19,14 +19,14 @@ class OsiguranjeTip extends Model
 
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'osiguranje_tip';
 
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'integer';
@@ -38,7 +38,7 @@ class OsiguranjeTip extends Model
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = false;
@@ -52,5 +52,11 @@ class OsiguranjeTip extends Model
     public function osiguranja()
     {
         return $this->hasMany('App\Models\Osiguranja');
+    }
+
+
+    public function getOsiguranjeTipNazivIdAttribute()
+    {
+        return "{$this->naziv} ({$this->id})";
     }
 }
