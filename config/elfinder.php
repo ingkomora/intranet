@@ -26,7 +26,10 @@ return [
     |    ]
     */
     'disks' => [
-        // 'uploads',
+        'allUploads' => [
+            'URL' => Config('app.url') . '/uploads/',
+            'alias' => 'All Uploads'
+        ]
     ],
 
     /*
