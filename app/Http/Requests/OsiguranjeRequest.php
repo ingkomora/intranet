@@ -35,8 +35,8 @@ class OsiguranjeRequest extends FormRequest
             'polisaPokrice' => 'required', // polisa_pokrice_id
             'FirmaOsiguravajucaKuca' => 'required',
             'osobe' => 'required', // korisnici_osiguranja
-            'ugovarac_osiguranja_mb' => 'required_without:osiguravajuca_kuca_mb|required_unless:osiguranje_tip_id,' . OSIGURANJE_INDIVIDUALNO,
-            'osiguravajuca_kuca_mb' => 'required_without:ugovarac_osiguranja_mb|required_if:osiguranje_tip_id,' . OSIGURANJE_INDIVIDUALNO,
+            'ugovarac_osiguranja_mb' => 'required_without:ugovarac_osiguranja_osoba_id|required_unless:osiguranje_tip_id,' . OSIGURANJE_INDIVIDUALNO,
+            'ugovarac_osiguranja_osoba_id' => 'required_without:ugovarac_osiguranja_mb|required_if:osiguranje_tip_id,' . OSIGURANJE_INDIVIDUALNO,
             'osiguranje_tip_id' => 'required',
             'status_polise_id' => 'required',
             'status_dokumenta_id' => 'required',
