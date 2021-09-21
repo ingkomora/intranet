@@ -41,10 +41,10 @@ Route::group([
     Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
     Route::get('/zavodjenje/zavedi', 'ZavodjenjeController@show');
     Route::post('/zavodjenje/zavedi', 'ZavodjenjeController@store');
-    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
-    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
-    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
-    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
+//    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
+//    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
+//    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
+//    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
 //    Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
     Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');
 
