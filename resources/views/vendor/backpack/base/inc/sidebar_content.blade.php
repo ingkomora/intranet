@@ -55,8 +55,20 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
+        <li class="nav-title">PRIJEM U ČLANSTVO</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Prijave</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obradi zahteve</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obrada zahteva</a></li>
+        @role('admin')
+        <li class="nav-title">MIROVANJA</li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/obradamirovanja') }}'> Obrada zahteva</a></li>
+        <li class="nav-title">PROMENA PODATAKA</li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka') }}'> Promena podataka</a></li>
+        @endrole
+        @role('rk')
+        <li class="nav-title">PROMENA PODATAKA</li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka?active=true') }}'> Promena podataka</a></li>
+        @endrole
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->
@@ -66,7 +78,7 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavedi') }}'> Prijave za stručni ispit</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi') }}'> Prijave za stručni ispit</a></li>
 {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}
     </ul>
 </li>

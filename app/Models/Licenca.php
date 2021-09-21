@@ -47,19 +47,19 @@ class Licenca extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = FALSE;
 
     /**
      * @var array
      */
-    protected $fillable = ['id', 'osoba', 'zahtev', 'datum', 'datumuo', 'datumobjave', 'status', 'datumukidanja', 'razlogukidanja', 'preuzeta', 'mirovanje', 'prva','prijava_clan_id','broj_resenja','created_at','updated_at','licencatip','napomena','reg_oblast_id','reg_pod_oblast_id','vrsta_posla_id'];
+    protected $fillable = ['id', 'osoba', 'zahtev', 'datum', 'datumuo', 'datumobjave', 'status', 'datumukidanja', 'razlogukidanja', 'preuzeta', 'mirovanje', 'prva', 'prijava_clan_id', 'broj_resenja', 'created_at', 'updated_at', 'licencatip', 'napomena', 'reg_oblast_id', 'reg_pod_oblast_id', 'vrsta_posla_id'];
 
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     public $identifiableAttribute = 'id';
 
@@ -87,5 +87,10 @@ class Licenca extends Model
     public function zahtevId()
     {
         return $this->belongsTo('App\Models\ZahtevLicenca', 'zahtev');
+    }
+
+    public function getImePrezimeJmbgAttribute()
+    {
+        return $this->osobaId->ime . " " . $this->osobaId->prezime . " (" . $this->osobaId->id . ")";
     }
 }
