@@ -62,7 +62,7 @@ trait PromenaPodatakaEmailOperation
     }
 
     /**
-     * Define what happens when the Obrada operation is loaded.
+     * Define what happens when the PromenaPodatakaEmail operation is loaded.
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|void
      */
@@ -72,11 +72,10 @@ trait PromenaPodatakaEmailOperation
         CRUD::setValidation(PromenaPodatakaEmailRequest::class);
 
         /**
-         * Define Columns that are visible in Obrada operation
+         * Define Columns that are visible in PromenaPodatakaEmail operation
          */
         $this->crud->addFields($this->fields_definition_array);
-//        $this->crud->removeFields($fieldsToRemove);
-
+        $this->crud->removeFields($this->remove_fields_definition_array);
 
         /*$this->crud->addSaveAction([
             'name' => 'save_and_back',

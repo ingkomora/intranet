@@ -259,6 +259,13 @@ class Osoba extends Model
         return "{$this->ime} {$this->prezime} ($licence)";
     }
 
+    public function getLicenceArrayAttribute()
+    {
+        $licenceArray = $this->licence->where('status', '<>', 'D')->pluck('id')->toArray();
+        $licence = implode(', ', $licenceArray);
+        return $licence;
+    }
+
 
     /*
     |--------------------------------------------------------------------------

@@ -31,10 +31,8 @@ class PrijavaPromenaPodataka extends Model
         return $this->belongsTo('App\Models\Licenca', 'brlic');
     }
 
-//    public function osoba()
-//    {
-//        return
-//    }
-
-
+    public function opstina()
+    {
+        return $this->belongsTo('App\Models\Opstina', 'topstina_id');
+    }
 }
