@@ -1,4 +1,4 @@
-@extends('layouts.print')
+@extends('layouts.printsf')
 
 @section('title', 'Svečana forma - Izveštaj')
 
