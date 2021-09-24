@@ -42,7 +42,7 @@ class ZahtevLicencaCrudController extends CrudController
 
 
 
-        CRUD::setColumns(['id','osoba','licencatip','datum','status','prijem','prijava_clan_id','licenca_broj','licenca_broj_resenja','licenca_datum_resenja','created_at','updated_at']);
+        CRUD::setColumns(['id','osoba','licencatip','datum','statusId','prijem','prijava_clan_id','licenca_broj','licenca_broj_resenja','licenca_datum_resenja','created_at','updated_at']);
 
 /*       $this->crud->setColumnDetails('osoba', [
             'name' => 'osoba',
@@ -79,7 +79,14 @@ class ZahtevLicencaCrudController extends CrudController
 //        CRUD::column('referenca2');
 //        CRUD::column('pecat');
         CRUD::column('datum');
-        CRUD::column('status');
+//        CRUD::column('status');
+        CRUD::setColumnDetails('statusId', [
+            'name' => 'statusId',
+            'type' => 'relationship',
+            'label' => 'Status',
+            'attribute' => 'naziv',
+
+        ]);
 //        CRUD::column('razlog');
         CRUD::column('prijem');
 //        CRUD::column('preporuka2');
