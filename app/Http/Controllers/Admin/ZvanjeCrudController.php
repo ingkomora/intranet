@@ -18,7 +18,7 @@ class ZvanjeCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     public function setup()
@@ -28,6 +28,17 @@ class ZvanjeCrudController extends CrudController
         $this->crud->setEntityNameStrings('zvanje', 'zvanja');
 
         $this->crud->setColumns(['id','naziv', 'skrnaziv', 'sekcija', 'regSekcija']);
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
+        $this->crud->enableDetailsRow();
+        $this->crud->enableExportButtons();
     }
 
     protected function setupListOperation()

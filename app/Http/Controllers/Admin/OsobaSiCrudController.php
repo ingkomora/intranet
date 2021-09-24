@@ -16,7 +16,7 @@ class OsobaSiCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
@@ -32,6 +32,16 @@ class OsobaSiCrudController extends CrudController
 
         $this->crud->setColumns(['id', 'ime', 'prezime', 'zvanjeId', 'opstinaId', 'mobilnitel', 'kontaktemail', 'firmanaziv']);
 
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
+        $this->crud->enableDetailsRow();
+        $this->crud->enableExportButtons();
     }
 
     /**

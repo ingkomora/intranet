@@ -15,11 +15,11 @@ class LicencaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
 
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -42,6 +42,16 @@ class LicencaCrudController extends CrudController
             'attribute' => 'ime_prezime_jmbg',
             'model' => 'App\Models\Osoba',
         ]);
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
+        $this->crud->enableExportButtons();
     }
 
     /**

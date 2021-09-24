@@ -21,7 +21,7 @@ class OsobaCrudController extends CrudController
     use UpdateLicencaStatusOperation;
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
@@ -31,11 +31,18 @@ class OsobaCrudController extends CrudController
         $this->crud->setModel('App\Models\Osoba');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
         $this->crud->setEntityNameStrings('osoba', 'osobe');
-
         $this->crud->setColumns(['id', 'ime_prezime_roditelj', 'zvanjeId', 'lib', 'clan', 'kontaktemail', 'mobilnitel', 'firmanaziv', 'opstinaId', 'firma_mb', 'firma', 'created_at', 'updated_at']);
 
 //        prikazuje samo osobe sa maticnim brojem od 13 karaktera
         $this->crud->addClause('whereRaw', 'length(id) = 13');
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
@@ -134,27 +141,27 @@ class OsobaCrudController extends CrudController
             }
         );*/
 
-/*        $this->crud->addFilter([
-            'type' => 'text',
-            'name' => 'ime',
-            'label' => 'Ime'
-        ],
-            false,
-            function ($value) {
-                $this->crud->addClause('where', 'ime', 'ILIKE', "%$value%");
-            }
-        );*/
+        /*        $this->crud->addFilter([
+                    'type' => 'text',
+                    'name' => 'ime',
+                    'label' => 'Ime'
+                ],
+                    false,
+                    function ($value) {
+                        $this->crud->addClause('where', 'ime', 'ILIKE', "%$value%");
+                    }
+                );*/
 
-/*        $this->crud->addFilter([
-            'type' => 'text',
-            'name' => 'prezime',
-            'label' => 'Prezime'
-        ],
-            false,
-            function ($value) {
-                $this->crud->addClause('where', 'prezime', 'LIKE', "%$value%");
-            }
-        );*/
+        /*        $this->crud->addFilter([
+                    'type' => 'text',
+                    'name' => 'prezime',
+                    'label' => 'Prezime'
+                ],
+                    false,
+                    function ($value) {
+                        $this->crud->addClause('where', 'prezime', 'LIKE', "%$value%");
+                    }
+                );*/
 
         $this->crud->addFilter([
             'type' => 'simple',

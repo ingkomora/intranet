@@ -17,7 +17,7 @@ class FirmaCrudController extends CrudController {
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
@@ -29,6 +29,15 @@ class FirmaCrudController extends CrudController {
 
         $this->crud->setColumns(['mb', 'pib', 'naziv', 'drzava', 'mesto', 'pb', 'adresa', 'opstina', 'fax', 'telefon', 'email', 'web', 'created_at', 'updated_at']);
 
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
+        $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
 
     }

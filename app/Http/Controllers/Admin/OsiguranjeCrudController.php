@@ -384,6 +384,16 @@ class OsiguranjeCrudController extends CrudController
             }
         ]);
 
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('create');
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
+        $this->crud->enableDetailsRow();
+        $this->crud->enableExportButtons();
     }
 
     protected function setupListOperation()

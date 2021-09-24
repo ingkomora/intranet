@@ -1,7 +1,7 @@
 <!-- This file is used to store sidebar items, starting with Backpack\Base 0.9.0 -->
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="nav-icon fas fa-tachometer"></i> {{ trans('backpack::base.dashboard') }}</a></li>
 
-@role('korisnik|urednik|admin')
+@role('korisnik|urednik|admin|rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
@@ -14,7 +14,7 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('korisnik|urednik|admin')
+@role('korisnik|urednik|admin|rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>REGISTAR</a>
     <ul class="nav-dropdown-items">
@@ -28,7 +28,7 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('korisnik|urednik|admin')
+@role('korisnik|urednik|admin|rk')
 <li class="divider">
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-certificate"></i>LICENCE</a>
@@ -51,13 +51,17 @@
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sivrsta') }}'> Vrste ispita</a></li>
     </ul>
 </li>
+@endrole
 
+@role('korisnik|urednik|admin|rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
+@role('korisnik|urednik|admin')
         <li class="nav-title">PRIJEM U ČLANSTVO</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Prijave</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obrada zahteva</a></li>
+        @endrole
         @role('admin')
         <li class="nav-title">MIROVANJA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>

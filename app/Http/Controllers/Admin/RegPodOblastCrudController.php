@@ -17,13 +17,19 @@ class RegPodOblastCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     public function setup()
     {
         $this->crud->setModel('App\Models\RegPodoblast');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/regpodoblast');
         $this->crud->setEntityNameStrings('regpodoblast', 'reg_pod_oblasti');
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create','delete','update']);
+        }
+
+        $this->crud->enableExportButtons();
     }
 
     protected function setupListOperation()

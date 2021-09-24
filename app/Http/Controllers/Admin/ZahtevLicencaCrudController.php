@@ -14,10 +14,10 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class ZahtevLicencaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -29,7 +29,15 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::setModel(\App\Models\ZahtevLicenca::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
         CRUD::setEntityNameStrings('zahtevlicenca', 'Zahtevi Licence');
-        CRUD::enableDetailsRow();
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create','delete']);
+        }
+
+        if (backpack_user()->hasRole('rk')) {
+            $this->crud->denyAccess(['update']);
+        }
+
         CRUD::enableExportButtons();
 
 
