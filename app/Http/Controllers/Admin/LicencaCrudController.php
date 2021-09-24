@@ -44,7 +44,7 @@ class LicencaCrudController extends CrudController
         ]);
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess('create');
+            $this->crud->denyAccess(['create']);
         }
 
         if (backpack_user()->hasRole('rk')) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ZahtevLicencaRequest;
+use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -31,7 +32,7 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::setEntityNameStrings('zahtevlicenca', 'Zahtevi Licence');
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create','delete']);
+            $this->crud->denyAccess(['create', 'delete']);
         }
 
         if (backpack_user()->hasRole('rk')) {
@@ -41,26 +42,25 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::enableExportButtons();
 
 
+        CRUD::setColumns(['id', 'osoba', 'licencatip', 'datum', 'statusId', 'prijem', 'prijava_clan_id', 'licenca_broj', 'licenca_broj_resenja', 'licenca_datum_resenja', 'created_at', 'updated_at']);
 
-        CRUD::setColumns(['id','osoba','licencatip','datum','statusId','prijem','prijava_clan_id','licenca_broj','licenca_broj_resenja','licenca_datum_resenja','created_at','updated_at']);
+        /*       $this->crud->setColumnDetails('osoba', [
+                    'name' => 'osoba',
+                    'type' => 'select',
+                    'label' => 'Osoba',
+                    'entity' => 'osobaId',
+                    'attribute' => 'ime_prezime_jmbg',
+                    'model' => 'App\Models\Osoba',
+                ]);*/
 
-/*       $this->crud->setColumnDetails('osoba', [
-            'name' => 'osoba',
-            'type' => 'select',
-            'label' => 'Osoba',
-            'entity' => 'osobaId',
-            'attribute' => 'ime_prezime_jmbg',
-            'model' => 'App\Models\Osoba',
-        ]);*/
-
-/*        $this->crud->setColumnDetails('status', [
-            'name' => 'status',
-            'type' => 'select',
-            'label' => 'Status',
-            'entity' => 'statusId',
-            'attribute' => 'naziv_id',
-            'model' => 'App\Models\Status',
-        ]);*/
+        /*        $this->crud->setColumnDetails('status', [
+                    'name' => 'status',
+                    'type' => 'select',
+                    'label' => 'Status',
+                    'entity' => 'statusId',
+                    'attribute' => 'naziv_id',
+                    'model' => 'App\Models\Status',
+                ]);*/
     }
 
     /**
@@ -106,6 +106,22 @@ class ZahtevLicencaCrudController extends CrudController
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
+
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'statusId',
+            'label' => 'Status'
+        ],
+            function () {
+                return Status::where('log_status_grupa_id', LICENCE)->orderBy('id')->pluck('naziv', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'status', $value);
+            }
+        );
+
+
     }
 
     /**
