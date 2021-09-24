@@ -16,7 +16,7 @@
         </h2>
     </div>
     <div class="container-fluid animated fadeIn my-5">
-        <form id="prijaveFormular" action="/admin/zavedi" method="POST">
+        <form id="prijaveFormular" action="/admin/zavodjenje/zavedi" method="POST">
             @csrf
             <div class="form-group row">
                 <label for="datum_prijema" class="col-sm-2 col-form-label">Datum prijema:</label>
