@@ -29,16 +29,15 @@ class FirmaCrudController extends CrudController {
 
         $this->crud->setColumns(['mb', 'pib', 'naziv', 'drzava', 'mesto', 'pb', 'adresa', 'opstina', 'fax', 'telefon', 'email', 'web', 'created_at', 'updated_at']);
 
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess('create');
-        }
-
-        if (backpack_user()->hasRole('rk')) {
-            $this->crud->denyAccess(['update']);
-        }
-
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
+
+        /**
+         * PERMISSIONS - Define access to operation to auth user
+         */
+        if (!backpack_user()->hasRole('admin') AND !backpack_user()->hasPermissionTo('kreiraj firmu')) {
+            $this->crud->denyAccess('create');
+        }
 
     }
 
