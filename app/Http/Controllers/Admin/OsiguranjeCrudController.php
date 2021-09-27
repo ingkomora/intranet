@@ -384,7 +384,7 @@ class OsiguranjeCrudController extends CrudController
             }
         ]);
 
-        if (!backpack_user()->hasRole('admin')) {
+        if (!backpack_user()->hasRole('admin') AND !backpack_user()->hasPermissionTo('kreiraj osiguranje')) {
             $this->crud->denyAccess('create');
         }
 
