@@ -11,5 +11,11 @@
             class="btn btn-sm btn-link">
             <i class="la la-pencil"></i> Izmeni
         </a>
+    @elseif($entry->obradjen === backpack_user()->id + 200)
+        <a
+            href="{{ url($crud->route.'/'.$entry->getKey().'/promenapodatakaemail') }}"
+            class="btn btn-sm btn-link">
+            <i class="la la-pencil"></i> Izmeni
+        </a>
     @endif
 @endif

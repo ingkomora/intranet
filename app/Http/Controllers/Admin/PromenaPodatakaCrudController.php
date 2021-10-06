@@ -12,16 +12,17 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class PrijavaPromenaPodatakaCrudController extends CrudController
+class PromenaPodatakaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
-//    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use Operations\PromenaPodatakaEmailOperation;
-
+    use Operations\PromenaPodatakaObradaBulkOperation;
 
     protected
         $columns_definition_array = [
@@ -301,6 +302,7 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
         'updated_at',
     ];
 
+
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
      *
@@ -308,11 +310,15 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\PrijavaPromenaPodataka::class);
+        CRUD::setModel(\App\Models\PromenaPodataka::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/clanstvo/promenapodataka');
         CRUD::setEntityNameStrings('promena podataka', 'Promena podataka');
 
-//        $this->crud->addClause('where', 'obradjen', backpack_user()->id);
+/*                if (!backpack_user()->hasRole('admin')) {
+                    $this->crud->addClause('whereIn', 'obradjen', [116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142]);
+                }*/
+//        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
+        $this->crud->setColumns($this->columns_definition_array);
     }
 
     /**
@@ -323,9 +329,7 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->setColumns($this->columns_definition_array);
         $this->crud->removeColumns($this->remove_columns_list_definition_array);
-
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -419,6 +423,7 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
                     case 241:
                     case 242:
                         return 'Email-Problem';
+                    case 300: return 'Bulk-neobradjen';
                 }
             },
             'wrapper' => [
@@ -442,16 +447,17 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
          * Define filters
          * start
          */
-
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'active',
-            'label' => backpack_user()->name
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->query->whereIn('obradjen', [backpack_user()->id, backpack_user()->id + 100, backpack_user()->id + 200]); // apply the "active" eloquent scope
-            });
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'active',
+                'label' => backpack_user()->name
+            ],
+                FALSE,
+                function () { // if the filter is active
+                    $this->crud->query->whereIn('obradjen', [backpack_user()->id, backpack_user()->id + 100, backpack_user()->id + 200]); // apply the "active" eloquent scope
+                });
+        }
 
         $this->crud->addFilter([
             'type' => 'simple',
@@ -482,6 +488,66 @@ class PrijavaPromenaPodatakaCrudController extends CrudController
             function () { // if the filter is active
                 $this->crud->query->where('obradjen', backpack_user()->id + 200); // apply the "active" eloquent scope
             });
+
+        if (backpack_user()->hasRole('admin')) {
+            $this->crud->addFilter([
+                'name' => 'obradjen',
+                'type' => 'select2_multiple',
+                'label' => 'Status',
+                'ajax' => TRUE,
+            ], function () {
+                return [
+                    0 => '0 - Neobrađen',
+                    1 => '1 - Obrađen',
+                    2 => '2 - Duplikat',
+                    3 => '3 - Email',
+                    4 => '4 - Otkazan',
+                    5 => '5 - Noviji',
+                    6 => '6 - Potpis',
+                    7 => '7 - Email-neobrađen',
+                    16 => '16 - Email-neobrađen',
+                    32 => '32 - Email-neobrađen',
+                    33 => '33 - Email-neobrađen',
+                    34 => '34 - Email-neobrađen',
+                    35 => '35 - Email-neobrađen',
+                    36 => '36 - Email-neobrađen',
+                    37 => '37 - Email-neobrađen',
+                    38 => '38 - Email-neobrađen',
+                    39 => '39 - Email-neobrađen',
+                    40 => '40 - Email-neobrađen',
+                    41 => '41 - Email-neobrađen',
+                    42 => '42 - Email-neobrađen',
+                    116 => '116 - Email-obrađen',
+                    132 => '132 - Email-obrađen',
+                    133 => '133 - Email-obrađen',
+                    134 => '134 - Email-obrađen',
+                    135 => '135 - Email-obrađen',
+                    136 => '136 - Email-obrađen',
+                    137 => '137 - Email-obrađen',
+                    138 => '138 - Email-obrađen',
+                    139 => '139 - Email-obrađen',
+                    140 => '140 - Email-obrađen',
+                    141 => '141 - Email-obrađen',
+                    142 => '142 - Email-obrađen',
+                    216 => '216 - Email-Problem',
+                    232 => '232 - Email-Problem',
+                    233 => '233 - Email-Problem',
+                    234 => '234 - Email-Problem',
+                    235 => '235 - Email-Problem',
+                    236 => '236 - Email-Problem',
+                    237 => '237 - Email-Problem',
+                    238 => '238 - Email-Problem',
+                    239 => '239 - Email-Problem',
+                    240 => '240 - Email-Problem',
+                    241 => '241 - Email-Problem',
+                    242 => '242 - Email-Problem',
+                    300 => '300 - Bulk-neobradjen',
+                ];
+            }, function ($values) { // if the filter is active
+                $this->crud->addClause('whereIn', 'obradjen', json_decode($values));
+            });
+
+        }
         /*
         * end
         * Define filters

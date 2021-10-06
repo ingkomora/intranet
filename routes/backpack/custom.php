@@ -46,7 +46,7 @@ Route::group([
 //    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
 //    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
 //    Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
-    Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');
+//    Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');
 
     Route::get('/prijava/si/{prijava_id}/{type?}', 'ZavodjenjeController@prijavaPDF');
 //    Route::get('/prijava/si/{prijava_id}', 'ZavodjenjeController@prijavaPDF');
@@ -59,7 +59,7 @@ Route::group([
     Route::crud('zahtevtip', 'ZahtevTipCrudController');
     Route::crud('zahtev', 'ZahtevCrudController');
     Route::crud('sikandidat', 'SiKandidatCrudController');
-    Route::crud('clanstvo/promenapodataka', 'PrijavaPromenaPodatakaCrudController');
+    Route::crud('clanstvo/promenapodataka', 'PromenaPodatakaCrudController');
 });
 
 // this should be the absolute last line of this file
