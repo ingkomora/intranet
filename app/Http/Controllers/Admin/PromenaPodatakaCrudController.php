@@ -314,9 +314,10 @@ class PromenaPodatakaCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/clanstvo/promenapodataka');
         CRUD::setEntityNameStrings('promena podataka', 'Promena podataka');
 
-/*                if (!backpack_user()->hasRole('admin')) {
-                    $this->crud->addClause('whereIn', 'obradjen', [116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142]);
-                }*/
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess('update');
+            $this->crud->denyAccess('promenapodatakaobradabulk');
+        }
 //        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
         $this->crud->setColumns($this->columns_definition_array);
     }
@@ -423,7 +424,8 @@ class PromenaPodatakaCrudController extends CrudController
                     case 241:
                     case 242:
                         return 'Email-Problem';
-                    case 300: return 'Bulk-neobradjen';
+                    case 300:
+                        return 'Bulk-neobradjen';
                 }
             },
             'wrapper' => [
