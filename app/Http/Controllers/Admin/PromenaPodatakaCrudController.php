@@ -316,7 +316,6 @@ class PromenaPodatakaCrudController extends CrudController
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess('update');
-            $this->crud->denyAccess('promenapodatakaobradabulk');
         }
 //        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
         $this->crud->setColumns($this->columns_definition_array);
