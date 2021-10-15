@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin\Operations;
 
+use App\Mail\PromenaPodataka\AdminReportEmail;
+use App\Mail\PromenaPodataka\ConfirmationEmail;
 use App\Models\Firma;
 use App\Models\Opstina;
 use App\Models\PromenaPodataka;
 use App\Models\User;
 use Carbon\Carbon;
-use Cassandra\Exception\TruncateException;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
+use Mail;
 
 trait PromenaPodatakaObradaBulkOperation
 {
@@ -52,15 +53,21 @@ trait PromenaPodatakaObradaBulkOperation
     public function promenapodatakaobradabulk()
     {
         $this->crud->hasAccessOrFail('promenapodatakaobradabulk');
-
         $entries = $this->crud->getRequest()->input('entries');
         $result = [];
+        $mail_data = new \stdClass();
+
         foreach ($entries as $key => $id) {
             $obradjen = FALSE;
             $zahtev = PromenaPodataka::find($id);
             $osoba = $zahtev->licenca->osobaId;
             if (in_array($zahtev->obradjen, [3, 116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142])) { // email
-                $osoba->kontaktemail = $zahtev->email;
+                if ($osoba->kontaktemail != $zahtev->email) {
+                    $osoba->kontaktemail = $zahtev->email;
+                    $mail_data->fields['azurirano']['email'] = $osoba->kontaktemail; // polje koje se azurira
+                } else {
+                    $mail_data->fields['neazurirano']['email'] = $osoba->kontaktemail; // polje koje je vec azurno
+                }
                 if ($osoba->isDirty('kontaktemail')) {
                     $osoba->save();
                 }
@@ -79,15 +86,26 @@ trait PromenaPodatakaObradaBulkOperation
             } else if ($zahtev->obradjen === 0 or $zahtev->obradjen === 300) {
                 $azurna_polja_u_bazi = TRUE;
                 foreach ($zahtev->osoba_related_fields as $zahtev_field => $osoba_field) {
-                    if (!empty($zahtev_field)) {
+                    if (!empty($zahtev->{$zahtev_field})) {
                         if ($osoba->{$osoba_field} != $zahtev->{$zahtev_field}) {
                             $osoba->{$osoba_field} = $zahtev->{$zahtev_field};
                             $azurna_polja_u_bazi &= FALSE;
+                            if ($zahtev_field == 'topstina_id') {
+                                $mail_data->fields[$zahtev->public_fields['topstina_id']]['azurirano'] = $zahtev->opstina->ime; // polja koja se azuriraju
+                            } else {
+                                $mail_data->fields[$zahtev->public_fields[$zahtev_field]]['azurirano'] = $osoba->{$osoba_field}; // polja koja se azuriraju
+                            }
                         } else {
                             $azurna_polja_u_bazi &= TRUE;
+                            if ($zahtev_field == 'topstina_id') {
+                                $mail_data->fields[$zahtev->public_fields['topstina_id']]['neazurirano'] = $zahtev->opstina->ime; // polja koja se azuriraju
+                            } else {
+                                $mail_data->fields[$zahtev->public_fields[$zahtev_field]]['neazurirano'] = $osoba->{$osoba_field}; // polja koja se azuriraju
+                            }
                         }
                     }
                 }
+
                 $result['azurna_polja_u_bazi'][$id] = $azurna_polja_u_bazi;
                 if ($osoba->isDirty()) {
                     $osoba->save();
@@ -101,21 +119,20 @@ trait PromenaPodatakaObradaBulkOperation
                 }
 
                 if (!empty($osoba->firma_mb)) {
-                    $firmaArr['mb'] = $osoba->firma_mb;
-                    $firmaArrUpdate = [];
+                    $firma_create['mb'] = $osoba->firma_mb;
+                    $firma_update = [];
                     foreach ($zahtev->firma_related_fields as $zahtev_field => $firma_field) {
                         if (!empty($zahtev_field)) {
                             $result['firme_polja_az'][$id] = $zahtev_field;
                             if ($zahtev_field == 'opstinafirm') {
-                                $zahtev_field = Opstina::where('ime', $zahtev->{$firma_field})->get('id');
-                            }
-                            $firmaArr[$firma_field] = $zahtev->{$zahtev_field};
-                            if ($zahtev_field != 'mbfirm') {
-                                $firmaArrUpdate[] = $firma_field;
+                                $firma_update[$firma_field] = Opstina::where('ime', $zahtev->{$zahtev_field})->value('id');
+                            } else {
+                                $firma_update[$firma_field] = $zahtev->{$zahtev_field};
                             }
                         }
                     }
-                    $firma = Firma::upsert($firmaArr, ['mb'], $firmaArrUpdate);
+//                    $firma = Firma::upsert($firmaArr, ['mb'], ['pib']); // TODO: UPSERT was introduced in PostgreSQL 9.5
+                    $firma = Firma::updateOrCreate($firma_create, $firma_update);
                     $result['firma'] = $firma;
                 }
             }
@@ -123,6 +140,19 @@ trait PromenaPodatakaObradaBulkOperation
                 $zahtev->datumobrade = Carbon::now()->format('Y-m-d H:i:s');
                 $zahtev->obradjen = 1;
                 $zahtev->save();
+
+                $mail_data->zahtev = $zahtev;
+                $mail_data->osoba = $osoba;
+
+                try {
+                    Mail::to($osoba->kontaktemail)
+                        ->send(new ConfirmationEmail($mail_data));
+                    $result['email_send_error'] = FALSE;
+                } catch (\Exception $e) {
+                    Mail::to('izmeneadresa@ingkomora.rs')
+                        ->send(new AdminReportEmail($mail_data));
+                    $result['email_send_error'] = $e->getMessage();
+                }
             }
         }
         return $result;
