@@ -58,6 +58,7 @@ trait PromenaPodatakaObradaBulkOperation
         $mail_data = new \stdClass();
 
         foreach ($entries as $key => $id) {
+            $mail_data->fields = [];
             $obradjen = FALSE;
             $zahtev = PromenaPodataka::find($id);
             $osoba = $zahtev->licenca->osobaId;
@@ -145,13 +146,12 @@ trait PromenaPodatakaObradaBulkOperation
                 $mail_data->osoba = $osoba;
 
                 try {
-                    Mail::to($osoba->kontaktemail)
+                    Mail::to($osoba->kontaktemail ?? '')
                         ->send(new ConfirmationEmail($mail_data));
-                    $result['email_send_error'] = FALSE;
                 } catch (\Exception $e) {
+                    $mail_data->error['message'] = $e->getMessage();
                     Mail::to('izmeneadresa@ingkomora.rs')
                         ->send(new AdminReportEmail($mail_data));
-                    $result['email_send_error'] = $e->getMessage();
                 }
             }
         }
