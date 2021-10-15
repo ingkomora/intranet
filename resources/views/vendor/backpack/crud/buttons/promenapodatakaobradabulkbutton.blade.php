@@ -58,7 +58,7 @@
                             type: 'POST',
                             data: {entries: crud.checkedItems},
                             success: function (result) {
-                                console.log(result);
+                                // console.log(result);
                                 // Show an alert with the result
                                 new Noty({
                                     type: "primary",
