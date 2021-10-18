@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Operations;
 use App\Mail\PromenaPodataka\AdminReportEmail;
 use App\Mail\PromenaPodataka\ConfirmationEmail;
 use App\Models\Firma;
+use App\Models\Log;
 use App\Models\Opstina;
 use App\Models\PromenaPodataka;
 use App\Models\User;
@@ -146,14 +147,25 @@ trait PromenaPodatakaObradaBulkOperation
                 $mail_data->zahtev = $zahtev;
                 $mail_data->osoba = $osoba;
 
+                $log = new Log();
                 try {
                     Mail::to($osoba->kontaktemail ?? '')
                         ->send(new ConfirmationEmail($mail_data));
+
+                    $log->naziv = "Poslat konfirmacioni mejl na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
+                    $log->type = 'INFO';
+
                 } catch (\Exception $e) {
                     $mail_data->error['message'] = $e->getMessage();
                     Mail::to('izmeneadresa@ingkomora.rs')
                         ->send(new AdminReportEmail($mail_data));
+
+                    $log->naziv = "Greška prilikom slanja konfirmacionog mejla na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
+                    $log->type = 'ERROR';
                 }
+                    $log->log_status_grupa_id = PODACI;
+                    $log->loggable()->associate($zahtev);
+                    $log->save();
             }
         }
         return $result;
