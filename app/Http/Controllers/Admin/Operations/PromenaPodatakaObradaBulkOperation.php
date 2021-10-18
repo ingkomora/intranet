@@ -59,20 +59,22 @@ trait PromenaPodatakaObradaBulkOperation
 
         foreach ($entries as $key => $id) {
             $mail_data->fields = [];
+            $azurna_polja_u_bazi = TRUE;
             $obradjen = FALSE;
             $zahtev = PromenaPodataka::find($id);
             $osoba = $zahtev->licenca->osobaId;
             if (in_array($zahtev->obradjen, [3, 116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142])) { // email
                 if ($osoba->kontaktemail != $zahtev->email) {
                     $osoba->kontaktemail = $zahtev->email;
-                    $mail_data->fields['azurirano']['email'] = $osoba->kontaktemail; // polje koje se azurira
+                    $mail_data->fields['Email']['azurirano'] = $osoba->kontaktemail; // polje koje se azurira
+                    $azurna_polja_u_bazi = FALSE;
                 } else {
-                    $mail_data->fields['neazurirano']['email'] = $osoba->kontaktemail; // polje koje je vec azurno
+                    $mail_data->fields['Email']['neazurirano'] = $osoba->kontaktemail; // polje koje je vec azurno
                 }
                 if ($osoba->isDirty('kontaktemail')) {
                     $osoba->save();
                 }
-                if ($osoba->wasChanged('kontaktemail')) {
+                if ($osoba->wasChanged('kontaktemail') or $azurna_polja_u_bazi) {
                     $zahtev->datumobrade = Carbon::now()->format('Y-m-d H:i:s');
                     if ($zahtev->obradjen !== 3) {
                         $operater = User::find($zahtev->obradjen - 100)->name;
@@ -85,7 +87,6 @@ trait PromenaPodatakaObradaBulkOperation
                     $result['message'][] = 'zahtev';
                 }
             } else if ($zahtev->obradjen === 0 or $zahtev->obradjen === 300) {
-                $azurna_polja_u_bazi = TRUE;
                 foreach ($zahtev->osoba_related_fields as $zahtev_field => $osoba_field) {
                     if (!empty($zahtev->{$zahtev_field})) {
                         if ($osoba->{$osoba_field} != $zahtev->{$zahtev_field}) {
@@ -111,7 +112,7 @@ trait PromenaPodatakaObradaBulkOperation
                 if ($osoba->isDirty()) {
                     $osoba->save();
                 }
-                if ($osoba->wasChanged() or $azurna_polja_u_bazi == TRUE) {
+                if ($osoba->wasChanged() or $azurna_polja_u_bazi) {
                     $obradjen = TRUE;
                     $result['ok'][] = $id;
                 } else {

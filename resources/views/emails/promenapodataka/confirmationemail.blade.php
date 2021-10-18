@@ -1,7 +1,12 @@
 @component('vendor.mail.html.message_promena_podataka')
-## Vaš zahtev za promenu ličnih podataka je obrađen.
 
-
+@component('mail::panel')
+{{$data->osoba->isMale() ? 'Poštovani' : 'Poštovana'}} {{$data->osoba->full_name}},\
+Vaš zahtev za promenu ličnih podataka je obrađen.
+@endcomponent
+&nbsp;
+&nbsp;
+&nbsp;
 @component('mail::table')
 
 | Podatak        | Ažuriran                      | Već je ažuran                   |

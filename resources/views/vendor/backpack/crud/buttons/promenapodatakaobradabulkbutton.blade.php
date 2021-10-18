@@ -24,7 +24,7 @@
                     return;
                 }
 
-                var message = "Da li ste sigurni da želite obradite označene stavke?\nBroj oznaćenih stavki: :number";
+                var message = "Da li ste sigurni da želite obradite označene stavke?\nBroj označenih stavki: :number";
                 message = message.replace(":number", crud.checkedItems.length);
 
                 // show confirm message

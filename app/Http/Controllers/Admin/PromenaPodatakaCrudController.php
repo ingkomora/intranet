@@ -32,11 +32,15 @@ class PromenaPodatakaCrudController extends CrudController
             'name' => 'licni_podaci',
         ],
         'osoba' => [
-            'name' => 'licenca',
+            'name' => 'osoba',
+//            'name' => 'licenca',
+//            'name' => 'licenca.osobaId',
             'type' => 'select',
+//            'type' => 'relationship',
             'label' => 'Ime prezime (jmbg)',
             'entity' => 'licenca',
             'attribute' => 'ime_prezime_jmbg',
+//            'attribute' => 'ime_prezime_licence',
             'model' => 'App\Models\Licenca',
         ], // virtual column
         /*'ime'=>[
@@ -49,9 +53,18 @@ class PromenaPodatakaCrudController extends CrudController
             'name' => 'brlic',
             'label' => 'Broj licence'
         ],
-        'adresa',
-        'mesto',
-        'pbroj',
+        'adresa' => [
+            'name' => 'adresa',
+            'label' => 'Adresa prebivališta'
+        ],
+        'mesto' => [
+            'name' => 'mesto',
+            'label' => 'Mesto prebivališta'
+        ],
+        'pbroj' => [
+            'name' => 'pbroj',
+            'label' => 'Poštanski broj mesta prebivališta'
+        ],
 //        'topstina_id',
         'opstina' => [
             'name' => 'opstina',
@@ -218,10 +231,28 @@ class PromenaPodatakaCrudController extends CrudController
                 'attributes' => ['disabled' => 'disabled'],
                 'ajax' => TRUE,
             ],
-        'adresa',
-        'mesto',
-        'pbroj',
-        'topstina_id',
+        'adresa' => [
+            'name' => 'adresa',
+            'label' => 'Adresa prebivališta'
+        ],
+        'mesto' => [
+            'name' => 'mesto',
+            'label' => 'Mesto prebivališta'
+        ],
+        'pbroj' => [
+            'name' => 'pbroj',
+            'label' => 'Poštanski broj mesta prebivališta'
+        ],
+//        'topstina_id',
+        'opstina' => [
+            'name' => 'opstina',
+            'type' => 'relationship',
+            'attribute' => 'ime',
+//            'ajax' => TRUE,
+            'label' => 'Opština',
+            'placeholder' => 'Odaberite opštinu prebivališta',
+            'hint' => 'Odaberite jednu od ponuđenih opcija za opštinu prebivališta.',
+        ],
         'tel' => [
             'name' => 'tel',
             'label' => 'Telefon'
@@ -234,13 +265,32 @@ class PromenaPodatakaCrudController extends CrudController
         'obradjen' => [
             'name' => 'obradjen',
             'label' => 'Status zahteva',
+            'type' => 'select_from_array',
         ],
-        'nazivfirm',
-        'mestofirm',
-        'opstinafirm',
-        'emailfirm',
-        'telfirm',
-        'wwwfirm',
+        'nazivfirm' => [
+            'name' => 'nazivfirm',
+            'label' => 'Naziv firme'
+        ],
+        'mestofirm' => [
+            'name' => 'mestofirm',
+            'label' => 'Mesto firme'
+        ],
+        'opstinafirm' => [
+            'name' => 'opstinafirm',
+            'label' => 'Opština firme'
+        ],
+        'emailfirm' => [
+            'name' => 'emailfirm',
+            'label' => 'Email firme'
+        ],
+        'telfirm' => [
+            'name' => 'telfirm',
+            'label' => 'Telefon firme'
+        ],
+        'wwwfirm' => [
+            'name' => 'wwwfirm',
+            'label' => 'Www'
+        ],
         'ipaddress',
         'datumprijema' => [
             'name' => 'datumprijema',
@@ -254,15 +304,27 @@ class PromenaPodatakaCrudController extends CrudController
             'type' => 'datetime',
             'format' => 'DD.MM.YYYY. HH:mm:ss'
         ],
-        'mbfirm',
-        'pibfirm',
-        'adresafirm',
+        'mbfirm' => [
+            'name' => 'mbfirm',
+            'label' => 'MB'
+        ],
+        'pibfirm' => [
+            'name' => 'pibfirm',
+            'label' => 'PIB'
+        ],
+        'adresafirm' => [
+            'name' => 'adresafirm',
+            'label' => 'Adresa firme'
+        ],
         'napomena',
         'created_at' => [
             'name' => 'created_at',
             'label' => 'Kreiran',
             'type' => 'datetime',
-            'format' => 'DD.MM.YYYY. HH:mm:ss'
+            'format' => 'DD.MM.YYYY. HH:mm:ss',
+            'attributes'=> [
+                    'readonly' => 'readonly'
+                ]
         ],
         'updated_at' => [
             'name' => 'updated_at',
@@ -319,6 +381,26 @@ class PromenaPodatakaCrudController extends CrudController
         }
 //        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
         $this->crud->setColumns($this->columns_definition_array);
+
+        $this->crud->setColumnDetails('osoba', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('ime', 'ilike', $searchTerm . '%')
+                            ->orWhere('prezime', 'ilike', $searchTerm . '%')
+                            ->orWhere('id', 'ilike', $searchTerm . '%');
+//                        });
+                    });
+                }
+            }
+        ]);
     }
 
     /**
@@ -335,24 +417,6 @@ class PromenaPodatakaCrudController extends CrudController
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
-
-        $this->crud->setColumnDetails('osoba', [
-            'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
-                    $searchTerm = explode(" ", $searchTerm);
-                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
-                    });
-                } else {
-                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm . '%')
-                            ->orWhere('prezime', 'ilike', $searchTerm . '%')
-                            ->orWhere('id', 'ilike', $searchTerm . '%');
-                    });
-                }
-            }
-        ]);
 
 //        todo: testirati da li radi pretraga sa licencom sa kojom nije podneo zahtev
         $this->crud->setColumnDetails('brlic', [
@@ -564,7 +628,7 @@ class PromenaPodatakaCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(PromenaPodatakaEmailRequest::class);
-
+        $this->crud->addFields($this->fields_definition_array);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
@@ -581,6 +645,56 @@ class PromenaPodatakaCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+
+        $this->crud->modifyField('obradjen', [
+            'options' => [
+                0 => '(0) Neobrađen',
+                1 => '(1) Obrađen',
+                2 => '(2) Duplikat',
+                3 => '(3) Email',
+                4 => '(4) Otkazan',
+                5 => '(5) Noviji',
+                6 => '(6) Potpis',
+                7 => '(7) Email-neobrađen',
+                16 => '(16) Email-neobrađen Tijana',
+                32 => '(32) Email-neobrađen Nada',
+                33 => '(33) Email-neobrađen Ljilja',
+                34 => '(34) Email-neobrađen Miljan',
+                35 => '(35) Email-neobrađen Jasmina',
+                36 => '(36) Email-neobrađen Milorad',
+                37 => '(37) Email-neobrađen Milena',
+                38 => '(38) Email-neobrađen Mirjana',
+                39 => '(39) Email-neobrađen Aca',
+                40 => '(40) Email-neobrađen Biserka',
+                41 => '(41) Email-neobrađen Edisa',
+                42 => '(42) Email-neobrađen Aleksandra',
+                116 => '(116) Email-obrađen Tijana',
+                132 => '(132) Email-obrađen Nada',
+                133 => '(133) Email-obrađen Ljilja',
+                134 => '(134) Email-obrađen Miljan',
+                135 => '(135) Email-obrađen Jasmina',
+                136 => '(136) Email-obrađen Milorad',
+                137 => '(137) Email-obrađen Milena',
+                138 => '(138) Email-obrađen Mirjana',
+                139 => '(139) Email-obrađen Aca',
+                140 => '(140) Email-obrađen Biserka',
+                141 => '(141) Email-obrađen Edisa',
+                142 => '(142) Email-obrađen Aleksandra',
+                216 => '(216) Email-Problem Tijana',
+                232 => '(232) Email-Problem Nada',
+                233 => '(233) Email-Problem Ljilja',
+                234 => '(234) Email-Problem Miljan',
+                235 => '(235) Email-Problem Jasmina',
+                236 => '(236) Email-Problem Milorad',
+                237 => '(237) Email-Problem Milena',
+                238 => '(238) Email-Problem Mirjana',
+                239 => '(239) Email-Problem Aca',
+                240 => '(240) Email-Problem Biserka',
+                241 => '(241) Email-Problem Edisa',
+                242 => '(242) Email-Problem Aleksandra',
+                300 => '(300) Bulk-neobradjen',
+            ]
+        ]);
     }
 
     /**
