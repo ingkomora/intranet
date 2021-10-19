@@ -79,7 +79,8 @@ trait PromenaPodatakaObradaBulkOperation
                     $zahtev->datumobrade = Carbon::now()->format('Y-m-d H:i:s');
                     if ($zahtev->obradjen !== 3) {
                         $operater = User::find($zahtev->obradjen - 100)->name;
-                        $zahtev->napomena .= "Zahtev kreirao operater $operater telefonskim pozivom člana.";
+                        $napomena_string = "Zahtev kreirao operater $operater telefonskim pozivom člana.";
+                        $zahtev->napomena .= is_null($zahtev->napomena) ? "" : ". " . $napomena_string;
                     }
                     $obradjen = TRUE;
                     $result['ok'][] = $id;
@@ -163,9 +164,9 @@ trait PromenaPodatakaObradaBulkOperation
                     $log->naziv = "Greška prilikom slanja konfirmacionog mejla na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
                     $log->type = 'ERROR';
                 }
-                    $log->log_status_grupa_id = PODACI;
-                    $log->loggable()->associate($zahtev);
-                    $log->save();
+                $log->log_status_grupa_id = PODACI;
+                $log->loggable()->associate($zahtev);
+                $log->save();
             }
         }
         return $result;
