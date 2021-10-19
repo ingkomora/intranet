@@ -88,7 +88,7 @@ class Osoba extends Model
 
     public function isMale()
     {
-        return substr($this->id, 9, 3) <= 500;
+        return substr($this->id, 9, 3) < 500;
     }
 
     /*
