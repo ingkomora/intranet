@@ -58,22 +58,29 @@
                             type: 'POST',
                             data: {entries: crud.checkedItems},
                             success: function (result) {
-                                // console.log(result);
                                 // Show an alert with the result
                                 new Noty({
                                     type: "primary",
                                     text: "<strong>Ukupan broj označenih stavki:</strong> " + crud.checkedItems.length
                                 }).show();
-                                if (result['ok']) {
+                                if (result['INFO']) {
+                                    var counter = 0;
+                                    $.each(result['INFO'], function (id) {
+                                        counter++;
+                                    });
                                     new Noty({
                                         type: "success",
-                                        text: "<strong>Broj uspešno obrađenih stavki:</strong> " + result['ok'].length
+                                        text: "<strong>Broj uspešno obrađenih stavki:</strong> " + counter
                                     }).show();
                                 }
-                                if (result['nok']) {
+                                if (result['ERROR']) {
+                                    var errors = "<strong>Zahtevi koji nisu ažurirani:</strong> <br>| ";
+                                    $.each(result['ERROR'], function (id, item) {
+                                        errors += id + " | ";
+                                    });
                                     new Noty({
                                         type: "warning",
-                                        text: "<strong>Broj obrađenih stavki koje nisu ažurirane:</strong> " + result['nok'].length
+                                        text: errors
                                     }).show();
                                 }
 
@@ -81,11 +88,11 @@
                                 crud.table.ajax.reload();
                             },
                             error: function (result) {
-                                // Show an alert with the result
                                 new Noty({
                                     type: "danger",
-                                    text: "<strong>Obrada nije uspela</strong><br>Jedna ili više stavki nije obrađena. Molimo Vas da pokušate ponovo."
+                                    text: "<strong>Broj označenih stavki koje nisu ažurirane:</strong> " + result.length
                                 }).show();
+                                // Show an alert with the result
                             }
                         });
                     }

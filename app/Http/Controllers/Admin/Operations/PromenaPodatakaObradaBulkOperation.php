@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use Mail;
+use function Composer\Autoload\includeFile;
 
 trait PromenaPodatakaObradaBulkOperation
 {
@@ -55,15 +56,20 @@ trait PromenaPodatakaObradaBulkOperation
     {
         $this->crud->hasAccessOrFail('promenapodatakaobradabulk');
         $entries = $this->crud->getRequest()->input('entries');
+
+        // declaration
         $result = [];
         $mail_data = new \stdClass();
+        $log = new Log();
 
         foreach ($entries as $key => $id) {
             $mail_data->fields = [];
             $azurna_polja_u_bazi = TRUE;
             $obradjen = FALSE;
+            $firmaOK = FALSE;
             $zahtev = PromenaPodataka::find($id);
             $osoba = $zahtev->licenca->osobaId;
+
             if (in_array($zahtev->obradjen, [3, 116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142])) { // email
                 if ($osoba->kontaktemail != $zahtev->email) {
                     $osoba->kontaktemail = $zahtev->email;
@@ -83,15 +89,18 @@ trait PromenaPodatakaObradaBulkOperation
                         $zahtev->napomena .= is_null($zahtev->napomena) ? "" : ". " . $napomena_string;
                     }
                     $obradjen = TRUE;
-                    $result['ok'][] = $id;
+
+                    $log->type = 'INFO';
+                    $result[$log->type][$id]['message'] = 'Email adresa je uspešno ažurirana.';
                 } else {
-                    $result['nok'][] = $id;
-                    $result['message'][] = 'zahtev';
+                    $log->type = 'ERROR';
+                    $result[$log->type][$id]['message'] = 'Greška prilikom ažuriranja email adrese.';
                 }
+
             } else if ($zahtev->obradjen === 0 or $zahtev->obradjen === 300) {
                 foreach ($zahtev->osoba_related_fields as $zahtev_field => $osoba_field) {
                     if (!empty($zahtev->{$zahtev_field})) {
-                        if ($osoba->{$osoba_field} != $zahtev->{$zahtev_field}) {
+                        if ($osoba->{$osoba_field} !== $zahtev->{$zahtev_field}) {
                             $osoba->{$osoba_field} = $zahtev->{$zahtev_field};
                             $azurna_polja_u_bazi &= FALSE;
                             if ($zahtev_field == 'topstina_id') {
@@ -111,19 +120,10 @@ trait PromenaPodatakaObradaBulkOperation
                 }
 
                 $result['azurna_polja_u_bazi'][$id] = $azurna_polja_u_bazi;
-                if ($osoba->isDirty()) {
-                    $osoba->save();
-                }
-                if ($osoba->wasChanged() or $azurna_polja_u_bazi) {
-                    $obradjen = TRUE;
-                    $result['ok'][] = $id;
-                } else {
-                    $result['nok'][] = $id;
-                    $result['message'][] = 'osoba';
-                }
 
-                if (!empty($osoba->firma_mb)) {
-                    $firma_create['mb'] = $osoba->firma_mb;
+                //snimanje firme
+                if (!empty($zahtev->mbfirm)) {
+                    $firma_create['mb'] = $zahtev->mbfirm;
                     $firma_update = [];
                     foreach ($zahtev->firma_related_fields as $zahtev_field => $firma_field) {
                         if (!empty($zahtev_field)) {
@@ -135,11 +135,44 @@ trait PromenaPodatakaObradaBulkOperation
                             }
                         }
                     }
+
+                    try {
 //                    $firma = Firma::upsert($firmaArr, ['mb'], ['pib']); // TODO: UPSERT was introduced in PostgreSQL 9.5
-                    $firma = Firma::updateOrCreate($firma_create, $firma_update);
-                    $result['firma'] = $firma;
+                        $firma = Firma::updateOrCreate($firma_create, $firma_update);
+                        $log->type = 'INFO';
+                        $result[$log->type][$id]['message'] = "Podaci o firmi su uspešno ažurirani.";
+
+                        $log->naziv = $result[$log->type][$id]['message'];
+                        $firmaOK = TRUE;
+
+                    } catch (\Exception $e) {
+                        $log->type = 'ERROR';
+                        $result[$log->type][$id]['message'] = "Greška prilikom ažuriranja firme. Exception " . $e->getMessage();
+
+                        $log->naziv = $result[$log->type][$id]['message'] . ".";
+                        $result[$log->type][$id]['message'] = $e->getMessage();
+                    }
+                } else {
+                    $firmaOK = TRUE;
                 }
+
+                if ($firmaOK) {
+                    if ($osoba->isDirty()) {
+                        $osoba->save();
+                    }
+                    if ($osoba->wasChanged() or $azurna_polja_u_bazi) {
+                        $obradjen = TRUE;
+
+                        $log->type = 'INFO';
+                        $result[$log->type][$id]['message'] .= ' Podaci o osobi su uspešno ažurirani.';
+                    } else {
+                        $log->type = 'ERROR';
+                        $result[$log->type][$id]['message'] = 'Greška prilikom ažuriranja osobe.';
+                    }
+                }
+
             }
+
             if ($obradjen) {
                 $zahtev->datumobrade = Carbon::now()->format('Y-m-d H:i:s');
                 $zahtev->obradjen = 1;
@@ -148,26 +181,25 @@ trait PromenaPodatakaObradaBulkOperation
                 $mail_data->zahtev = $zahtev;
                 $mail_data->osoba = $osoba;
 
-                $log = new Log();
                 try {
                     Mail::to($osoba->kontaktemail ?? '')
                         ->send(new ConfirmationEmail($mail_data));
 
-                    $log->naziv = "Poslat konfirmacioni mejl na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
                     $log->type = 'INFO';
+                    $log->naziv .= " Poslat konfirmacioni mejl na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
 
                 } catch (\Exception $e) {
                     $mail_data->error['message'] = $e->getMessage();
                     Mail::to('izmeneadresa@ingkomora.rs')
                         ->send(new AdminReportEmail($mail_data));
 
-                    $log->naziv = "Greška prilikom slanja konfirmacionog mejla na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
                     $log->type = 'ERROR';
+                    $log->naziv .= " Greška prilikom slanja konfirmacionog mejla na: $osoba->kontaktemail, podnosilac: $osoba->full_name";
                 }
-                $log->log_status_grupa_id = PODACI;
-                $log->loggable()->associate($zahtev);
-                $log->save();
             }
+            $log->log_status_grupa_id = PODACI;
+            $log->loggable()->associate($zahtev);
+            $log->save();
         }
         return $result;
     }
