@@ -193,8 +193,8 @@ class PromenaPodatakaCrudController extends CrudController
         'pibfirm',
         'adresafirm',
 //        'napomena',
-        'created_at',
-        'updated_at'
+//        'created_at',
+//        'updated_at'
     ],
 
         $fields_definition_array = [
@@ -322,9 +322,9 @@ class PromenaPodatakaCrudController extends CrudController
             'label' => 'Kreiran',
             'type' => 'datetime',
             'format' => 'DD.MM.YYYY. HH:mm:ss',
-            'attributes'=> [
-                    'readonly' => 'readonly'
-                ]
+            'attributes' => [
+                'readonly' => 'readonly'
+            ]
         ],
         'updated_at' => [
             'name' => 'updated_at',
@@ -611,8 +611,21 @@ class PromenaPodatakaCrudController extends CrudController
             }, function ($values) { // if the filter is active
                 $this->crud->addClause('whereIn', 'obradjen', json_decode($values));
             });
-
         }
+
+        // daterange filter
+        $this->crud->addFilter([
+            'type' => 'date_range',
+            'name' => 'created_at',
+            'label' => 'Period'
+        ],
+            FALSE,
+            function ($value) { // if the filter is active, apply these constraints
+                $dates = json_decode($value);
+                $this->crud->addClause('where', 'created_at', '>=', $dates->from);
+                $this->crud->addClause('where', 'created_at', '<=', $dates->to);
+            });
+
         /*
         * end
         * Define filters
