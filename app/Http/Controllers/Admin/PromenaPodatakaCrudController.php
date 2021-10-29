@@ -527,11 +527,12 @@ class PromenaPodatakaCrudController extends CrudController
         $this->crud->addFilter([
             'type' => 'simple',
             'name' => 'neobradjeni',
-            'label' => 'Nebrađeni zahtevi'
+            'label' => 'Neobrađeni zahtevi'
         ],
             FALSE,
             function () { // if the filter is active
-                $this->crud->query->where('obradjen', backpack_user()->id); // apply the "active" eloquent scope
+//                $this->crud->query->where('obradjen', backpack_user()->id); // apply the "active" eloquent scope
+                $this->crud->query->where('obradjen', NEAKTIVAN); // apply the "active" eloquent scope
             });
 
         $this->crud->addFilter([
@@ -541,10 +542,11 @@ class PromenaPodatakaCrudController extends CrudController
         ],
             FALSE,
             function () { // if the filter is active
-                $this->crud->query->where('obradjen', backpack_user()->id + 100); // apply the "active" eloquent scope
+//                $this->crud->query->where('obradjen', backpack_user()->id + 100); // apply the "active" eloquent scope
+                $this->crud->query->where('obradjen', AKTIVAN); // apply the "active" eloquent scope
             });
 
-        $this->crud->addFilter([
+/*        $this->crud->addFilter([
             'type' => 'simple',
             'name' => 'problematicni',
             'label' => 'Problematični'
@@ -552,7 +554,7 @@ class PromenaPodatakaCrudController extends CrudController
             FALSE,
             function () { // if the filter is active
                 $this->crud->query->where('obradjen', backpack_user()->id + 200); // apply the "active" eloquent scope
-            });
+            });*/
 
         if (backpack_user()->hasRole('admin')) {
             $this->crud->addFilter([
