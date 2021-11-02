@@ -11,7 +11,7 @@ use App\Models\PromenaPodataka;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
-use Mail;
+use Illuminate\Support\Facades\Mail;
 use function Composer\Autoload\includeFile;
 
 trait PromenaPodatakaObradaBulkOperation
@@ -144,7 +144,6 @@ trait PromenaPodatakaObradaBulkOperation
 
                         $log->naziv = $result[$log->type][$id]['message'];
                         $firmaOK = TRUE;
-
                     } catch (\Exception $e) {
                         $log->type = 'ERROR';
                         $result[$log->type][$id]['message'] = "Greška prilikom ažuriranja firme. Exception " . $e->getMessage();
@@ -153,6 +152,8 @@ trait PromenaPodatakaObradaBulkOperation
                         $result[$log->type][$id]['message'] = $e->getMessage();
                     }
                 } else {
+                    $log->type = 'INFO';
+                    $result[$log->type][$id]['message'] = "Nezaposlen ili peznioner.";
                     $firmaOK = TRUE;
                 }
 
@@ -201,6 +202,7 @@ trait PromenaPodatakaObradaBulkOperation
             $log->loggable()->associate($zahtev);
             $log->save();
         }
+
         return $result;
     }
 }
