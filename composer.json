@@ -27,12 +27,12 @@
         "tesla-software/jmbg": "*"
     },
     "require-dev": {
-        "laravel/telescope": "^4.4",
-        "barryvdh/laravel-debugbar": "^3.5",
         "backpack/generators": "^3.0",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
+        "krlove/eloquent-model-generator": "^1.3",
         "laracasts/generators": "^2.0.0",
+        "laravel/telescope": "^4.4",
         "mockery/mockery": "^1.4.2",
         "nunomaduro/collision": "^5.0",
         "phpunit/phpunit": "^9.3.3"
