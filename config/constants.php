@@ -72,6 +72,7 @@ define('REGISTAR', 5);
 define('DOKUMENTA', 6);
 define('MIROVANJA', 7);
 define('OSIGURANJE', 8);
+define('PODACI', 9);
 
 define('VRSTA_LICENCE_SVE', 0);
 define('VRSTA_LICENCE_PLANIRANJE', 1);

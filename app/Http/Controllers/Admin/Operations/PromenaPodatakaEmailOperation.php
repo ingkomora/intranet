@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Operations;
 
 use App\Http\Requests\PromenaPodatakaEmailRequest;
 use App\Models\Mirovanje;
-use App\Models\PrijavaPromenaPodataka;
+use App\Models\PromenaPodataka;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use App\Http\Requests\MirovanjeObradaRequest;
@@ -97,15 +97,15 @@ trait PromenaPodatakaEmailOperation
         return view('vendor.backpack.crud.operations.promenapodatakaemailform', $this->data);
     }
 
-    public function postPromenaPodatakaEmailForm(PromenaPodatakaEmailRequest $request, PrijavaPromenaPodataka $promenaPodataka)
+    public function postPromenaPodatakaEmailForm(PromenaPodatakaEmailRequest $request, PromenaPodataka $promenaPodataka)
     {
         $this->crud->hasAccessOrFail('promenapodatakaemail');
 
         $validated = $request->validated();
 
-        $zahtev = PrijavaPromenaPodataka::find($request->id);
+        $zahtev = PromenaPodataka::find($request->id);
 
-        $zahtev->datumobrade = Carbon::now()->format('Y-m-d H:i:s');
+        $zahtev->datumprijema = Carbon::now()->format('Y-m-d H:i:s');
         $zahtev->napomena = $validated['napomena'];
         if (empty($validated['email'])) {
             $zahtev->obradjen = backpack_user()->id + 200;

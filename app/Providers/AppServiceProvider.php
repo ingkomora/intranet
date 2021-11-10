@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Osoba::saved(function ($osoba){
             $lib = new LibLibrary();
-            $lib->dodeliJedinstveniLib($osoba->id, 48);
+            $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
 
         });
     }

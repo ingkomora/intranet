@@ -13,20 +13,20 @@ use Illuminate\Database\Eloquent\Model;
  * @property integer $loggable_id
  * @property string $created_at
  * @property string $updated_at
- * @property LogGrupa $logGrupa
+ * @property string $type
  */
 class Log extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'logovi';
 
     /**
      * The "type" of the auto-incrementing ID.
-     * 
+     *
      * @var string
      */
     protected $keyType = 'integer';
@@ -38,7 +38,7 @@ class Log extends Model
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = true;
@@ -46,10 +46,10 @@ class Log extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function logStatusGrupa()
+/*    public function logStatusGrupa()
     {
         return $this->belongsTo('App\Models\LogGrupa', 'log_status_grupa_id');
-    }
+    }*/
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\morphTo

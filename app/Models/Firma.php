@@ -45,7 +45,7 @@ class Firma extends Model {
     /**
      * The "type" of the auto-incrementing ID.
      *
-     * @var string
+     * @var integer
      */
     protected $keyType = 'integer';
 
