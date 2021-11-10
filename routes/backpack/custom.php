@@ -57,7 +57,6 @@ Route::group([
     Route::crud('status', 'StatusCrudController');
     Route::crud('logstatusgrupa', 'LogStatusGrupaCrudController');
     Route::crud('zahtevtip', 'ZahtevTipCrudController');
-    Route::crud('zahtev', 'ZahtevCrudController');
     Route::crud('sikandidat', 'SiKandidatCrudController');
     Route::crud('clanstvo/promenapodataka', 'PromenaPodatakaCrudController');
 });
