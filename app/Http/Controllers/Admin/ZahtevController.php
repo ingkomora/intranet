@@ -28,19 +28,22 @@ use Prologue\Alerts\Facades\Alert;
 use Session;
 
 
-class ZahtevController extends Controller {
+class ZahtevController extends Controller
+{
     protected $data = []; // the information we send to the view
     protected $h;
 
     /**
      * Create a new controller instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->h = new Helper();
         $this->middleware(backpack_middleware());
     }
 
-    public function unesi($action, $url = '') {
+    public function unesi($action, $url = '')
+    {
         if (Session::get('message') !== NULL) {
             $data['message'] = Session::get('message');
         }
@@ -58,7 +61,8 @@ class ZahtevController extends Controller {
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\View\View|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function obradizahtevsvecanaforma(Request $request) {
+    public function obradizahtevsvecanaforma(Request $request)
+    {
 
         $file = $request->file('upload');
 
@@ -308,11 +312,13 @@ class ZahtevController extends Controller {
 
     }
 
-    public function createZip($zipfile) {
+    public function createZip($zipfile)
+    {
         return $zipfile;
     }
 
-    public function downloadZip(Request $request) {
+    public function downloadZip(Request $request)
+    {
 //        dd($request->zipfile);
         ob_end_clean();
         //TODO: lokacija sa koje se fajl preuzima
@@ -325,7 +331,8 @@ class ZahtevController extends Controller {
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function unesinovelicence(Request $request) {
+    public function unesinovelicence(Request $request)
+    {
         $file = $request->file('upload');
         if (!is_null($file)) {
 //            UNOS LICENCI IZ EXCEL DATOTEKE
@@ -491,12 +498,14 @@ class ZahtevController extends Controller {
         return redirect('/admin/unesinovelicence')->with('message', $messageLicencaOK)->with('messageNOK', $messageLicencaNOK)->withInput();
     }
 
-    private function checkDate($date) {
+    private function checkDate($date)
+    {
         $dt = DateTime::createFromFormat("Y-m-d", $date);
         return $dt !== false && !array_sum($dt::getLastErrors());
     }
 
-    private function checkOsoba($jmbg) {
+    private function checkOsoba($jmbg)
+    {
         $osoba = Osoba::find($jmbg);
         if (!is_null($osoba)) {
             return true;
@@ -511,7 +520,8 @@ class ZahtevController extends Controller {
      * @param $tip
      * @return null
      */
-    private function getJMBG($broj, $tip) {
+    private function getJMBG($broj, $tip)
+    {
         $jmbg = NULL;
         switch ($tip) {
             case 'zahtev':
@@ -536,7 +546,8 @@ class ZahtevController extends Controller {
      * @param string $tip
      * @return \stdClass
      */
-    private function getZahtevLicenca($broj, $tip = 'broj_licence') {
+    private function getZahtevLicenca($broj, $tip = 'broj_licence')
+    {
         $response = new \stdClass();
         switch ($tip) {
             case 'broj_zahteva':
@@ -574,7 +585,8 @@ class ZahtevController extends Controller {
      * @param $licenca
      * @return \stdClass
      */
-    private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca) {
+    private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca)
+    {
         $response = new \stdClass();
         $tipLicence = LicencaTip::find($licenca['tip']);
         if (is_null($tipLicence)) {
@@ -611,7 +623,8 @@ class ZahtevController extends Controller {
      * @param $licenca
      * @return \stdClass
      */
-    private function kreirajZahtevLicenca($licenca) {
+    private function kreirajZahtevLicenca($licenca)
+    {
         $response = new \stdClass();
 
         $zahtev = new ZahtevLicenca();
@@ -624,7 +637,8 @@ class ZahtevController extends Controller {
      * @param $broj_licence
      * @return \stdClass
      */
-    private function getLicenca($broj_licence) {
+    private function getLicenca($broj_licence)
+    {
         $response = new \stdClass();
         $licenca = Licenca::find($broj_licence);
         if (!is_null($licenca)) {
@@ -648,7 +662,8 @@ class ZahtevController extends Controller {
      * @param ZahtevLicenca $zahtev
      * @return \stdClass
      */
-    private function azurirajLicencu(Licenca $licenca, ZahtevLicenca $zahtev) {
+    private function azurirajLicencu(Licenca $licenca, ZahtevLicenca $zahtev)
+    {
         $response = new \stdClass();
         $licenca->id = $zahtev->licenca_broj;
         $licenca->licencatip = $zahtev->licencatip;
@@ -679,7 +694,8 @@ class ZahtevController extends Controller {
      * @param ZahtevLicenca $zahtev
      * @return \stdClass
      */
-    private function kreirajLicencu(ZahtevLicenca $zahtev) {
+    private function kreirajLicencu(ZahtevLicenca $zahtev)
+    {
 //dd($zahtev);
         $licenca = new Licenca();
         $response = $this->azurirajLicencu($licenca, $zahtev);
@@ -697,7 +713,8 @@ class ZahtevController extends Controller {
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function unesinoveclanove(Request $request) {
+    public function unesinoveclanove(Request $request)
+    {
         $messageOK = "";
         $messageNOK = "";
         $file = $request->file('upload');
@@ -752,7 +769,8 @@ class ZahtevController extends Controller {
     }
 
 
-    public function odobrinovogclana($prijava) {
+    public function odobrinovogclana($prijava)
+    {
         $resp = new \stdClass();
         $prijava_clan = PrijavaClanstvo::find($prijava['broj']);
 
@@ -802,14 +820,16 @@ class ZahtevController extends Controller {
         return $resp;
     }
 
-    private function getOsobaLicence($osoba) {
+    private function getOsobaLicence($osoba)
+    {
 
     }
 
     /*
      * funkcija koja se poziva iz bladea AJAX
      */
-    public function checkLicencaTip(Request $request) {
+    public function checkLicencaTip(Request $request)
+    {
         $licTip4 = strtoupper(substr(trim($request->input('licence.*.broj')[0]), 0, 4));
         $licencaTip = LicencaTip::where("id", $licTip4)->pluck('naziv', 'id')->toArray();
         if ($licencaTip) {
@@ -828,7 +848,8 @@ class ZahtevController extends Controller {
     /*
      * funkcija koja se poziva iz bladea AJAX
      */
-    public function getLicencaTip($id) {
+    public function getLicencaTip($id)
+    {
         $id = substr($id, 0, 3);
         $licencaTip = LicencaTip::where("id", 'LIKE', $id . '%')->get()->pluck('tip_naziv', 'id')->toArray();
         return json_encode($licencaTip);
@@ -838,14 +859,16 @@ class ZahtevController extends Controller {
     /*
      * funkcija koja se poziva iz bladea AJAX
      */
-    public function checkZahtev($licenca, $jmbg) {
+    public function checkZahtev($licenca, $jmbg)
+    {
 //        dd($licenca . $jmbg);
 
         return json_encode(true);
     }
 
 //    TODO dodati ovo u helper ili LOG klasu
-    private function log($object, $statusGrupa, $naziv, $napomena = '') {
+    private function log($object, $statusGrupa, $naziv, $napomena = '')
+    {
 //        dd($object->id);
         $log = Log::firstOrNew(['naziv' => $naziv, 'loggable_id' => $object->id]);
         $log->naziv = $naziv;
@@ -855,7 +878,8 @@ class ZahtevController extends Controller {
         $log->save();
     }
 
-    private function logOsoba($object, $statusGrupa, $naziv, $napomena = '') {
+    private function logOsoba($object, $statusGrupa, $naziv, $napomena = '')
+    {
         $log = LogOsoba::firstOrNew(['naziv' => $naziv, 'loggable_id' => $object->id]);
         $log->naziv = $naziv;
         $log->napomena = $napomena;
@@ -863,5 +887,49 @@ class ZahtevController extends Controller {
         $log->loggable()->associate($object);
         $log->save();
     }
+
+    public function splitAddress()
+    {
+        $saved = 0;
+        $requests = \App\Models\Request::where('request_category_id', 2)->where('status_id', 35)->get();
+        foreach ($requests as $request) {
+//            ^([a-zA-ZčČćĆžŽšŠđĐ.\s]+)(\d+[a-z])\/?
+            $osoba = $request->osoba;
+            $original = $osoba->prebivalisteadresa;
+            /*            if(preg_match('/(\s|,)br.\s+\d+|(\s|,)broj\s+\d+/',$original)){
+                        $broj[]= "$original";
+                        }
+                        if(preg_match('/(\s|,)st.\s+\d+|(\s|,)stan\s+\d+/',$original)) {
+                            $stan[] = "$original";
+                        }*/
+            if (preg_match('/^((?:\d+)?\.?[a-zA-ZčČćĆžŽšŠđĐ.\-\s]+)(?:\s|,|,\s|\s,|br.|,\sbr.\s)(\d+)\/?([a-zA-Z]+)?\/?(\d+)?(?:(?:\s|,)?br\.\s?(\d+)|(?:\s|,)?broj\s+(\d+))?(?:.\sulaz\s?\d+,?)?(?:(?:\s|,|,\s|\s,)?st\.\s?(\d+)|(?:\s|,|,\s|\s,)?stan\s+(\d+))?.*$/', $original, $m)) {
+                $full[] = $m;
+
+                $osoba->ulica = (!empty($m[1])) ? $m[1] : NULL;
+                $osoba->broj = (!empty($m[2])) ? $m[2] : NULL;
+                $osoba->podbroj = (!empty($m[3])) ? $m[3] : NULL;
+                $osoba->stan = (!empty($m[4])) ? $m[4] : ((!empty($m[8])) ? $m[8] : NULL);
+            } else {
+                $osoba->ulica = $original;
+                $osoba->broj = NULL;
+                $osoba->podbroj = NULL;
+                $osoba->stan = NULL;
+//                echo "<br>!!!!!!$original";
+            }
+            $osoba->save();
+            if ($osoba->wasChanged()) {
+                $saved++;
+            }
+//                echo "<br>$osoba->ulica $osoba->broj$osoba->podbroj $osoba->stan";
+//                echo "<br>$original";
+
+        }
+        echo "<br>saved: $saved";
+        echo "<br>" . count($full);
+//        var_dump($full);
+
+//        dd($request->osoba->prebivalisteadresa);
+    }
+
 
 }

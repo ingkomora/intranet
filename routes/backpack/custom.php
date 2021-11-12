@@ -41,6 +41,8 @@ Route::group([
     Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
     Route::get('/zavodjenje/zavedi', 'ZavodjenjeController@show');
     Route::post('/zavodjenje/zavedi', 'ZavodjenjeController@store');
+
+    Route::get('/splitaddress', 'ZahtevController@splitAddress');
 //    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
 //    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
 //    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
