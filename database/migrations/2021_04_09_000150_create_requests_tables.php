@@ -35,7 +35,6 @@ class CreateRequestsTables extends Migration
 //        create_requests_table
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->string('osoba_id',13);
             $table->foreign('osoba_id')->references('id')->on('tosoba')->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('request_category_id')->constrained('request_categories')->onUpdate('cascade')->onDelete('restrict');
