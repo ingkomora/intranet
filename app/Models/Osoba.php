@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Libraries\ProveraLibrary;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 use Tesla\JMBG\JMBG;
@@ -10,6 +11,7 @@ use Tesla\JMBG\JMBG;
  * @property string $id
  * @property string $ime
  * @property string $prezime
+ * @property string $titula
  * @property string $roditelj
  * @property string $rodjenjemesto
  * @property int $zvanje
@@ -23,6 +25,8 @@ use Tesla\JMBG\JMBG;
  * @property int $clan
  * @property string $lib
  * @property Zvanje $zvanjeId
+ * @property Licenca[] $licence
+ * @property Request[] $requests
  */
 class Osoba extends Model
 {
@@ -35,11 +39,12 @@ class Osoba extends Model
     */
 
     protected $table = 'tosoba';
-    // protected $primaryKey = 'id';
+    //mora ovako jos uvek nije implementirana getRouteKeyName()
+//     protected $primaryKey = 'lib';
     // public $timestamps = false;
-//    protected $guarded = ['id'];
+    protected $guarded = ['id'];
     // protected $fillable = [];
-    // protected $hidden = [];
+//     protected $hidden = [];
     // protected $dates = [];
     /**
      * The accessors to append to the model's array form.
@@ -55,34 +60,45 @@ class Osoba extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = FALSE;
 
     /**
      * @var array
      */
-    protected $fillable = ['id', 'zvanje', 'titula', 'funkcija', 'ime', 'prezime', 'roditelj', 'devojackoprezime', 'rodjenjemesto', 'rodjenjeopstina', 'rodjenjedrzava', 'prebivalistebroj', 'prebivalistemesto', 'prebivalisteopstina', 'prebivalisteadresa', 'kontakttel', 'mobilnitel', 'kontaktemail', 'firmanaziv', 'firmamesto', 'firmaopstina', 'firmaweb', 'firmatel', 'firmaemail', 'diplfakultet', 'diplmesto', 'dipldrzava', 'diplodsek', 'diplsmer', 'diplgodina', 'mrfakultet', 'mrmesto', 'mrdrzava', 'mrodsek', 'mrsmer', 'mrgodina', 'drfakultet', 'drmesto', 'drdrzava', 'drodsek', 'drsmer', 'drgodina', 'lozinka', 'biografija', 'diplbroj', 'mrbroj', 'drbroj', 'pol', 'rodjenjedan', 'rodjenjemesec', 'rodjenjegodina', 'rodjenjeopstinaid', 'rodjenjeinodrzava', 'rodjenjeinomesto', 'diplfakultetid', 'diplsmerid', 'diplunetfakultet', 'diplunetsmer', 'specfakultetid', 'specunetfakultet', 'specsmerid', 'specunetsmer', 'specgodina', 'magfakultetid', 'magunetfakultet', 'magsmerid', 'magunetsmer', 'docfakultetid', 'docunetfakultet', 'docsmerid', 'docunetsmer', 'prebivalisteopstinaid', 'kontaktfax', 'licniweb', 'adresaprikazi', 'telefonprikazi', 'mobilniprikazi', 'faxprikazi', 'mailprikazi', 'prikazisliku', 'firmaopstinaid', 'firmafax', 'imalp', 'zaposlen', 'st_drzavljanstvoscg', 'clanskupstine', 'dozvolareklamnimail', 'lib', 'temp_dms_password', 'prezime_staro', 'primary_serial', 'ranije_deaktivirao_clanstvo', 'clan', 'datumrodjenja', 'prebivalistedrzava', 'vrsta_poslova', 'godine_radnog_iskustva', 'bolonja', 'firma_mb', 'created_at', 'updated_at'];
 
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
 //    public $identifiableAttribute = 'ime_prezime_jmbg';
     public $identifiableAttribute = 'id';
+//    public $identifiableAttribute = 'lib';
 
     /*
     |--------------------------------------------------------------------------
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    /*    public function getRouteKeyName()
+        {
+            return 'lib';
+        }*/
+
+
     public function validanJmbg()
     {
         if (JMBG::for($this->id)->isValid()) {
-            return true;
+            return TRUE;
         } else {
-            return false;
+            return FALSE;
         }
     }
 
@@ -118,7 +134,7 @@ class Osoba extends Model
      */
     public function opstinaId()
     {
-        return $this->belongsTo('App\Models\Opstina', 'prebivalisteopstinaid');
+        return $this->belongsTo('App\Models\Opstina', 'prebivalisteopstinaid')->orderBy('ime','desc');
     }
 
     /**
@@ -136,7 +152,6 @@ class Osoba extends Model
     {
         return $this->belongsTo('App\Models\Funkcija', 'funkcija');
     }
-
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -207,6 +222,15 @@ class Osoba extends Model
                 'updated_at',
             ]);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function requests()
+    {
+        return $this->hasMany('App\Models\Request', 'osoba_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -246,9 +270,9 @@ class Osoba extends Model
      * @param string $value
      * @return string
      */
-    public function getImePrezimeRoditeljAttribute()
+    public function getImeRoditeljPrezimeAttribute()
     {
-        return "{$this->ime} {$this->prezime} ($this->roditelj)";
+        return "{$this->ime} ($this->roditelj) {$this->prezime}";
     }
 
     /**
@@ -264,6 +288,12 @@ class Osoba extends Model
         return "{$this->ime} {$this->prezime} ($licence)";
     }
 
+    /**
+     * Get the user's Licence.
+     *
+     * @param string $value
+     * @return string
+     */
     public function getLicenceArrayAttribute()
     {
         $licenceArray = $this->licence->where('status', '<>', 'D')->pluck('id')->toArray();

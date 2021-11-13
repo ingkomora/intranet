@@ -71,7 +71,7 @@ class Request extends Model
      */
     public function status()
     {
-        return $this->belongsTo('App\Models\Status', 'status_id');
+        return $this->belongsTo('App\Models\Status', 'status_id')->where('log_status_grupa_id', PODACI);
     }
     /*
     |--------------------------------------------------------------------------

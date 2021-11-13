@@ -6,6 +6,8 @@
 // This route file is loaded automatically by Backpack\Base.
 // Routes you generate using Backpack\Generators will be placed here.
 
+use App\Imports\ExcelImport;
+
 Route::get('admin/register', 'App\Http\Controllers\Admin\Auth\RegisterController')->name('backpack.auth.register');
 
 Route::group([
@@ -43,12 +45,12 @@ Route::group([
     Route::post('/zavodjenje/zavedi', 'ZavodjenjeController@store');
 
     Route::get('/splitaddress', 'ZahtevController@splitAddress');
-//    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
-//    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
-//    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
-//    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
-//    Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
-//    Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');
+/*    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
+    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
+    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
+    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
+    Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
+    Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');*/
 
     Route::get('/prijava/si/{prijava_id}/{type?}', 'ZavodjenjeController@prijavaPDF');
 //    Route::get('/prijava/si/{prijava_id}', 'ZavodjenjeController@prijavaPDF');
@@ -61,6 +63,8 @@ Route::group([
     Route::crud('zahtevtip', 'ZahtevTipCrudController');
     Route::crud('sikandidat', 'SiKandidatCrudController');
     Route::crud('clanstvo/promenapodataka', 'PromenaPodatakaCrudController');
+
+
 });
 
 // this should be the absolute last line of this file
@@ -72,4 +76,13 @@ Route::group([
     Route::get('/getprijavaclan/{id}', 'Helper@getPrijavaClan');
     Route::get('/checkprijavaclan/', 'Helper@checkPrijavaClan');
 
+    Route::crud('funkcioner', 'FunkcionerCrudController');
+    Route::crud('funkcioner-mandat', 'FunkcionerMandatCrudController');
+    Route::crud('funkcioner-mandat-tip', 'FunkcionerMandatTipCrudController');
+    Route::crud('funkcija', 'FunkcijaCrudController');
+    Route::crud('funkcija-tip', 'FunkcijaTipCrudController');
+    Route::crud('request-category-type', 'RequestCategoryTypeCrudController');
+    Route::crud('request-category', 'RequestCategoryCrudController');
+    Route::crud('request', 'RequestCrudController');
+    Route::crud('osoba-edit', 'OsobaEditCrudController');
 }); // this should be the absolute last line of this file

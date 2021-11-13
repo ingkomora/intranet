@@ -57,9 +57,9 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
-@role('korisnik|urednik|admin')
+        @role('korisnik|urednik|admin')
         <li class="nav-title">PRIJEM U ČLANSTVO</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Prijave</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Zahtevi</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obrada zahteva</a></li>
         @endrole
         @role('admin')
@@ -83,7 +83,7 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi') }}'> Prijave za stručni ispit</a></li>
-{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}
+        {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->
@@ -96,6 +96,13 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-tools"></i> RAZNO</a>
     <ul class="nav-dropdown-items">
+        <li class="nav-title">Funkcioneri</li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner') }}'> Funkcioneri</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat') }}'> Mandati</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat-tip') }}'> Tipovi mandata</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija') }}'> Funkcije</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija-tip') }}'> Tipovi funkcija</a></li>
+        <li class="nav-title">Razno</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('status') }}'> Statusi</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('brojac') }}'> Brojaci</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('logstatusgrupa') }}'> Log Statusi Grupe</a></li>
@@ -111,7 +118,6 @@
     </ul>
 </li>
 
-<li class="divider">
 <li class="nav-title">U PRIPREMI</li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevtip') }}'> Tipovi zahteva</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('test') }}'> Test</a></li>
@@ -120,3 +126,9 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('delovodnikorganizacionejedinice') }}'> Organizacione Jedinice</a></li>
 <!-- Users, Roles, Permissions -->
 @endrole
+
+
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'><i class='nav-icon la la-question'></i> Request Category Types</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'><i class='nav-icon la la-question'></i> Request Categories</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'><i class='nav-icon la la-question'></i> Requests</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('osoba-edit') }}'><i class='nav-icon la la-question'></i> Osoba Edits</a></li>
