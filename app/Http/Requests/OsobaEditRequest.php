@@ -32,7 +32,7 @@ class OsobaEditRequest extends FormRequest {
             'prebivalistemesto' => 'required',
             'prebivalistedrzava' => 'required',
             'ulica' => 'required',
-            'broj' => 'required',
+//            'broj' => 'required',
             'status_id' => 'required',
         ];
     }
