@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $log_status_grupa_id
  * @property string $napomena
  * @property string $const
+ * @property LogStatusGrupa $statusGrupa
+ * @property Request[] $requests
  */
 class Status extends Model {
 
@@ -60,6 +62,14 @@ class Status extends Model {
     public function statusGrupa()
     {
         return $this->belongsTo('App\Models\LogStatusGrupa', 'log_status_grupa_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function requests()
+    {
+        return $this->hasMany('App\Models\Request', 'status_id');
     }
     /*
     |--------------------------------------------------------------------------

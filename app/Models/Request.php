@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use function PHPUnit\Framework\isEmpty;
 
 /**
  * @property integer $id
@@ -71,7 +72,18 @@ class Request extends Model
      */
     public function status()
     {
-        return $this->belongsTo('App\Models\Status', 'status_id')->where('log_status_grupa_id', PODACI);
+        return $this->belongsTo('App\Models\Status', 'status_id')
+            ->where('log_status_grupa_id', OPSTA);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public static function existingStatuses()
+    {
+        $statusi = Status::whereHas('requests')->pluck('naziv', 'id')->toArray();
+
+        return $statusi;
     }
     /*
     |--------------------------------------------------------------------------

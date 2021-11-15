@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Operations\UpdateDataBrisanjeClanstvoOperation;
 use App\Http\Requests\OsobaEditRequest;
 use App\Models\Request;
+use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -224,9 +225,9 @@ class OsobaEditCrudController extends CrudController
                     switch ($related_key) {
 //                        case 35:
 //                            return 'bg-info text-white px-2 rounded';
-                        case 36:
+                        case OBRADJEN:
                             return 'bg-success text-white px-2 rounded';
-                        case 37:
+                        case PROBLEM:
                             return 'bg-danger text-white px-2 rounded';
                     }
                 }
@@ -242,8 +243,22 @@ class OsobaEditCrudController extends CrudController
             FALSE,
             function () { // if the filter is active
                 $this->crud->addClause('whereHas', 'requests', function ($query) {
-                    $query->where('status_id', 35);
+                    $query->where('status_id', KREIRAN);
                 }); // apply the "active" eloquent scope
+            });
+
+        // dropdown filter
+        $this->crud->addFilter([
+            'name' => 'status',
+            'type' => 'dropdown',
+            'label' => 'Status'
+        ], function () {
+            return Request::existingStatuses();
+        },
+            function ($value) { // if the filter is active
+                $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
+                    $q->where('status_id', $value);
+                });
             });
 
         /**
