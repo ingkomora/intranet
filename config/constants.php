@@ -1,8 +1,14 @@
 <?php
 
-//OSNOVNI STATUSI
+//OPŠTI STATUSI
 define('NEAKTIVAN', 0);
 define('AKTIVAN', 1);
+define('KREIRAN', 35);
+define('OBRADJEN', 36);
+define('PROBLEM', 37);
+define('ZAVRSEN', 38);
+define('OTKAZAN', 39);
+define('_NEAKTIVAN', 40);
 
 //PRIJAVE ZA STRUCNI ISPIT
 define('PRIJAVA_KREIRANA', 2);
