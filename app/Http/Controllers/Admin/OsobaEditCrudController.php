@@ -218,6 +218,21 @@ class OsobaEditCrudController extends CrudController
             }
         ]);
 
+        $this->crud->modifyColumn('status_id', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($related_key) {
+//                        case 35:
+//                            return 'bg-info text-white px-2 rounded';
+                        case 36:
+                            return 'bg-success text-white px-2 rounded';
+                        case 37:
+                            return 'bg-danger text-white px-2 rounded';
+                    }
+                }
+            ]
+        ]);
+
         // simple filter
         $this->crud->addFilter([
             'type' => 'simple',
