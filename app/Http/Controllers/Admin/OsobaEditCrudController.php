@@ -23,7 +23,7 @@ class OsobaEditCrudController extends CrudController
         update as traitUpdate;
     }
 
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 //    use UpdateDataBrisanjeClanstvoOperation;
@@ -178,10 +178,9 @@ class OsobaEditCrudController extends CrudController
         $this->crud->addClause('whereHas', 'requests', function ($query) {
             $query->where('request_category_id', 2);
         });
-        $this->crud->limit(1000);
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['delete', 'create']);
+            $this->crud->denyAccess('create');
         }
 
         $this->crud->enableDetailsRow();
@@ -224,8 +223,6 @@ class OsobaEditCrudController extends CrudController
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
                     switch ($related_key) {
-//                        case 35:
-//                            return 'bg-info text-white px-2 rounded';
                         case OBRADJEN:
                             return 'bg-success text-white px-2 rounded';
                         case PROBLEM:
@@ -245,6 +242,19 @@ class OsobaEditCrudController extends CrudController
             function () { // if the filter is active
                 $this->crud->addClause('whereHas', 'requests', function ($query) {
                     $query->where('status_id', KREIRAN);
+                }); // apply the "active" eloquent scope
+            });
+
+        // simple filter
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'platili',
+            'label' => 'Platili članarinu'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '>', 'now()');
                 }); // apply the "active" eloquent scope
             });
 
@@ -272,7 +282,6 @@ class OsobaEditCrudController extends CrudController
             'Platili 2018' => 'Platili 2018',
         ],
             function ($value) { // if the filter is active
-//            Clanarina::yearOfLastPayment();
                 $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
                     $q->where('note', $value);
                 });
@@ -350,10 +359,10 @@ class OsobaEditCrudController extends CrudController
         $request = Request::where('osoba_id', $this->crud->getRequest()->id)
             ->where('request_category_id', 2)
             ->first();
-        if ($this->crud->getRequest()->status_id == 37) {
-            $request->status_id = 37;
+        if ($this->crud->getRequest()->status_id == PROBLEM) {
+            $request->status_id = PROBLEM;
         } else {
-            $request->status_id = 36;
+            $request->status_id = OBRADJEN;
         }
         $request->save();
         $response = $this->traitUpdate();
