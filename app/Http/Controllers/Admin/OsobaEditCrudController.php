@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Operations\UpdateDataBrisanjeClanstvoOperation;
 use App\Http\Requests\OsobaEditRequest;
+use App\Models\Clanarina;
 use App\Models\Request;
 use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -261,6 +262,21 @@ class OsobaEditCrudController extends CrudController
                 });
             });
 
+        // dropdown filter
+        $this->crud->addFilter([
+            'name' => 'clanarina',
+            'type' => 'dropdown',
+            'label' => 'Članarina'
+        ], [
+            'Platili 2017' => 'Platili 2017',
+            'Platili 2018' => 'Platili 2018',
+        ],
+            function ($value) { // if the filter is active
+//            Clanarina::yearOfLastPayment();
+                $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
+                    $q->where('note', $value);
+                });
+            });
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
