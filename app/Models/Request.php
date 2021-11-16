@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
-use function PHPUnit\Framework\isEmpty;
 
 /**
  * @property integer $id

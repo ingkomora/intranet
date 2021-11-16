@@ -276,10 +276,10 @@ class OsobaEditCrudController extends CrudController
         $this->crud->addFilter([
             'name' => 'clanarina',
             'type' => 'dropdown',
-            'label' => 'Članarina'
+            'label' => 'Plaćena članarina za godinu:'
         ], [
-            'Platili 2017' => 'Platili 2017',
-            'Platili 2018' => 'Platili 2018',
+            'Platili 2017' => '2017',
+            'Platili 2018' => '2018',
         ],
             function ($value) { // if the filter is active
                 $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
@@ -308,7 +308,7 @@ class OsobaEditCrudController extends CrudController
         $this->crud->modifyField('status_id', [
             'options' => (function ($query) {
                 return $query
-                    ->where('log_status_grupa_id', PODACI)
+                    ->where('log_status_grupa_id', OPSTA)
                     ->get();
             }), //  you can use this to filter the results show in the select
         ]);
