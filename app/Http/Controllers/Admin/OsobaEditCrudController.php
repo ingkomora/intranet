@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Operations\UpdateDataBrisanjeClanstvoOperation;
 use App\Http\Requests\OsobaEditRequest;
-use App\Models\Clanarina;
 use App\Models\Request;
-use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -157,8 +155,7 @@ class OsobaEditCrudController extends CrudController
             'label' => 'Ažuriran',
             'entity' => 'requests.status',
             'attribute' => 'naziv',
-//            'placeholder' => 'Odaberite opštinu',
-//            'hint' => 'Pretražite po opštinu po nazivu',
+            'default' => OBRADJEN, // TODO: da postavi vrednost iz baze, a ne prvi status za opstu kategoriju
         ],
     ];
 
@@ -277,14 +274,18 @@ class OsobaEditCrudController extends CrudController
             'name' => 'clanarina',
             'type' => 'dropdown',
             'label' => 'Plaćena članarina za godinu:'
-        ], [
-            'Platio 2017' => '2017',
-            'Platio 2018' => '2018',
-            'Platio 2019' => '2019',
         ],
+            function () {
+                return \DB::table('requests')
+                    ->select('id', \DB::raw("substr(note, 8) as godina"))
+                    ->distinct('godina')
+                    ->orderBy('godina', 'DESC')
+                    ->pluck('godina', 'godina')
+                    ->toArray();
+            },
             function ($value) { // if the filter is active
                 $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
-                    $q->where('note', $value);
+                    $q->whereRaw("substr(note, 8) = $value::text");
                 });
             });
         /**
