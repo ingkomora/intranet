@@ -77,7 +77,7 @@ class OsobaCrudController extends CrudController
         ]);
 
         $this->crud->setColumnDetails('ime_prezime_roditelj', [
-            'name' => 'ime_prezime_roditelj',
+            'name' => 'ime_roditelj_prezime',
             'type' => 'text',
             'label' => 'Ime prezime (roditelj)',
         ]);
