@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\DelovodnikOrganizacioneJediniceRequest;
+use App\Http\Requests\RegistryDepartmentUnitRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class DelovodnikOrganizacioneJediniceCrudController
+ * Class RegistryDepartmentUnitCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class DelovodnikOrganizacioneJediniceCrudController extends CrudController
+class RegistryDepartmentUnitCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class DelovodnikOrganizacioneJediniceCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\DelovodnikOrganizacioneJedinice::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/delovodnikorganizacionejedinice');
-        CRUD::setEntityNameStrings('delovodnikorganizacionejedinice', 'delovodnik_organizacione_jedinice');
+        CRUD::setModel(\App\Models\RegistryDepartmentUnit::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/registry-department-unit');
+        CRUD::setEntityNameStrings('registry department unit', 'registry department units');
     }
 
     /**
@@ -39,7 +39,12 @@ class DelovodnikOrganizacioneJediniceCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
+        CRUD::column('id');
+        CRUD::column('label');
+        CRUD::column('name');
+        CRUD::column('parent_id');
+        CRUD::column('created_at');
+        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -56,9 +61,14 @@ class DelovodnikOrganizacioneJediniceCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(DelovodnikOrganizacioneJediniceRequest::class);
+        CRUD::setValidation(RegistryDepartmentUnitRequest::class);
 
-        CRUD::setFromDb(); // fields
+        CRUD::field('id');
+        CRUD::field('label');
+        CRUD::field('name');
+        CRUD::field('parent_id');
+        CRUD::field('created_at');
+        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

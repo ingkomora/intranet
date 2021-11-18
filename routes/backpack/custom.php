@@ -25,8 +25,6 @@ Route::group([
     Route::crud('sivrsta', 'SiVrstaCrudController');
     Route::crud('licenca', 'LicencaCrudController');
     Route::crud('zahtevlicenca', 'ZahtevLicencaCrudController');
-    Route::crud('delovodnikorganizacionejedinice', 'DelovodnikOrganizacioneJediniceCrudController');
-    Route::crud('delovodnik', 'DelovodnikCrudController');
     Route::crud('brojac', 'BrojacCrudController');
     Route::get('home', 'HomeController@dashboard');
 //    Route::get('pdf', 'PdfController@downloadPDF');
@@ -85,4 +83,6 @@ Route::group([
     Route::crud('request-category', 'RequestCategoryCrudController');
     Route::crud('request', 'RequestCrudController');
     Route::crud('osoba-edit', 'OsobaEditCrudController');
+    Route::crud('registry-department-unit', 'RegistryDepartmentUnitCrudController');
+    Route::crud('registry', 'RegistryCrudController');
 }); // this should be the absolute last line of this file

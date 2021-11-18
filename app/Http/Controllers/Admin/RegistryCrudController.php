@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\DelovodnikRequest;
+use App\Http\Requests\RegistryRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class DelovodnikCrudController
+ * Class RegistryCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class DelovodnikCrudController extends CrudController
+class RegistryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class DelovodnikCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Delovodnik::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/delovodnik');
-        CRUD::setEntityNameStrings('delovodnik', 'delovodnik');
+        CRUD::setModel(\App\Models\Registry::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/registry');
+        CRUD::setEntityNameStrings('registry', 'registries');
     }
 
     /**
@@ -39,16 +39,16 @@ class DelovodnikCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
-
-        $this->crud->setColumnDetails('organizaciona_jedinica_id', [
-            'name' => 'organizaciona_jedinica_id',
-            'type' => 'select',
-            'label' => 'Org.jed.',
-            'entity' => 'delovodnikOrganizacioneJedinice',
-            'attribute' => 'oznaka',
-            'model' => 'App\Models\DelovodnikOrganizacioneJedinice',
-        ]);
+        CRUD::column('id');
+        CRUD::column('base_number');
+        CRUD::column('copy');
+        CRUD::column('subject');
+        CRUD::column('sub_base_number');
+        CRUD::column('registry_department_unit_id');
+        CRUD::column('counter');
+        CRUD::column('status_id');
+        CRUD::column('created_at');
+        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -65,24 +65,18 @@ class DelovodnikCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(DelovodnikRequest::class);
+        CRUD::setValidation(RegistryRequest::class);
 
-        CRUD::setFromDb(); // fields
-
-        $this->crud->removeField('organizaciona_jedinica_id', 'update/create/both');
-        $this->crud->removeField('brojac', 'update/create/both');
-
-        $this->crud->addField([
-            'label' => "Org.jed.",
-            'type' => 'select2',
-            'name' => 'organizaciona_jedinica_id', // the db column for the foreign key
-            'entity' => 'delovodnikOrganizacioneJedinice', // the method that defines the relationship in your Model
-            'attribute' => 'oznaka', // foreign key attribute that is shown to user
-            'model' => "App\Models\DelovodnikOrganizacioneJedinice" // foreign key model
-        ]);
-
-
-
+        CRUD::field('id');
+        CRUD::field('base_number');
+        CRUD::field('copy');
+        CRUD::field('subject');
+        CRUD::field('sub_base_number');
+        CRUD::field('registry_department_unit_id');
+        CRUD::field('counter');
+        CRUD::field('status_id');
+        CRUD::field('created_at');
+        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

@@ -97,12 +97,12 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-tools"></i> RAZNO</a>
     <ul class="nav-dropdown-items">
-{{--        <li class="nav-title">Funkcioneri</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner') }}'> Funkcioneri</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat') }}'> Mandati</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat-tip') }}'> Tipovi mandata</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija') }}'> Funkcije</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija-tip') }}'> Tipovi funkcija</a></li>--}}
+        {{--        <li class="nav-title">Funkcioneri</li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner') }}'> Funkcioneri</a></li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat') }}'> Mandati</a></li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat-tip') }}'> Tipovi mandata</a></li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija') }}'> Funkcije</a></li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija-tip') }}'> Tipovi funkcija</a></li>--}}
         <li class="nav-title">Razno</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('status') }}'> Statusi</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('brojac') }}'> Brojaci</a></li>
@@ -123,12 +123,13 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevtip') }}'> Tipovi zahteva</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('test') }}'> Test</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('delovodnik') }}'> Delovodnik</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('delovodnikorganizacionejedinice') }}'> Organizacione Jedinice</a></li>
 <!-- Users, Roles, Permissions -->
-@endrole
 
 
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'><i class='nav-icon la la-question'></i> Request Category Types</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'><i class='nav-icon la la-question'></i> Request Categories</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'><i class='nav-icon la la-question'></i> Requests</a></li>
+@endrole
+
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'><i class='nav-icon la la-question'></i> Registry Department Units</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'><i class='nav-icon la la-question'></i> Registries</a></li>
