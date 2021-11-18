@@ -21,6 +21,11 @@ class CreateDocumentsTable extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
 
+            $table->foreignId('registry_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
             $table->string('registry_number')
                 ->nullable()
                 ->comment('zavodni broj');
@@ -29,20 +34,8 @@ class CreateDocumentsTable extends Migration
                 ->nullable()
                 ->comment('datum zavodjenja');
 
-            $table->foreignId('registry_id')
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('restrict');
-
             $table->foreignId('status_id')
                 ->constrained('statusi')
-                ->onUpdate('cascade')
-                ->onDelete('restrict');
-
-            $table->foreignId('user_id')
-                ->nullable()
-                ->comment('user koji je kreirao ili koji je poslednji obradio dokument...not null dok se ne bude sve podnosilo sa portala')
-                ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
 
@@ -54,14 +47,21 @@ class CreateDocumentsTable extends Migration
                 ->comment('fizicka lokacija dokumenta')
                 ->nullable();
 
-            $table->text('note')
-                ->nullable();
-
             $table->string('barcode')
                 ->nullable();
 
+            $table->foreignId('user_id')
+                ->nullable()
+                ->comment('user koji je kreirao ili koji je poslednji obradio dokument...not null dok se ne bude sve podnosilo sa portala')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
             $table->text('metadata')
                 ->comment('json')
+                ->nullable();
+
+            $table->text('note')
                 ->nullable();
 
             $table->morphs('documentable');
