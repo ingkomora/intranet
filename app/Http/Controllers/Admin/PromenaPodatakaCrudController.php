@@ -379,6 +379,8 @@ class PromenaPodatakaCrudController extends CrudController
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess('update');
         }
+        $this->crud->enableExportButtons();
+
 //        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
         $this->crud->setColumns($this->columns_definition_array);
 
@@ -547,15 +549,15 @@ class PromenaPodatakaCrudController extends CrudController
                 $this->crud->query->where('obradjen', AKTIVAN); // apply the "active" eloquent scope
             });
 
-/*        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'problematicni',
-            'label' => 'Problematični'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->query->where('obradjen', backpack_user()->id + 200); // apply the "active" eloquent scope
-            });*/
+        /*        $this->crud->addFilter([
+                    'type' => 'simple',
+                    'name' => 'problematicni',
+                    'label' => 'Problematični'
+                ],
+                    FALSE,
+                    function () { // if the filter is active
+                        $this->crud->query->where('obradjen', backpack_user()->id + 200); // apply the "active" eloquent scope
+                    });*/
 
         if (backpack_user()->hasRole('admin')) {
             $this->crud->addFilter([
@@ -720,9 +722,9 @@ class PromenaPodatakaCrudController extends CrudController
      * @return void
      */
     protected function setupShowOperation()
+
     {
         $this->crud->setColumns($this->columns_definition_array);
-
         /*
          * virtual columns
          * for separating purpose
