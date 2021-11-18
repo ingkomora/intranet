@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDokumentiVrsteTipoviTable extends Migration
+class CreateDocumentTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateDokumentiVrsteTipoviTable extends Migration
      */
     public function up()
     {
-        Schema::create('dokumenti_vrste_tipovi', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('naziv');
-            $table->text('napomena')->comment('kakvi su tipovi')->nullable();
+        Schema::create('document_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('note')
+                ->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ class CreateDokumentiVrsteTipoviTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dokumenti_vrste_tipovi');
+        Schema::dropIfExists('document_types');
     }
 }
