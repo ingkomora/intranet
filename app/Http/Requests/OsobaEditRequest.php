@@ -31,6 +31,7 @@ class OsobaEditRequest extends FormRequest {
             'prebivalistebroj' => 'required',
             'prebivalistemesto' => 'required',
             'prebivalistedrzava' => 'required',
+            'prebivalisteopstinaid' => 'required',
             'ulica' => 'required',
             'broj' => 'required',
             'status_id' => 'required',
