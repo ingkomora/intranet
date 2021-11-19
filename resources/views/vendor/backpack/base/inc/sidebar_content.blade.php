@@ -129,7 +129,7 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'><i class='nav-icon la la-question'></i> Request Category Types</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'><i class='nav-icon la la-question'></i> Request Categories</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'><i class='nav-icon la la-question'></i> Requests</a></li>
-@endrole
 
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'><i class='nav-icon la la-question'></i> Registry Department Units</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'><i class='nav-icon la la-question'></i> Registries</a></li>
+@endrole
