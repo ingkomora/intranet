@@ -255,6 +255,18 @@ class OsobaEditCrudController extends CrudController
                 }); // apply the "active" eloquent scope
             });
 
+
+        // simple filter
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'nemalib',
+            'label' => 'Nema LIB'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('whereNull', 'lib');
+            });
+
         // dropdown filter
         $this->crud->addFilter([
             'name' => 'status',
