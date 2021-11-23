@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Osoba $osoba
  * @property RequestCategory $requestCategory
  * @property Status $status
+ * @property Clanarina[] $clanarine
  */
 class Request extends Model
 {
@@ -80,9 +81,18 @@ class Request extends Model
      */
     public static function existingStatuses()
     {
-        $statusi = Status::whereHas('requests')->pluck('naziv', 'id')->toArray();
+        $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests')->pluck('naziv', 'id')->toArray();
 
         return $statusi;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clanarine()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba', 'osoba_id')
+            ->orderBy('rokzanaplatu');
     }
     /*
     |--------------------------------------------------------------------------

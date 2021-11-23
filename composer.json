@@ -24,7 +24,8 @@
         "maatwebsite/excel": "^3.1",
         "milon/barcode": "^8.0",
         "nesbot/carbon": "^2.40",
-        "tesla-software/jmbg": "*"
+        "tesla-software/jmbg": "*",
+        "ext-json": "*"
     },
     "require-dev": {
         "backpack/generators": "^3.0",
@@ -41,7 +42,7 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "process-timeout":0
+        "process-timeout": 0
     },
     "extra": {
         "laravel": {

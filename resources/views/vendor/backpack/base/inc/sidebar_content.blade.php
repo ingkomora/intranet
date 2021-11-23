@@ -32,6 +32,18 @@
 @role('korisnik|urednik|admin|rk')
 <li class="divider">
 <li class="nav-item nav-dropdown">
+    <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>ZAHTEVI</a>
+    <ul class="nav-dropdown-items">
+        <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'> Zahtevi</a></li>
+        <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'> Kategorije zahteva</a></li>
+        <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'> Tipovi kategorija zahteva</a></li>
+    </ul>
+</li>
+@endrole
+
+@role('korisnik|urednik|admin|rk')
+<li class="divider">
+<li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-certificate"></i>LICENCE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('licenca') }}'> Licence</a></li>
@@ -125,11 +137,6 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>
 <!-- Users, Roles, Permissions -->
 
-
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'><i class='nav-icon la la-question'></i> Request Category Types</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'><i class='nav-icon la la-question'></i> Request Categories</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'><i class='nav-icon la la-question'></i> Requests</a></li>
-
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'><i class='nav-icon la la-question'></i> Registry Department Units</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'><i class='nav-icon la la-question'></i> Registries</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'> Registries</a></li>
 @endrole
