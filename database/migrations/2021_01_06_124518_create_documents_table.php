@@ -30,7 +30,15 @@ class CreateDocumentsTable extends Migration
                 ->nullable()
                 ->comment('zavodni broj');
 
-            $table->string('registry_date')
+            $table->date('registry_date')
+                ->nullable()
+                ->comment('datum zavodjenja');
+
+            $table->date('registry_date')
+                ->nullable()
+                ->comment('datum zavodjenja');
+
+            $table->date('registry_date')
                 ->nullable()
                 ->comment('datum zavodjenja');
 
