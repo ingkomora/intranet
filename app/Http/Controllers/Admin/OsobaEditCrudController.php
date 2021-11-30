@@ -87,7 +87,7 @@ class OsobaEditCrudController extends CrudController
             'name' => 'status_id',
             'type' => 'select',
             'entity' => 'requests.status',
-            'label' => 'Ažurirani?',
+            'label' => 'Status',
             'model' => 'App\Models\Request',
             'attribute' => 'naziv'
         ]
@@ -150,9 +150,8 @@ class OsobaEditCrudController extends CrudController
         ],
         'status_id' => [
             'name' => 'status_id',
-//            'type' => 'relationship',
             'type' => 'select',
-            'label' => 'Ažuriran',
+            'label' => 'Status',
             'entity' => 'requests.status',
             'attribute' => 'naziv',
             'default' => OBRADJEN, // TODO: da postavi vrednost iz baze, a ne prvi status za opstu kategoriju
@@ -229,18 +228,6 @@ class OsobaEditCrudController extends CrudController
             ]
         ]);
 
-        // simple filter
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'active',
-            'label' => 'Neažurirani'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('whereHas', 'requests', function ($query) {
-                    $query->where('status_id', KREIRAN);
-                }); // apply the "active" eloquent scope
-            });
 
         // simple filter
         $this->crud->addFilter([
@@ -251,7 +238,19 @@ class OsobaEditCrudController extends CrudController
             FALSE,
             function () { // if the filter is active
                 $this->crud->addClause('whereHas', 'clanarine', function ($query) {
-                    $query->where('rokzanaplatu', '>', 'now()');
+                    $query->where('rokzanaplatu', '>=', 'now()');
+                }); // apply the "active" eloquent scope
+            });
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'nisuplatili',
+            'label' => 'Nisu platili članarinu'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '<', 'now()')->whereRaw('iznoszanaplatu > iznosuplate + pretplata');
                 }); // apply the "active" eloquent scope
             });
 
@@ -284,20 +283,20 @@ class OsobaEditCrudController extends CrudController
         // dropdown filter
         $this->crud->addFilter([
             'name' => 'clanarina',
-            'type' => 'dropdown',
+            'type' => 'select2_multiple',
             'label' => 'Plaćena članarina za godinu:'
         ],
             function () {
                 return \DB::table('requests')
-                    ->select('id', \DB::raw("substr(note, 8) as godina"))
-                    ->distinct('godina')
-                    ->orderBy('godina', 'DESC')
-                    ->pluck('godina', 'godina')
+                    ->select('id', 'note')
+                    ->distinct('note')
+                    ->orderBy('note', 'DESC')
+                    ->pluck('note', 'note')
                     ->toArray();
             },
-            function ($value) { // if the filter is active
-                $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
-                    $q->whereRaw("substr(note, 8) = $value::text");
+            function ($values) { // if the filter is active
+                $this->crud->addClause('whereHas', 'requests', function ($q) use ($values) {
+                    $q->whereIn('note', json_decode($values));
                 });
             });
         /**
