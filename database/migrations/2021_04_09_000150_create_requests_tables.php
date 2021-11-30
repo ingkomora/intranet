@@ -20,6 +20,8 @@ class CreateRequestsTables extends Migration
             $table->string('name');
             $table->text('note')->nullable();
             $table->foreignId('status_id')->default(1)->constrained('statusi')->onUpdate('cascade')->onDelete('restrict');
+            $table->text('note')->nullable();
+            $table->morphs('requestable');
             $table->timestamps();
         });
 //        create_request_categories_table
