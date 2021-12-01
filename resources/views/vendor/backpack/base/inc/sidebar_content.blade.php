@@ -139,4 +139,5 @@
 
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'> Registries</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('document') }}'> Documents</a></li>
 @endrole

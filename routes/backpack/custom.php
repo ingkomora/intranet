@@ -43,6 +43,9 @@ Route::group([
     Route::post('/zavodjenje/zavedi', 'ZavodjenjeController@store');
 
     Route::get('/splitaddress', 'ZahtevController@splitAddress');
+    Route::get('/joinaddress', 'ZahtevController@joinAddress');
+    Route::get('/registries', 'ZahtevController@registries');
+    Route::get('/clanstvo', 'ZahtevController@clanstvo');
 /*    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
     Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
     Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
@@ -85,4 +88,6 @@ Route::group([
     Route::crud('osoba-edit', 'OsobaEditCrudController');
     Route::crud('registry-department-unit', 'RegistryDepartmentUnitCrudController');
     Route::crud('registry', 'RegistryCrudController');
+    Route::crud('document-type', 'DocumentTypeCrudController');
+    Route::crud('document', 'DocumentCrudController');
 }); // this should be the absolute last line of this file

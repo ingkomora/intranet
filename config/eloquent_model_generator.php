@@ -96,11 +96,8 @@ return [
 //php artisan krlove:generate:model OsiguranjeOsoba --table-name=osiguranje_osoba
 //php artisan krlove:generate:model OsiguranjeTip --table-name=osiguranje_tip
 //php artisan krlove:generate:model OsiguranjePolisaPokrice --table-name=osiguranja_polise_pokrica
-//php artisan krlove:generate:model DelovodnikOrganizacionaJedinica --table-name=delovodnik_organizacione_jedinice
-//php artisan krlove:generate:model Delovodnik --table-name=delovodnik
-//php artisan krlove:generate:model Dokument --table-name=dokumenti
-//php artisan krlove:generate:model DokumentVrsta --table-name=dokumenti_vrste
-//php artisan krlove:generate:model DokumentVrstaTip --table-name=dokumenti_vrste_tipovi
+//php artisan krlove:generate:model RegistryDepartmentUnit --table-name=registry_department_units
+//php artisan krlove:generate:model Registry --table-name=registries
 //php artisan krlove:generate:model VrstaPosla --table-name=vrste_poslova
 
 //php artisan krlove:generate:model VrstaPlana --table-name=tvrstaplana
@@ -113,7 +110,9 @@ return [
 php artisan krlove:generate:model RequestCategoryType --table-name=request_category_types
 php artisan krlove:generate:model RequestCategory --table-name=request_categories
 
-
+php artisan krlove:generate:model Document --table-name=documents
+php artisan krlove:generate:model DocumentType --table-name=document_types
+php artisan krlove:generate:model ClanarinaOld --table-name=tclanarina
 
 ********************************************************
    K A S N I J E
@@ -121,7 +120,6 @@ php artisan krlove:generate:model RequestCategory --table-name=request_categorie
  nejasno cemu ovo sluzi
 php artisan krlove:generate:model  Strucniispit --table-name=tstrucniispit
 
-tclanarina
 tclanarina_intervaliobracuna
 tclanarinaod2006_korekcijabackup
 tclanarinaod2006_upravljanjekorekcijama

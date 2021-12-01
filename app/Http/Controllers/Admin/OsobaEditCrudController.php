@@ -254,6 +254,18 @@ class OsobaEditCrudController extends CrudController
                 }); // apply the "active" eloquent scope
             });
 
+        // simple filter
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'nemaAdresu',
+            'label' => 'Nema adresu'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('where','prebivalisteadresa', '=', '/');
+//                $this->crud->addClause('orWhere','prebivalistebroj', '=', '/');
+            });
+
 
         // simple filter
         $this->crud->addFilter([

@@ -22,6 +22,11 @@ class CreateRegistryDepartmentUnitsTable extends Migration
                 ->constrained('registry_department_units')
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
+            $table->text('note');
+            $table->foreignId('status_id')
+                ->constrained('statusi')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
             $table->timestamps();
         });
     }

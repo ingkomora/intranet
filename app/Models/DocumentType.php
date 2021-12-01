@@ -6,33 +6,29 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property int $id
- * @property string $label
+ * @property integer $id
  * @property string $name
- * @property int $parent_id
+ * @property string $note
  * @property string $created_at
  * @property string $updated_at
- * @property RegistryDepartmentUnit[] $childrenRegistryDepartmentUnits
- * @property RegistryDepartmentUnit $allChildrenRegistryDepartmentUnits
+ * @property Document[] $documents
  */
-class RegistryDepartmentUnit extends Model
+class DocumentType extends Model
 {
     use CrudTrait;
-
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'registry_department_units';
+    protected $table = 'document_types';
     // protected $primaryKey = 'id';
-//    public $timestamps = true;
+    public $timestamps = TRUE;
     protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
-
     /*
     |--------------------------------------------------------------------------
     | FUNCTIONS
@@ -44,26 +40,19 @@ class RegistryDepartmentUnit extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-    // return one level of child items
-    public function childrenRegistryDepartmentUnits()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function documents()
     {
-        return $this->hasMany(RegistryDepartmentUnit::class, 'parent_id');
-    }
-
-    // recursive relationship
-    public function allChildrenRegistryDepartmentUnits()
-    {
-        return $this->childrenRegistryDepartmentUnits()->with('allChildrenRegistryDepartmentUnits');
+        return $this->hasMany(Document::class);
     }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
     |--------------------------------------------------------------------------
     */
-    public function scopeChildless($q)
-    {
-        $q->has('childrenRegistryDepartmentUnits', '=', 0);
-    }
+
     /*
     |--------------------------------------------------------------------------
     | ACCESSORS

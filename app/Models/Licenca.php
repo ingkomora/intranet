@@ -89,6 +89,16 @@ class Licenca extends Model
         return $this->belongsTo('App\Models\ZahtevLicenca', 'zahtev');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clanarineOld()
+    {
+        return $this->hasMany('App\Models\ClanarinaOld', 'brlicence');
+    }
+
+
+
     public function getImePrezimeJmbgAttribute()
     {
         return $this->osobaId->ime . " " . $this->osobaId->prezime . " (" . $this->osobaId->id . ")";

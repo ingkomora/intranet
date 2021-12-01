@@ -20,6 +20,7 @@ class RequestCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -166,20 +167,22 @@ class RequestCrudController extends CrudController
     {
         CRUD::setValidation(RequestRequest::class);
 
-        $this->crud->setFromDb();
-/*        $this->crud->addFields([
+//        $this->crud->setFromDb();
+        $this->crud->addFields([
             'id',
             'osoba_id' => [
                 'name' => 'osoba',
                 'type' => 'relationship',
-                'label' => 'Ime prezime (jmbg)',
-                'attribute' => 'ime_prezime_jmbg',
+                'label' => 'Ime prezime (licence)',
+                'attribute' => 'ime_prezime_licence',
+                'ajax' => true
             ],
             'request_category_id' => [
                 'name' => 'requestCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
             ],
+            //TODO samo OPSTI statusi !!!
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
@@ -209,7 +212,7 @@ class RequestCrudController extends CrudController
                     'language' => 'sr_latin'
                 ],
             ],
-        ]);*/
+        ]);
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -237,4 +240,36 @@ class RequestCrudController extends CrudController
         // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
         return view('crud::osoba_clanarina_details_row', $this->data);
     }
+
+    public function fetchOsoba()
+    {
+        return $this->fetch([
+            'model' => \App\Models\Osoba::class, // required
+            'searchable_attributes' => [],
+//            'searchable_attributes' => ['id', 'ime', 'prezime'],
+//            'routeSegment' => 'mb', // falls back to the key of this array if not specified ("category")
+            'paginate' => 10, // items to show per page
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? FALSE;
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    return $model->where('ime', 'ilike', $searchTerm[0] . '%')
+                        ->where('prezime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('ime', 'ilike', $searchTerm[1] . '%')
+//                                ->orWhere('prezime', 'ilike', $searchTerm[0] . '%')
+                        ->whereHas('licence', function ($query) use ($model) {
+                            $query->where('status', '<>', 'D');
+                        });
+                } else {
+                    return $model->whereHas('licence', function ($q) use ($searchTerm) {
+                        $q->where('id', 'ilike', $searchTerm . '%');
+                    })->orWhere('ime', 'ilike', $searchTerm . '%')
+                        ->orWhere('prezime', 'ilike', $searchTerm . '%')
+                        ->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            } // to filter the results that are returned
+        ]);
+    }
+
+
 }

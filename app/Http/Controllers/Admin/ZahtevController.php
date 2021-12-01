@@ -6,11 +6,14 @@ use App\Imports\ExcelImport;
 use App\Libraries\Helper;
 use App\Libraries\LibLibrary;
 use App\Libraries\ProveraLibrary;
+use App\Models\Clanarina;
+use App\Models\ClanarinaOld;
 use App\Models\LicencaTip;
 use App\Models\Log;
 use App\Models\LogOsoba;
 use App\Models\Osoba;
 use App\Models\PrijavaClanstvo;
+use App\Models\RegistryDepartmentUnit;
 use App\Models\SiPrijava;
 use App\Models\ZahtevLicenca;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -891,7 +894,10 @@ class ZahtevController extends Controller
     public function splitAddress()
     {
         $saved = 0;
-        $requests = \App\Models\Request::where('request_category_id', 2)->where('status_id', 35)->get();
+        $requests = \App\Models\Request::where('request_category_id', 3)
+            ->where('note', 'SFL_20211130')
+            ->where('status_id', KREIRAN)->get();
+//        dd($requests);
         foreach ($requests as $request) {
 //            ^([a-zA-ZčČćĆžŽšŠđĐ.\s]+)(\d+[a-z])\/?
             $osoba = $request->osoba;
@@ -916,19 +922,102 @@ class ZahtevController extends Controller
                 $osoba->stan = NULL;
 //                echo "<br>!!!!!!$original";
             }
-            $osoba->save();
+            if (!empty($osoba->lib)) {
+                $osoba->save();
+            }
             if ($osoba->wasChanged()) {
                 $saved++;
             }
 //                echo "<br>$osoba->ulica $osoba->broj$osoba->podbroj $osoba->stan";
 //                echo "<br>$original";
-
         }
+//        dd($full);
         echo "<br>saved: $saved";
-        echo "<br>" . count($full);
+    }
+
+    public function joinAddress()
+    {
+        $saved = 0;
+//        $requests = \App\Models\Request::where('request_category_id', 2)->where('status_id', OBRADJEN)->get();
+        $requests = \App\Models\Request::where('request_category_id', 2)->where('note', 'Platio 2017')->where('status_id', '<>', PROBLEM)->get();
+//        dd($requests);
+        foreach ($requests as $request) {
+            $osoba = $request->osoba;
+
+            if (!empty($request->osoba->ulica)) {
+                $new = $request->osoba->ulica;
+                $new .= (!is_null($request->osoba->broj)) ? " " . $request->osoba->broj : "";
+                $new .= (!is_null($request->osoba->podbroj)) ? $request->osoba->podbroj : "";
+                $new .= (!is_null($request->osoba->stan)) ? "/" . $request->osoba->stan : "";
+                $new .= (!is_null($request->osoba->sprat)) ? ", " . $request->osoba->sprat . ". sprat" : "";
+                $osoba->prebivalisteadresa = $new;
+//                echo "<br>$osoba->prebivalisteadresa";
+
+                $osoba->save();
+            }
+            if ($osoba->wasChanged()) {
+                $saved++;
+            }
+//                echo "<br>$original";
+        }
+//        dd($full);
+        echo "<br>saved: $saved";
+//        echo "<br>" . count($saved);
 //        var_dump($full);
 
 //        dd($request->osoba->prebivalisteadresa);
+    }
+
+    public function registries()
+    {
+//        $reg = RegistryDepartmentUnit::with('childrenRegistryDepartmentUnits')->first();
+//        $reg = RegistryDepartmentUnit::with('allChildrenRegistryDepartmentUnits')->find(1);
+        $reg = RegistryDepartmentUnit::whereNull('parent_id')
+            ->with('allChildrenRegistryDepartmentUnits')
+            ->get();
+//        $children = $reg->childrenRegistryDepartmentUnits->pluck('label','id')->toArray();
+//        $children = $reg->allChildrenRegistryDepartmentUnits->pluck('label','id')->toArray();
+        dd($reg);
+//        dd($children);
+    }
+
+    public function clanstvo()
+    {
+        $licence = Licenca::all()->count();
+//        $licenceClanarinaOld = ClanarinaOld::distinct('brlicence')->get()->count();
+        /*        $licenceClanarinaOld = ClanarinaOld::whereHas('licenca.osobaId', function ($q){
+                    $q->distinct('id');
+                })->get()->count();*/
+        $osobeClanarinaOldCol = Osoba::select('id', 'ime', 'prezime')
+            ->whereHas('licence.clanarineold', function ($q) {
+                $q->distinct('brlicence');
+            })
+//            ->limit(10)
+//            ->get(['id','ime','prezime'])
+            ->get()
+            ->makeHidden(['ime_prezime_jmbg', 'full_name', 'ime_prezime_licence'])
+//            ->toArray()
+//            ->count()
+        ;
+
+        $osobeClanarinaCol = Osoba::select('id', 'ime', 'prezime')
+            ->whereHas('clanarine', function ($q) {
+                $q->distinct('osoba');
+            })
+//            ->limit(10)
+//            ->get(['id','ime','prezime'])
+            ->get()
+            ->makeHidden(['ime_prezime_jmbg', 'full_name', 'ime_prezime_licence'])
+//            ->toArray()
+//            ->count()
+        ;
+
+//        dd($osobeClanarinaOld->toSql());
+        $osobeClanarina = $osobeClanarinaCol->toArray();
+        $osobeClanarinaOld = $osobeClanarinaOldCol->toArray();
+        $osobeSamoUClanarina = $osobeClanarinaCol->diff($osobeClanarinaOldCol)->toArray();
+        $osobeSamoUClanarinaOld = $osobeClanarinaOldCol->diff($osobeClanarinaCol)->toArray();
+        dd($osobeSamoUClanarinaOld);
     }
 
 

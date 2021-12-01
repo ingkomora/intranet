@@ -231,6 +231,13 @@ class Osoba extends Model
         return $this->hasMany('App\Models\Request', 'osoba_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function documents()
+    {
+        return $this->hasManyThrough('App\Models\Document', 'App\Models\Request');
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES

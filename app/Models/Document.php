@@ -7,38 +7,46 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property integer $id
- * @property string $osoba_id
- * @property integer $request_category_id
+ * @property integer $document_type_id
+ * @property integer $registry_id
  * @property integer $status_id
- * @property string $name
+ * @property integer $user_id
+ * @property string $registry_number
+ * @property string $registry_date
+ * @property string $path
+ * @property string $location
+ * @property string $barcode
+ * @property string $metadata
  * @property string $note
+ * @property string $documentable_type
+ * @property integer $documentable_id
  * @property string $created_at
  * @property string $updated_at
- * @property Osoba $osoba
- * @property RequestCategory $requestCategory
+ * @property string $sent_at
+ * @property string $valid_from
+ * @property DocumentType $documentType
+ * @property Registry $registry
  * @property Status $status
- * @property Clanarina[] $clanarine
- * @property Request $requestable
+ * @property User $user
+ * @property Document $documentable
+ *
  */
-class Request extends Model
+class Document extends Model
 {
     use CrudTrait;
-
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'requests';
+    protected $table = 'documents';
     // protected $primaryKey = 'id';
-    // public $timestamps = false;
+    public $timestamps = TRUE;
     protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
-    public $identifiableAttribute = 'id';
-
 
     /*
     |--------------------------------------------------------------------------
@@ -46,17 +54,6 @@ class Request extends Model
     |--------------------------------------------------------------------------
     */
 
-    public static function existingStatuses()
-    {
-        $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests')->pluck('naziv', 'id')->toArray();
-
-        return $statusi;
-    }
-
-    public function opstiStatuses()
-    {
-        return $this->status()->where('log_status_grupa_id', OPSTA)->get();
-    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -66,17 +63,17 @@ class Request extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function osoba()
+    public function documentType()
     {
-        return $this->belongsTo('App\Models\Osoba', 'osoba_id');
+        return $this->belongsTo('App\Models\DocumentType');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function requestCategory()
+    public function registry()
     {
-        return $this->belongsTo('App\Models\RequestCategory');
+        return $this->belongsTo('App\Models\Registry');
     }
 
     /**
@@ -84,31 +81,21 @@ class Request extends Model
      */
     public function status()
     {
-        return $this->belongsTo('App\Models\Status', 'status_id')
-            ->where('log_status_grupa_id', OPSTA);
+        return $this->belongsTo(Status::class, 'status_id')
+            ->where('log_status_grupa_id', DOKUMENTA);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function clanarine()
+    public function user()
     {
-        return $this->hasMany('App\Models\Clanarina', 'osoba', 'osoba_id')
-            ->orderBy('rokzanaplatu');
+        return $this->belongsTo('App\Models\User');
     }
-
-    /**
-     * Get all of the request's documents.
-     */
-    public function documents()
-    {
-        return $this->morphMany(Document::class, 'documentable');
-    }
-
     /**
      * Get the parent commentable model (post or video).
      */
-    public function requestable()
+    public function documentable()
     {
         return $this->morphTo();
     }
