@@ -45,7 +45,7 @@ class ZavodjenjeController extends Controller
 //        generisi zavodni broj i datum prijema
                 $prijava->zavodni_broj = $zavodnibroj->zavodnibrojprefiks . $zavodnibroj->zavodnibrojbrojcanik;
                 $prijava->datum_prijema = (!empty($request->datum_prijema)) ? Carbon::parse($request->datum_prijema)->format('Y-m-d') : now()->toDateString();
-                $prijava->app_korisnik_id = 44;
+                $prijava->app_korisnik_id = backpack_user()->id;
 //            STATUS PRIJAVE ZAVEDENA = 3
                 $prijava->status_prijave = PRIJAVA_ZAVEDENA;
                 $prijava->save();
