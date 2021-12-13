@@ -39,6 +39,7 @@ class DocumentTypeCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        CRUD::column('id');
         CRUD::column('name');
         CRUD::column('note');
         CRUD::column('created_at');
