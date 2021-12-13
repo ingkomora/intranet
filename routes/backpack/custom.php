@@ -56,9 +56,7 @@ Route::group([
     Route::get('/prijava/si/{prijava_id}/{type?}', 'ZavodjenjeController@prijavaPDF');
 //    Route::get('/prijava/si/{prijava_id}', 'ZavodjenjeController@prijavaPDF');
 
-    Route::crud('prijavasistara', 'PrijavaSiStaraCrudController');
     Route::crud('prijavaclanstvo', 'PrijavaClanstvoCrudController');
-    Route::crud('osobasi', 'OsobaSiCrudController');
     Route::crud('status', 'StatusCrudController');
     Route::crud('logstatusgrupa', 'LogStatusGrupaCrudController');
     Route::crud('zahtevtip', 'ZahtevTipCrudController');

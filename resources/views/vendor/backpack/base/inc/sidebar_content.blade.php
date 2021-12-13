@@ -7,7 +7,6 @@
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje osoba</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba') }}'> Osobe</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osobasi') }}'> Osobe SI</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zvanje') }}'> Zvanja</a></li>
 
     </ul>
@@ -140,4 +139,5 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'> Registries</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('document') }}'> Documents</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('document-type') }}'> Document types</a></li>
 @endrole

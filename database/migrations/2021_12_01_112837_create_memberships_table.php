@@ -18,7 +18,7 @@ class CreateMembershipsTable extends Migration
             $table->string('osoba_id', 13);
             $table->date('started_at')->nullable()->comment('datumuo, tj. rokzanaplatu iz clanarine');
             $table->date('ended_at')->nullable();
-            $table->boolean('active')->default(0);
+//            $table->boolean('active')->default(0); //status ima i SUSPENDED pa je ovo nepotrebno
             $table->foreignId('status_id')->constrained('statusi')->cascadeOnUpdate()->restrictOnDelete();
             $table->text('note')->nullable();
             $table->timestamps();
