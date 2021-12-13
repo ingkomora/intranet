@@ -71,6 +71,14 @@ class Status extends Model {
     {
         return $this->hasMany('App\Models\Request', 'status_id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function siPrijave()
+    {
+        return $this->hasMany('App\Models\SiPrijava', 'status_prijave');
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
