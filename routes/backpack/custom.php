@@ -60,7 +60,7 @@ Route::group([
     Route::crud('status', 'StatusCrudController');
     Route::crud('logstatusgrupa', 'LogStatusGrupaCrudController');
     Route::crud('zahtevtip', 'ZahtevTipCrudController');
-    Route::crud('sikandidat', 'SiKandidatCrudController');
+//    Route::crud('sikandidat', 'SiKandidatCrudController');
     Route::crud('clanstvo/promenapodataka', 'PromenaPodatakaCrudController');
 
 
@@ -75,11 +75,11 @@ Route::group([
     Route::get('/getprijavaclan/{id}', 'Helper@getPrijavaClan');
     Route::get('/checkprijavaclan/', 'Helper@checkPrijavaClan');
 
-/*    Route::crud('funkcioner', 'FunkcionerCrudController');
+    Route::crud('funkcioner', 'FunkcionerCrudController');
     Route::crud('funkcioner-mandat', 'FunkcionerMandatCrudController');
     Route::crud('funkcioner-mandat-tip', 'FunkcionerMandatTipCrudController');
     Route::crud('funkcija', 'FunkcijaCrudController');
-    Route::crud('funkcija-tip', 'FunkcijaTipCrudController');*/
+    Route::crud('funkcija-tip', 'FunkcijaTipCrudController');
     Route::crud('request-category-type', 'RequestCategoryTypeCrudController');
     Route::crud('request-category', 'RequestCategoryCrudController');
     Route::crud('request', 'RequestCrudController');

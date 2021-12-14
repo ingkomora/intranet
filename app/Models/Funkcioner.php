@@ -2,52 +2,73 @@
 
 namespace App\Models;
 
+use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property string $osoba
+ * @property int $id
+ * @property string $osoba_id
  * @property int $mandat_id
  * @property int $funkcija_id
  * @property int $region_id
- * @property int $sekcija_id
- * @property int $status
+ * @property int $zvanje_grupa_id
+ * @property int $status_id
  * @property string $foto
  * @property string $cv
  * @property string $napomena
- * @property Osoba $osobaId
+ * @property Osoba $osoba
  * @property Funkcija $funkcija
  * @property FunkcionerMandat $funkcionerMandat
  * @property Region $region
  * @property Sekcija $sekcija
+ * @property Status $status
  */
+
 class Funkcioner extends Model
 {
-    /**
-     * The table associated with the model.
-     * 
-     * @var string
-     */
-    protected $table = 'tfunkcioner';
+    use HasFactory;
+
+    use CrudTrait;
+
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL VARIABLES
+    |--------------------------------------------------------------------------
+    */
+
+    protected $table = 'funkcioneri';
+//    protected $primaryKey = ['osoba_id', 'mandat_id', 'funkcija_id', 'status_id'];
+//    public $timestamps = false;
+    protected $guarded = ['id'];
+//    protected $fillable = [];
+//    protected $hidden = [];
+//    protected $dates = [];
 
     /**
-     * @var array
-     */
-    protected $fillable = ['funkcija_id', 'region_id', 'sekcija_id', 'status', 'foto', 'cv', 'napomena'];
-
-    /**
-     * Indicates if the model should be timestamped.
-     * 
+     * Indicates if the IDs are auto-incrementing.
+     *
      * @var bool
      */
-    public $timestamps = false;
+
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     * TODO rename FK osoba
      */
-    public function osobaId()
+    public function osoba()
     {
-        return $this->belongsTo('App\Models\Osoba', 'osoba');
+        return $this->belongsTo('App\Models\Osoba', 'osoba_id', 'id');
     }
 
     /**
@@ -79,6 +100,46 @@ class Funkcioner extends Model
      */
     public function sekcija()
     {
-        return $this->belongsTo('App\Models\Sekcija', 'sekcija_id');
+        return $this->belongsTo('App\Models\Sekcija', 'zvanje_grupa_id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function status()
+    {
+        return $this->belongsTo('App\Models\Status', 'status_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get the user's Full name with licence.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getImePrezimeLicenceAttribute()
+    {
+        $licenceArray = $this->osoba->licence->where('status', '<>', 'D')->pluck('id')->toArray();
+        $licence = implode(', ', $licenceArray);
+        return "{$this->osoba->ime} {$this->osoba->prezime} ($licence)";
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATORS
+    |--------------------------------------------------------------------------
+    */
+
 }

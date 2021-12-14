@@ -59,7 +59,6 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>STRUČNI ISPITI</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('siprijava') }}'> Prijave</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavasistara') }}'> Prijave stare</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sivrsta') }}'> Vrste ispita</a></li>
     </ul>
 </li>
@@ -75,9 +74,9 @@
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obrada zahteva</a></li>
         @endrole
         @role('admin')
-        <li class="nav-title">MIROVANJA</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/obradamirovanja') }}'> Obrada zahteva</a></li>
+{{--        <li class="nav-title">MIROVANJA</li>--}}
+{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>--}}
+{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/obradamirovanja') }}'> Obrada zahteva</a></li>--}}
         <li class="nav-title">PROMENA PODATAKA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka') }}'> Promena podataka</a></li>
         @endrole
@@ -89,7 +88,7 @@
 </li>
 <!-- Users, Roles, Permissions -->
 @endrole
-
+{{--backpack_user()->hasPermissionTo('kreiraj firmu')--}}
 @role('delovodja|admin')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
@@ -108,16 +107,16 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-tools"></i> RAZNO</a>
     <ul class="nav-dropdown-items">
-        {{--        <li class="nav-title">Funkcioneri</li>
+                <li class="nav-title">Funkcioneri</li>
                 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner') }}'> Funkcioneri</a></li>
                 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat') }}'> Mandati</a></li>
                 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcioner-mandat-tip') }}'> Tipovi mandata</a></li>
                 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija') }}'> Funkcije</a></li>
-                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija-tip') }}'> Tipovi funkcija</a></li>--}}
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('funkcija-tip') }}'> Tipovi funkcija</a></li>
         <li class="nav-title">Razno</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('status') }}'> Statusi</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('brojac') }}'> Brojaci</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('logstatusgrupa') }}'> Log Statusi Grupe</a></li>
+{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('brojac') }}'> Brojaci</a></li>--}}
         <li class="nav-item"><a class="nav-link py-1 pl-5" href="{{ backpack_url('elfinder') }}\"><i class="nav-icon la la-files-o"></i> <span>{{ trans('backpack::crud.file_manager') }}</span></a></li>
     </ul>
 </li>
@@ -131,13 +130,13 @@
 </li>
 
 <li class="nav-title">U PRIPREMI</li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevtip') }}'> Tipovi zahteva</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('test') }}'> Test</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>
+{{--<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevtip') }}'> Tipovi zahteva</a></li>--}}
+{{--<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('test') }}'> Test</a></li>--}}
+{{--<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>--}}
 <!-- Users, Roles, Permissions -->
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry') }}'> Registries</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('document') }}'> Documents</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('document-type') }}'> Document types</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document') }}'> Documents</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-type') }}'> Document types</a></li>
 @endrole

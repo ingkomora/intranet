@@ -7,30 +7,32 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property string $naziv
- * @property string $naziv_skr
+ * @property string $naziv_full
  * @property string $naziv_cir
- * @property string $naziv_skr_cir
- * @property int $trajanje
+ * @property string $naziv_full_cir
+ * @property string $trajanje
  * @property string $napomena
- * @property FunkcionerMandat[] $mandati
+ * @property FunkcionerMandat $mandati
  */
+
 class FunkcionerMandatTip extends Model
 {
+    use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
-    protected $table = 'tfunkcioner_mandat_tip';
+    protected $table = 'funkcioneri_mandati_tipovi';
 
     /**
      * @var array
      */
-    protected $fillable = ['naziv', 'naziv_skr', 'naziv_cir', 'naziv_skr_cir', 'trajanje', 'napomena'];
+    protected $guarded = ['id'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = false;
