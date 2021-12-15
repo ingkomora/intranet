@@ -16,6 +16,11 @@ class CreateDocumentsTable extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('document_category_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
+
             $table->foreignId('document_type_id')
                 ->constrained()
                 ->onUpdate('cascade')
