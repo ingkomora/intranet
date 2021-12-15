@@ -86,6 +86,6 @@ Route::group([
     Route::crud('osoba-edit', 'OsobaEditCrudController');
     Route::crud('registry-department-unit', 'RegistryDepartmentUnitCrudController');
     Route::crud('registry', 'RegistryCrudController');
-    Route::crud('document-type', 'DocumentTypeCrudController');
+    Route::crud('document-category', 'DocumentCategoryCrudController');
     Route::crud('document', 'DocumentCrudController');
 }); // this should be the absolute last line of this file
