@@ -138,5 +138,5 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document') }}'> Documents</a></li>
-<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-type') }}'> Document types</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Document categories</a></li>
 @endrole
