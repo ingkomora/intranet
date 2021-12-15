@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $updated_at
  * @property Document[] $documents
  */
-class DocumentType extends Model
+class DocumentCategory extends Model
 {
     use CrudTrait;
     /*
@@ -22,7 +22,7 @@ class DocumentType extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'document_types';
+    protected $table = 'document_categories';
     // protected $primaryKey = 'id';
     public $timestamps = TRUE;
     protected $guarded = ['id'];

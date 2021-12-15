@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property integer $id
+ * @property integer $document_category_id
  * @property integer $document_type_id
  * @property integer $registry_id
  * @property integer $status_id
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $updated_at
  * @property string $sent_at
  * @property string $valid_from
+ * @property DocumentCategory $documentCategory
  * @property DocumentType $documentType
  * @property Registry $registry
  * @property Status $status
@@ -59,6 +61,14 @@ class Document extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function documentCategory()
+    {
+        return $this->belongsTo('App\Models\DocumentCategory');
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

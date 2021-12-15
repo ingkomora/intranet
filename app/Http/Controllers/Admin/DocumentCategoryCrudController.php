@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\DocumentTypeRequest;
+use App\Http\Requests\DocumentCategoryRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -11,7 +11,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class DocumentTypeCrudController extends CrudController
+class DocumentCategoryCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class DocumentTypeCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\DocumentType::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/document-type');
-        CRUD::setEntityNameStrings('document type', 'document types');
+        CRUD::setModel(\App\Models\DocumentCategory::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/document-category');
+        CRUD::setEntityNameStrings('document category', 'document categories');
     }
 
     /**
@@ -60,7 +60,7 @@ class DocumentTypeCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(DocumentTypeRequest::class);
+        CRUD::setValidation(DocumentCategoryRequest::class);
 
         CRUD::field('name');
         CRUD::field('note');
