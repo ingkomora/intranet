@@ -26,7 +26,8 @@ class StatusRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+            'naziv' => 'required',
+            'log_status_grupa_id' => 'required',
         ];
     }
 

@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
 class Document extends Model
 {
     use CrudTrait;
+
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
@@ -56,6 +57,21 @@ class Document extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function metadataFormating()
+    {
+        $return = '';
+        foreach (json_decode($this->metadata, TRUE) as $key => $value) {
+            $return .= ucfirst($key) . ': ' . ucfirst($value) . '<br>';
+        };
+        return $return;
+    }
+
+//    public function relatedModel()
+//    {
+////        return "<a href='" . $this->documentable_type . "'>$this->documentable_type</a>";
+//        echo $this->documentable_type;
+//    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -75,7 +91,7 @@ class Document extends Model
      */
     public function documentType()
     {
-        return $this->belongsTo('App\Models\DocumentType');
+        return $this->belongsTo(DocumentType::class);
     }
 
     /**
@@ -91,8 +107,8 @@ class Document extends Model
      */
     public function status()
     {
-        return $this->belongsTo(Status::class, 'status_id')
-            ->where('log_status_grupa_id', DOKUMENTA);
+        return $this->belongsTo(Status::class, 'status_id')//            ->where('log_status_grupa_id', DOKUMENTA)
+            ;
     }
 
     /**
@@ -102,6 +118,7 @@ class Document extends Model
     {
         return $this->belongsTo('App\Models\User');
     }
+
     /**
      * Get the parent commentable model (post or video).
      */

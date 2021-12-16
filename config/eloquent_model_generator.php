@@ -111,7 +111,8 @@ php artisan krlove:generate:model RequestCategoryType --table-name=request_categ
 php artisan krlove:generate:model RequestCategory --table-name=request_categories
 
 php artisan krlove:generate:model Document --table-name=documents
-php artisan krlove:generate:model DocumentType --table-name=document_types
+php artisan krlove:generate:model DocumentType
+php artisan krlove:generate:model DocumentCategory
 php artisan krlove:generate:model ClanarinaOld --table-name=tclanarina
 
 ********************************************************
