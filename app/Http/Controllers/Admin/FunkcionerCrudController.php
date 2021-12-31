@@ -61,6 +61,20 @@ class FunkcionerCrudController extends CrudController
             'attribute' => 'naziv',
             'model' => 'App\Models\Sekcija',
         ],
+        'e-mail' => [
+            'name' => 'e-mail',
+            'label' => 'E-mail',
+            'type' => 'relationship',
+            'entity' => 'osoba',
+            'attribute' => 'kontaktemail',
+        ],
+        'adresa' => [
+            'name' => 'adresa',
+            'label' => 'Adresa',
+            'type' => 'relationship',
+            'entity' => 'osoba',
+            'attribute' => 'full_address',
+        ],
         'status_id' => [
             'name' => 'status_id',
             'label' => 'Status',
@@ -217,6 +231,8 @@ class FunkcionerCrudController extends CrudController
                 }
             }
         ]);
+
+        $this->crud->enableExportButtons();
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'update', 'delete']);

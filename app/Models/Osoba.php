@@ -27,6 +27,7 @@ use Tesla\JMBG\JMBG;
  * @property Zvanje $zvanjeId
  * @property Licenca[] $licence
  * @property Request[] $requests
+ * @property Membership[] $memberships
  */
 class Osoba extends Model
 {
@@ -43,6 +44,7 @@ class Osoba extends Model
 //     protected $primaryKey = 'lib';
     // public $timestamps = false;
     protected $guarded = ['id'];
+//    protected $guarded = [];//PRIVREMENO ZBOG KOPIRANJA IZ OSOBASI
     // protected $fillable = [];
 //     protected $hidden = [];
     // protected $dates = [];
@@ -51,15 +53,9 @@ class Osoba extends Model
      *
      * @var array
      */
-    protected $appends = ['ime_prezime_jmbg', 'full_name', 'ime_prezime_licence'];
+    protected $appends = ['ime_prezime_jmbg', 'full_name', 'ime_prezime_licence', 'full_address'];
 
     protected $keyType = 'string';
-
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
     public $incrementing = FALSE;
 
     /**
@@ -193,6 +189,19 @@ class Osoba extends Model
             ->orderBy('rokzanaplatu');
     }
 
+
+    public function prvaClanarina()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu')->limit(1);
+    }
+
+    public function poslednjaClanarina()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu','desc')->limit(1);
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -238,6 +247,14 @@ class Osoba extends Model
     {
         return $this->hasManyThrough('App\Models\Document', 'App\Models\Request');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function memberships()
+    {
+        return $this->hasMany('App\Models\Membership', 'osoba_id');
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -280,6 +297,17 @@ class Osoba extends Model
     public function getImeRoditeljPrezimeAttribute()
     {
         return "{$this->ime} ($this->roditelj) {$this->prezime}";
+    }
+
+    /**
+     * Get the user's Full address .
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getFullAddressAttribute()
+    {
+        return "$this->prebivalisteadresa, $this->prebivalistebroj, $this->prebivalistemesto";
     }
 
     /**
