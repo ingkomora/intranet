@@ -137,8 +137,8 @@
         #lic-container{
             margin: 0 auto;
             position: fixed;
-            left: 1.2cm;
-            bottom: 9cm;
+            left: 4.5cm;
+            bottom: 7cm;
         }
 
         #licencatekst{
