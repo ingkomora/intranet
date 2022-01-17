@@ -44,8 +44,10 @@
         }
         .broj-strane{
             position: absolute;
-            bottom: 1.2cm;
-            right: 1cm;
+            bottom: -0.3cm;
+            right: -0.3cm;
+            padding: 0;
+            margin: 0;
             /*float: right;*/
         }
     </style>
