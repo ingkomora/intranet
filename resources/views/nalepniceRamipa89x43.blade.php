@@ -8,7 +8,7 @@
         .container {
             width: 21cm;
             /*height: 29.7cm;*/
-            margin: 0;
+            /*margin: 0;*/
             padding: 0;
             margin: 0 0 -2cm 0.1cm;
 
@@ -26,11 +26,11 @@
             /*width: 50%;*/
             width: 8.9cm;
             height: 4.2cm;
-            box-sizing: border-box;
+            /*box-sizing: border-box;*/
             /*border: solid thin #0a1520;*/
             float: left;
             margin: 0;
-            padding: 0.2cm 0.5cm;
+            padding: 0 0.5cm;
         }
 
         .row:after {
