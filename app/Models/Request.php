@@ -32,12 +32,13 @@ class Request extends Model
 
     protected $table = 'requests';
     // protected $primaryKey = 'id';
-    // public $timestamps = false;
+    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
     protected $guarded = ['id'];
+//    protected $guarded = [];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
-    public $identifiableAttribute = 'id';
+//    public $identifiableAttribute = 'id';
 
 
     /*
@@ -85,7 +86,8 @@ class Request extends Model
     public function status()
     {
         return $this->belongsTo('App\Models\Status', 'status_id')
-            ->where('log_status_grupa_id', OPSTA);
+//            ->where('log_status_grupa_id', OPSTA)
+            ;
     }
 
     /**
@@ -112,6 +114,19 @@ class Request extends Model
     {
         return $this->morphTo();
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function registries() {
+        return $this->belongsToMany('App\Models\Registry', 'registry_request_category', 'request_category_id', 'registry_id')
+            ->using('App\Models\RegistryRequestCategory')
+            ->withPivot([
+                'created_at',
+                'updated_at',
+            ]);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

@@ -115,6 +115,13 @@ php artisan krlove:generate:model DocumentType
 php artisan krlove:generate:model DocumentCategory
 php artisan krlove:generate:model ClanarinaOld --table-name=tclanarina
 
+php artisan krlove:generate:model Membership
+php artisan krlove:generate:model DocumentType
+
+php artisan krlove:generate:model RegistryRequestCategory --table-name=registry_request_category
+
+
+
 ********************************************************
    K A S N I J E
 ********************************************************

@@ -8,15 +8,12 @@
         'Zavođenje' => false,
     ];
 @endphp
-
 @section('content')
     <div class="container-fluid">
-        <h2>
-            <span class="text-capitalize">Zavođenje prijava za polaganje stručnog ispita</span>
-        </h2>
+        <h2>{{$title}}</h2>
     </div>
     <div class="container-fluid animated fadeIn my-5">
-        <form id="prijaveFormular" action="/admin/zavodjenje/zavedi" method="POST">
+        <form id="prijaveFormular" action="/admin/zavodjenje/zavedi/{{$url}}" method="POST">
             @csrf
             <div class="form-group row">
                 <label for="datum_prijema" class="col-sm-2 col-form-label">Datum prijema:</label>

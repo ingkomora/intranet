@@ -167,7 +167,12 @@ class DocumentCrudController extends CrudController
 //                'type'=> 'function_model',
 //                'function_name'=> 'relatedModel',
             ],
-            'documentable_id',
+            'documentable_id'=>[
+                'name'=> 'documentable_id',
+//                'label' => 'Documentable id',
+                'type'=> 'text',
+//                'function_name'=> 'relatedModel',
+            ],
             'barcode',
             'metadata' => [
                 'name' => 'metadata',

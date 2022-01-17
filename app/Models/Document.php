@@ -45,11 +45,13 @@ class Document extends Model
 
     protected $table = 'documents';
     // protected $primaryKey = 'id';
-    public $timestamps = TRUE;
+    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
     protected $guarded = ['id'];
+//    protected $guarded = [];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
+    protected $appends = ['category_name_registry_number', 'category_name_status_registry_number'];
 
     /*
     |--------------------------------------------------------------------------
@@ -60,9 +62,11 @@ class Document extends Model
     public function metadataFormating()
     {
         $return = '';
-        foreach (json_decode($this->metadata, TRUE) as $key => $value) {
-            $return .= ucfirst($key) . ': ' . ucfirst($value) . '<br>';
-        };
+        if (!is_null($this->metadata)) {
+            foreach (json_decode($this->metadata, TRUE) as $key => $value) {
+                $return .= ucfirst($key) . ': ' . ucfirst($value) . '<br>';
+            };
+        }
         return $return;
     }
 
@@ -137,7 +141,29 @@ class Document extends Model
     | ACCESSORS
     |--------------------------------------------------------------------------
     */
+    /**
+     * Get the user's Document category name and registry number.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getCategoryNameRegistryNumberAttribute()
+    {
+//        return "{$this->documentCategory->name} ($this->registry_number)";
+        return "{$this->document_category_id} ($this->registry_number)";
+    }
 
+    /**
+     * Get the user's Document category name, status and registry number.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getCategoryNameStatusRegistryNumberAttribute()
+    {
+//        return "{$this->documentCategory->name} ($this->status_id|$this->registry_number)";
+        return "{$this->document_category_id} ($this->status_id|$this->registry_number)";
+    }
     /*
     |--------------------------------------------------------------------------
     | MUTATORS

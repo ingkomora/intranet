@@ -514,7 +514,7 @@ class OsiguranjeCrudController extends CrudController
 
         $this->crud->modifyField('status_dokumenta_id', [
             'options' => (function ($query) {
-                return $query->where('log_status_grupa_id', DOKUMENTA)->get();
+                return $query->where('log_status_grupa_id', VRSTA_DOKUMENTA)->get();
             }),
         ]);
         $this->crud->modifyField('status_polise_id', [

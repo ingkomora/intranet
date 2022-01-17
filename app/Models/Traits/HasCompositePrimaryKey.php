@@ -1,16 +1,35 @@
 <?php
-namespace App\Models\Traits; // *** Adjust this to match your model namespace! ***
+
+namespace App\Models\Traits;
+// *** Adjust this to match your model namespace! ***
 
 use Illuminate\Database\Eloquent\Builder;
 
-trait HasCompositePrimaryKey {
+trait HasCompositePrimaryKey
+{
     /**
      * Get the value indicating whether the IDs are incrementing.
      *
      * @return bool
      */
-    public function getIncrementing() {
-        return false;
+    public function getIncrementing()
+    {
+        return FALSE;
+    }
+
+    protected function getKeyForSaveQuery()
+    {
+
+        $primaryKeyForSaveQuery = array(count($this->primaryKey));
+//dd($this->primaryKey);
+        foreach ($this->primaryKey as $i => $pKey) {
+            $primaryKeyForSaveQuery[$i] = isset($this->original[$this->getKeyName()[$i]])
+                ? $this->original[$this->getKeyName()[$i]]
+                : $this->getAttribute($this->getKeyName()[$i]);
+        }
+
+        return $primaryKeyForSaveQuery;
+
     }
 
     /**
@@ -19,7 +38,8 @@ trait HasCompositePrimaryKey {
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function setKeysForSaveQuery($query) {
+    protected function setKeysForSaveQuery($query)
+    {
         foreach ($this->getKeyName() as $key) {
             // UPDATE: Added isset() per devflow's comment.
             if (isset($this->$key))
@@ -40,7 +60,8 @@ trait HasCompositePrimaryKey {
      * @param array $columns
      * @return mixed|static
      */
-    public static function find($ids, $columns = ['*']) {
+    public static function find($ids, $columns = ['*'])
+    {
         $me = new self;
         $query = $me->newQuery();
         foreach ($me->getKeyName() as $key) {

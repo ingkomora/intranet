@@ -24,12 +24,15 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ClanarinaOld extends Model
 {
+    use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     /**
      * The table associated with the model.
      *
      * @var string
      */
     protected $table = 'tclanarina';
+
+    public $timestamps = false;
 
     /**
      * @var array

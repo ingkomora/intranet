@@ -130,9 +130,7 @@ return [
         // 'https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js'
 
         'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.sr-latin.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.rs-latin.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.rs.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.sr.min.js',
         'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js',
         'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/additional-methods.min.js',
         'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/localization/messages_sr_lat.min.js',

@@ -27,42 +27,17 @@ class Clanarina extends Model
     use Traits\HasCompositePrimaryKey; // *** THIS!!! ***
 //    const CREATED_AT = 'date_created';
     const UPDATED_AT = 'datumazuriranja';
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
+
     protected $table = 'tclanarinaod2006';
 
-    /**
-     * The primary key of the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = array('osoba', 'rokzanaplatu');
-    /**
-     * The "type" of the auto-incrementing ID.
-     *
-     * @var string
-     */
-//    protected $keyType = 'string';
+//    protected $primaryKey = array('osoba', 'rokzanaplatu'); // sa ovim ne radi crudcontroller
 
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
+//    protected $keyType = 'array';
+
     public $incrementing = false;
-    /**
-     * @var array
-     */
+
     protected $fillable = ['osoba','rokzanaplatu','azurirao_korisnik', 'azurirao_admin', 'iznoszanaplatu', 'iznosuplate', 'pretplata', 'napomena', 'datumazuriranja', 'datumazuriranja_admin', 'datumuplate', 'created_at'];
 
-    /**
-     * Indicates if the model should be timestamped.
-     * 
-     * @var bool
-     */
     public $timestamps = true;
 
     /**

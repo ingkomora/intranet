@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
+use App\Models\Log;
+use App\Models\Registry;
 use App\Models\SiPrijava;
 use App\Models\SiStruka;
 use App\Models\User;
@@ -17,12 +20,25 @@ class ZavodjenjeController extends Controller
 {
     protected $result;
     protected $brprijava;
+    protected $zavodjenje = [
+        'si' => ['url' => 'si', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
+        'licence' => ['url' => 'licence', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
+//        'clanstvo' => ['url' => 'clanstvo', 'model' => 'PrijavaClanstvo', 'title' => 'Zavođenje prijava za prijem u članstvo'],
+        'clanstvo' => ['url' => 'clanstvo', 'model' => 'Request', 'title' => 'Zavođenje prijava za prijem u članstvo'],
+        'sfl' => ['url' => 'sfl', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
+    ];
 
-    public function show()
+    public function show($type)
     {
-        return view('zavodjenje');
+        return view("zavodjenje", $this->zavodjenje[$type]);
     }
 
+
+    /**
+     * ZAVODJENJE PRIJAVA ZA STRUCNI ISPIT
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(Request $request)
     {
         $request->prijave = trim($request->prijave);
@@ -61,6 +77,118 @@ class ZavodjenjeController extends Controller
 //        dd('GOTOVO!');
 //        return redirect("/nalepnicePDF");
         return $this->nalepnicePDF();
+    }
+
+
+    /**
+     * ZAVODJENJE SVEGA PO NOVOM SISTEMU
+     * TODO PRIJAVE SI DA SE PREBACE
+     * @param $type
+     * @return array|\Illuminate\Http\Response
+     */
+    public function zavedi($type, array $data)
+    {
+        $result = [];
+        $log = new Log();
+
+        $nameSpace = 'App\Models\\';
+        $model = $nameSpace . $this->zavodjenje[$type]['model'];
+//        echo "$model<br>";
+        $ids = array_map('trim', $data['entries']);
+        $registry_date = (!empty($data['registry_date'])) ? Carbon::parse($data['registry_date'])->format('Y-m-d') : now()->toDateString();
+        $this->brprijava = $ids;
+        $prijave = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+        foreach ($prijave as $prijava) {
+            if ($prijava->status_id == REQUEST_SUBMITED) {
+                $documents = $prijava->documents->where('document_category_id', 1)->where('status_id', DOCUMENT_CREATED);
+//                    dd($documents);
+                if ($documents->isNotEmpty()) {
+                    if ($documents->count() > 1) {
+                        //GRESKA IMA VISE OD JEDNOG ZAHTEVA
+//                    echo "ima vise od jednog zahteva";
+                        return FALSE;
+                    }
+                    foreach ($documents as $doc) {
+//                    echo $document->id;
+
+                        $document = $doc;
+                    }
+                } else {
+                    $document = new Document();
+                    $document->document_category_id = 1;
+                    $document->documentable()->associate($prijava);
+                }
+                if (is_null($document->registry_number) and is_null($document->registry_date)) {
+                    $zg = $prijava->osoba->zvanjeId->zvanje_grupa_id;
+                    $reg = Registry::whereHas('registryDepartmentUnit', function ($q) use ($zg) {
+                        $q->where('label', "02-$zg");
+                    })->whereHas('requestCategories', function ($q) use ($prijava) {
+                        $q->where('registry_request_category.request_category_id', 1);
+                    })->get()[0];
+                    $reg->counter++;
+                    $reg->save();
+                    $regnum = $reg->registryDepartmentUnit->label . "-" . $reg->base_number . "/" . date("Y", strtotime($registry_date)) . "-" . $reg->counter;
+                    $log->type = 'INFO';
+
+                    $document->document_type_id = 1;
+                    $document->registry_id = $reg->id;
+                    $document->registry_number = $regnum;
+                    $document->registry_date = $registry_date;
+                    $document->status_id = DOCUMENT_REGISTERED;
+
+                    $document->save();
+                }
+
+//            echo("<br>$regnum");
+                $result['category'] = ucfirst($prijava->requestCategory->name);
+                $result[$log->type][$prijava->id] = "{$prijava->osoba->ime} {$prijava->osoba->prezime}";
+
+                $prijava->status_id = REQUEST_IN_PROGRESS;
+                $prijava->save();
+
+                $data['result'][] = array(
+                    $prijava->id,
+                    $prijava->osoba->ime . " " . $prijava->osoba->prezime,
+                    $document->registry_number,
+                    $document->registry_date,
+                );
+            }
+        }
+//        dd();
+        $result['pdf'] = $this->zavodneNalepnicePDF($data);
+
+//        return TRUE;
+        return $result;
+
+    }
+
+    /**
+     * Generisi PDF.
+     *
+     * @return string|\Illuminate\Http\Response
+     */
+    public function zavodneNalepnicePDF($data)
+    {
+        $prijave = \App\Models\Request::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
+
+        /*        if ($this->result['oblast'] == 'Energetska efikasnost') {
+                    $data['oblast'] = $this->result['oblast'];
+                } else {
+                    $data['oblast'] = $this->result['oblast'] . " - " . $this->result['podoblast'];
+                }*/
+        $data['oblast'] = '';
+        $filename = date("Ymd") . "_test";
+        $pdf = PDF::loadView('nalepniceRamipa89x43', $data);
+//        return $pdf->stream("$filename.pdf");
+//        return $pdf->download("$filename.pdf");
+
+
+        $path = public_path('download/');
+        $pdf->save($path . '/' . "$filename.pdf");
+
+        $pdfpath = '/download/' . "$filename.pdf";
+//        return response()->download($pdf);
+        return $pdfpath;
     }
 
     /**

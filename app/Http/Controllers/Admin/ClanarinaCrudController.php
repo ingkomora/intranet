@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\RegistryRequest;
+use App\Http\Requests\ClanarinaRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class RegistryCrudController
+ * Class ClanarinaCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class RegistryCrudController extends CrudController
+class ClanarinaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class RegistryCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Registry::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/registry');
-        CRUD::setEntityNameStrings('registry', 'registries');
+        CRUD::setModel(\App\Models\Clanarina::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/clanarina');
+        CRUD::setEntityNameStrings('članarina', 'članarine');
     }
 
     /**
@@ -40,15 +40,18 @@ class RegistryCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('base_number');
-        CRUD::column('copy');
-        CRUD::column('subject');
-        CRUD::column('sub_base_number');
-        CRUD::column('registry_department_unit_id');
-        CRUD::column('counter');
-        CRUD::column('status_id');
+        CRUD::column('osoba');
+        CRUD::column('rokzanaplatu');
+        CRUD::column('azurirao_korisnik');
+        CRUD::column('azurirao_admin');
+        CRUD::column('iznoszanaplatu');
+        CRUD::column('iznosuplate');
+        CRUD::column('pretplata');
+        CRUD::column('napomena');
+        CRUD::column('datumazuriranja');
+        CRUD::column('datumazuriranja_admin');
+        CRUD::column('datumuplate');
         CRUD::column('created_at');
-        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -65,18 +68,20 @@ class RegistryCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(RegistryRequest::class);
+        CRUD::setValidation(ClanarinaRequest::class);
 
-//        CRUD::field('id');
-        CRUD::field('base_number');
-        CRUD::field('copy');
-        CRUD::field('subject');
-        CRUD::field('sub_base_number');
-        CRUD::field('registry_department_unit_id');
-        CRUD::field('counter');
-        CRUD::field('status_id');
+        CRUD::field('osoba');
+        CRUD::field('rokzanaplatu');
+        CRUD::field('azurirao_korisnik');
+        CRUD::field('azurirao_admin');
+        CRUD::field('iznoszanaplatu');
+        CRUD::field('iznosuplate');
+        CRUD::field('pretplata');
+        CRUD::field('napomena');
+        CRUD::field('datumazuriranja');
+        CRUD::field('datumazuriranja_admin');
+        CRUD::field('datumuplate');
         CRUD::field('created_at');
-        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

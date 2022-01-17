@@ -39,7 +39,7 @@ class PrijavaSiStara extends Model
      */
     public function osobaId()
     {
-        return $this->belongsTo('App\Models\OsobaSi', 'osoba');
+        return $this->belongsTo('App\Models\Osoba', 'osoba');
     }
 
     /**

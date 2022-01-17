@@ -49,7 +49,8 @@ class SiPrijava extends Model
     protected $table = 'si_prijava';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
-    protected $guarded = ['id'];
+    protected $guarded = []; //PRIVREMENO ZBOG KOPIRANJA
+//    protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];

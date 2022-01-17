@@ -1,5 +1,10 @@
 <?php
 
+//$statusi = app()->call(config('app.status_model'));
+//    dd($statusi);
+//foreach ($statusi as $status) {
+//}
+
 //OPŠTI STATUSI
 define('NEAKTIVAN', 0);
 define('AKTIVAN', 1);
@@ -9,6 +14,9 @@ define('PROBLEM', 37);
 define('ZAVRSEN', 38);
 define('OTKAZAN', 39);
 define('_NEAKTIVAN', 40);
+define('ZALBA', 41);        //PRIVREMEN
+define('OBAVESTEN', 42);    //PRIVREMEN
+define('PONISTEN', 43);     //PRIVREMEN
 
 //PRIJAVE ZA STRUCNI ISPIT
 define('PRIJAVA_KREIRANA', 2);
@@ -20,12 +28,17 @@ define('PRIJAVA_ZAKLJUCANA', 7);
 define('PRIJAVA_ZAVRSENA', 8);
 define('PRIJAVA_OTKAZANA', 9);
 
-//PRIJAVE ZA PRIJEM U CLANSTVO
-define('PRIJAVA_CLAN_KREIRANA', 10);
-define('PRIJAVA_CLAN_GENERISANA', 11);
-define('PRIJAVA_CLAN_ZAVEDENA', 12);
-define('PRIJAVA_CLAN_PRIHVACENA', 13);
-define('PRIJAVA_CLAN_ODBIJENA', 14);
+//MEMBERSHIPS                             | PRIJAVE ZA PRIJEM U CLANSTVO
+const PRIJAVA_CLAN_KREIRANA = 10;    //|
+const PRIJAVA_CLAN_GENERISANA = 11;  //|
+const PRIJAVA_CLAN_ZAVEDENA = 12;    //| => REQUESTS
+const PRIJAVA_CLAN_PRIHVACENA = 13;  //|
+const PRIJAVA_CLAN_ODBIJENA = 14;    //|
+
+const MEMBERSHIP_STARTED = 10;      //|
+const MEMBERSHIP_ENDED = 11;        //| => NOVI STATUSI
+const MEMBERSHIP_SUSPENDED = 12;    //|
+const MEMBERSHIP_PROBLEM = 13;      //|
 
 // STATUSI ZAHTEVA ZA IZDAVANJE LICENCE
 define("ZAHTEV_LICENCA_KREIRAN", 15);
@@ -43,7 +56,7 @@ define('LICENCA_NEAKTIVNA', 'N'); //21
 define('LICENCA_DEAKTIVIRANA', 'D'); //22
 define('LICENCA_NEAKTIVIRANA', 'H'); //23
 
-//STATUS DOKUMENTA
+//STATUS VRSTA_DOKUMENTA
 define('DOKUMENT_ORIGINAL', 24);
 define('DOKUMENT_FOTOKOPIJA', 25);
 define('DOKUMENT_DIGITALNA_KOPIJA', 26);
@@ -75,10 +88,13 @@ define('STRUCNI_ISPIT', 2);
 define('CLANSTVO', 3);
 define('LICENCE', 4);
 define('REGISTAR', 5);
-define('DOKUMENTA', 6);
+define('VRSTA_DOKUMENTA', 6);
 define('MIROVANJA', 7);
 define('OSIGURANJE', 8);
 define('PODACI', 9);
+define('OSOBE', 10);
+define('REQUESTS', 11);
+define('DOCUMENTS', 12);
 
 define('VRSTA_LICENCE_SVE', 0);
 define('VRSTA_LICENCE_PLANIRANJE', 1);
@@ -107,6 +123,27 @@ define('NEMA_POKRICE', 99);
 define('OSIGURANJE_IKS', 1);
 define('OSIGURANJE_KOLEKTIVNO', 2);
 define('OSIGURANJE_INDIVIDUALNO', 3);
+
+//OSOBE  U KOM JE SVOJSTVU OSOBA U BAZI CLAN=?
+define('CLAN', 44);
+define('NIJE_CLAN', 45);
+define('KANDIDAT_LICENCA', 46);
+define('KANDIDAT_SI', 47);
+define('LICENCIRAN', 48);
+define('OSTALI', 49);
+
+//REQUESTS
+define('REQUEST_CREATED', 50);
+define('REQUEST_SUBMITED', 51);
+define('REQUEST_IN_PROGRESS', 52);
+define('REQUEST_FINISHED', 53);
+define('REQUEST_CANCELED', 54);
+define('REQUEST_PROBLEM', 55);
+
+//DOCUMENTS
+define('DOCUMENT_CREATED', 56);
+define('DOCUMENT_REGISTERED', 57);
+define('DOCUMENT_CANCELED', 58);
 
 //TODO: VADITI IZ BAZE
 define('ARHITEKTE', array(1, 15, 30, 33, 34, 35));

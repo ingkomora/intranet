@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\RegistryRequest;
+use App\Http\Requests\MembershipRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
- * Class RegistryCrudController
+ * Class MembershipCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class RegistryCrudController extends CrudController
+class MembershipCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -26,9 +26,9 @@ class RegistryCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Registry::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/registry');
-        CRUD::setEntityNameStrings('registry', 'registries');
+        CRUD::setModel(\App\Models\Membership::class);
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/membership');
+        CRUD::setEntityNameStrings('membership', 'memberships');
     }
 
     /**
@@ -40,13 +40,11 @@ class RegistryCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('base_number');
-        CRUD::column('copy');
-        CRUD::column('subject');
-        CRUD::column('sub_base_number');
-        CRUD::column('registry_department_unit_id');
-        CRUD::column('counter');
+        CRUD::column('osoba_id');
         CRUD::column('status_id');
+        CRUD::column('started_at');
+        CRUD::column('ended_at');
+        CRUD::column('note');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
@@ -65,16 +63,13 @@ class RegistryCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(RegistryRequest::class);
+        CRUD::setValidation(MembershipRequest::class);
 
-//        CRUD::field('id');
-        CRUD::field('base_number');
-        CRUD::field('copy');
-        CRUD::field('subject');
-        CRUD::field('sub_base_number');
-        CRUD::field('registry_department_unit_id');
-        CRUD::field('counter');
+        CRUD::field('osoba_id');
         CRUD::field('status_id');
+        CRUD::field('started_at');
+        CRUD::field('ended_at');
+        CRUD::field('note');
         CRUD::field('created_at');
         CRUD::field('updated_at');
 

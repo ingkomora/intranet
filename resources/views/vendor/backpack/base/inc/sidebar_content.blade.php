@@ -93,8 +93,12 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi') }}'> Prijave za stručni ispit</a></li>
-        {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='#'> Zahtevi za licence</a></li>--}}
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>
+        @role('admin')
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/licence') }}'> Zahtevi za licence</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenjerequest') }}'> Zahtevi za prijem u članstvo</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/sfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
+        @endrole
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->
@@ -139,4 +143,6 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Document categories</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina') }}'><i class='nav-icon la la-question'></i> Članarine</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina-old') }}'><i class='nav-icon la la-question'></i> Članarine Old</a></li>
 @endrole

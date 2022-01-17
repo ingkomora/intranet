@@ -35,5 +35,7 @@ class AppServiceProvider extends ServiceProvider
             $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
 
         });
+
+        config(['app.status_model', App\Models\Status::class]);
     }
 }

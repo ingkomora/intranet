@@ -39,8 +39,9 @@ Route::group([
     Route::get('/licencatip/{id}', 'ZahtevController@getLicencaTip');
     Route::get('/checkzahtev/{licenca}/{jmbg}', 'ZahtevController@checkZahtev');
     Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
-    Route::get('/zavodjenje/zavedi', 'ZavodjenjeController@show');
-    Route::post('/zavodjenje/zavedi', 'ZavodjenjeController@store');
+    Route::get('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@show');
+    Route::post('/zavodjenje/zavedi/si', 'ZavodjenjeController@store');
+    Route::post('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@zavedi');
 
     Route::get('/splitaddress', 'ZahtevController@splitAddress');
     Route::get('/joinaddress', 'ZahtevController@joinAddress');
@@ -88,4 +89,8 @@ Route::group([
     Route::crud('registry', 'RegistryCrudController');
     Route::crud('document-category', 'DocumentCategoryCrudController');
     Route::crud('document', 'DocumentCrudController');
+    Route::crud('membership', 'MembershipCrudController');
+    Route::crud('clanarina', 'ClanarinaCrudController');
+    Route::crud('clanarina-old', 'ClanarinaOldCrudController');
+    Route::crud('zavodjenjerequest', 'ZavodjenjeRequestCrudController');
 }); // this should be the absolute last line of this file
