@@ -94,8 +94,8 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>
-        @role('admin')
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenjerequestclanstvo') }}'> Zahtevi za prijem u članstvo</a></li>
+        @role('admin')
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/licence') }}'> Zahtevi za licence</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/sfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
         @endrole

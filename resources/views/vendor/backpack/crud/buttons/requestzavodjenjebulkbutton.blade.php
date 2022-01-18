@@ -74,7 +74,7 @@
                         $.ajax({
                             url: request_zavodjenje_route,
                             type: 'POST',
-                            data: {entries: crud.checkedItems, registry_date: input.value},
+                            data: {entries: crud.checkedItems, registry_date: input.value, route: '{{$crud->route}}'},
 
                             success: function (result) {
                                 // Show an alert with the result

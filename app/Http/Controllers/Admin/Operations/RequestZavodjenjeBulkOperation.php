@@ -35,7 +35,7 @@ trait RequestZavodjenjeBulkOperation
         $this->crud->allowAccess('requestzavodjenjebulk');
 
         $this->crud->operation('list', function () {
-            if (backpack_user()->hasRole('admin')) {
+            if (backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) {
                 $this->crud->enableBulkActions();
                 $this->crud->addButtonFromView('top', 'requestzavodjenjebulkbutton', 'requestzavodjenjebulkbutton', 'end');
             }
@@ -51,15 +51,16 @@ trait RequestZavodjenjeBulkOperation
     {
         $this->crud->hasAccessOrFail('requestzavodjenjebulk');
 //        $entries = $this->crud->getRequest()->input('entries');
-        $data = $this->crud->getRequest()->all();
 
         // declaration
+        $data = $this->crud->getRequest()->all();
+        $type = str_replace('admin/zavodjenjerequest', '', $data['route']);
         $result = [];
         $mail_data = new \stdClass();
         $log = new Log();
 
         $contoller = new ZavodjenjeController();
-        $result = $contoller->zavedi('clanstvo', $data);
+        $result = $contoller->zavedi($type, $data);
 
 
         return $result;

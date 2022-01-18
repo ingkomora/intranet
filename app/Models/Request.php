@@ -47,9 +47,15 @@ class Request extends Model
     |--------------------------------------------------------------------------
     */
 
-    public static function existingStatuses()
+    public static function existingStatuses($type = '')
     {
-        $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests')->pluck('naziv', 'id')->toArray();
+        if (!empty($type)) {
+            $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests', function ($query) use ($type){
+                $query->where('request_category_id', $type);
+            })->pluck('naziv', 'id')->toArray();
+        } else {
+            $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests')->pluck('naziv', 'id')->toArray();
+        }
 
         return $statusi;
     }
@@ -85,8 +91,7 @@ class Request extends Model
      */
     public function status()
     {
-        return $this->belongsTo('App\Models\Status', 'status_id')
-//            ->where('log_status_grupa_id', OPSTA)
+        return $this->belongsTo('App\Models\Status', 'status_id')//            ->where('log_status_grupa_id', OPSTA)
             ;
     }
 
@@ -118,7 +123,8 @@ class Request extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function registries() {
+    public function registries()
+    {
         return $this->belongsToMany('App\Models\Registry', 'registry_request_category', 'request_category_id', 'registry_id')
             ->using('App\Models\RegistryRequestCategory')
             ->withPivot([

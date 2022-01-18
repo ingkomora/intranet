@@ -51,7 +51,7 @@ class Document extends Model
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
-    protected $appends = ['category_name_registry_number', 'category_name_status_registry_number'];
+//    protected $appends = ['category_name_registry_number', 'category_name_status_registry_number'];
 
     /*
     |--------------------------------------------------------------------------
@@ -149,8 +149,7 @@ class Document extends Model
      */
     public function getCategoryNameRegistryNumberAttribute()
     {
-//        return "{$this->documentCategory->name} ($this->registry_number)";
-        return "{$this->document_category_id} ($this->registry_number)";
+        return "{$this->documentCategory->name} ($this->registry_number)";
     }
 
     /**
@@ -161,8 +160,7 @@ class Document extends Model
      */
     public function getCategoryNameStatusRegistryNumberAttribute()
     {
-//        return "{$this->documentCategory->name} ($this->status_id|$this->registry_number)";
-        return "{$this->document_category_id} ($this->status_id|$this->registry_number)";
+        return "{$this->documentCategory->name} ({$this->status->naziv} | $this->registry_number)";
     }
     /*
     |--------------------------------------------------------------------------

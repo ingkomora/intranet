@@ -92,5 +92,5 @@ Route::group([
     Route::crud('membership', 'MembershipCrudController');
     Route::crud('clanarina', 'ClanarinaCrudController');
     Route::crud('clanarina-old', 'ClanarinaOldCrudController');
-//    Route::crud('zavodjenjerequestclanstvo', 'ZavodjenjeRequestClanstvoCrudController');
+    Route::crud('zavodjenjerequestclanstvo', 'ZavodjenjeRequestClanstvoCrudController');
 }); // this should be the absolute last line of this file
