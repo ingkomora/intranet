@@ -35,7 +35,7 @@ class ZahtevLicencaCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete']);
         }
 
-        if (backpack_user()->hasRole('rk')) {
+        if (backpack_user()->hasRole('sluzba_rk')) {
             $this->crud->denyAccess(['update']);
         }
 

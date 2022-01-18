@@ -388,7 +388,7 @@ class OsiguranjeCrudController extends CrudController
             $this->crud->denyAccess('create');
         }
 
-        if (backpack_user()->hasRole('rk')) {
+        if (backpack_user()->hasRole('sluzba_rk')) {
             $this->crud->denyAccess(['update']);
         }
 

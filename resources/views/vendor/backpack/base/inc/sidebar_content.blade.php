@@ -1,7 +1,7 @@
 <!-- This file is used to store sidebar items, starting with Backpack\Base 0.9.0 -->
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="nav-icon fas fa-tachometer"></i> {{ trans('backpack::base.dashboard') }}</a></li>
 
-@role('korisnik|urednik|admin|rk')
+@role('korisnik|urednik|admin|sluzba_rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
@@ -14,7 +14,7 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('korisnik|urednik|admin|rk')
+@role('korisnik|urednik|admin|sluzba_rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>REGISTAR</a>
     <ul class="nav-dropdown-items">
@@ -28,7 +28,7 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 
-@role('korisnik|urednik|admin|rk')
+@role('korisnik|urednik|admin|sluzba_rk')
 <li class="divider">
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>ZAHTEVI</a>
@@ -40,7 +40,7 @@
 </li>
 @endrole
 
-@role('korisnik|urednik|admin|rk')
+@role('korisnik|urednik|admin|sluzba_rk')
 <li class="divider">
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-certificate"></i>LICENCE</a>
@@ -64,7 +64,7 @@
 </li>
 @endrole
 
-@role('korisnik|urednik|admin|rk')
+@role('korisnik|urednik|admin|sluzba_rk')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
@@ -80,7 +80,7 @@
         <li class="nav-title">PROMENA PODATAKA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka') }}'> Promena podataka</a></li>
         @endrole
-        @role('rk')
+        @role('sluzba_rk')
         <li class="nav-title">PROMENA PODATAKA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka?active=true') }}'> Promena podataka</a></li>
         @endrole
@@ -89,14 +89,14 @@
 <!-- Users, Roles, Permissions -->
 @endrole
 {{--backpack_user()->hasPermissionTo('kreiraj firmu')--}}
-@role('delovodja|admin')
+@role('admin|sluzba_opsta')
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenjerequestclanstvo') }}'> Zahtevi za prijem u članstvo</a></li>
         @role('admin')
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/licence') }}'> Zahtevi za licence</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenjerequest') }}'> Zahtevi za prijem u članstvo</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/sfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
         @endrole
     </ul>
@@ -143,6 +143,6 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Document categories</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina') }}'><i class='nav-icon la la-question'></i> Članarine</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina-old') }}'><i class='nav-icon la la-question'></i> Članarine Old</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina') }}'> Članarine</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina-old') }}'> Članarine Old</a></li>
 @endrole
