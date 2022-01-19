@@ -147,7 +147,8 @@ class ZahtevController extends Controller
                 } else {
                     $osoba->roditelj = mb_ucfirst(mb_substr($osoba->roditelj, 0, 1));
                 }
-                $licencaTip = $this->h->getLicencaTipFromLicencaBroj($licencaO);
+//                $licencaTip = $this->h->getLicencaTipFromLicencaBroj($licencaO);
+                $licencaTip = $licencaO->tipLicence;
                 $data->osobaImeRPrezime = $this->h->iso88592_to_cirUTF($osoba->ime . " " . $osoba->roditelj . ". " . $osoba->prezime);
                 $data->zvanje = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->naziv);
                 $data->zvanjeskr = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
@@ -1032,8 +1033,8 @@ class ZahtevController extends Controller
 //        $this->clanarina();
 //        $this->prijavaSi();
 //        $this->prijaveClanstvo();//1
-        $this->osobeClanarinaNotMembership();//2
-//        $this->osobaNotClanNotRequest();//3
+//        $this->osobeClanarinaNotMembership();//2
+        $this->osobaNotClanNotRequest();//3
 //        $this->deleteModel();
 //        $this->compareModelProperties('documents', 'prijave_clanstvo');
 //        $this->compareModelProperties('tzahtev', 'tlicenca');
@@ -1091,45 +1092,84 @@ class ZahtevController extends Controller
 //        echo "<br>Osobe u memberships: $members";
 //dd();
         $query = Osoba::where('clan', 0)
-            ->whereDoesntHave('requests')
+            ->whereHas('clanarine')
+            ->whereHas('memberships')
+            ->whereDoesntHave('requests', function ($q) {
+                $q->where('request_category_id', 2);
+            })
+            ->whereHas('licence', function ($q) {
+                $q
+//                    ->where('status', 'D')
+//                    ->where('status','A')
+//                ->where('status','<>','A')
+//                ->where('status','<>','N')
+//                        ->whereNull('razlogukidanja')//reseno
+//                        ->orWhereNull('datumukidanja')//reseno
+                    ->where('status', '<>', 'H');
+            })
             ->orderBy('id')
             ->chunkById(1000, function ($osobe) {
                 foreach ($osobe as $osoba) {
+//                    dd($osoba);
                     $licence = $osoba->licence;
-                    if ($licence->isNotEmpty() and $licence->count() > 1) {
-                        echo $this->counter;
-                        dd($licence->toArray());
-                    }
-                    /*$data = [
-                        "osoba_id" => $osoba->id,
-                        "datum_prijema" => $clanarina['rokzanaplatu'],
-                        "app_korisnik_id" => 14,
-                        "zavodni_broj" => "",
-                        "barcode" => NULL,
-                        "created_at" => date('Y-m-d H:i:s', strtotime($clanarina['rokzanaplatu'])),
-                        "updated_at" => Carbon::now()->format("Y-m-d H:i:s"),
-                        "broj_odluke_uo" => "",
-                        "datum_odluke_uo" => $clanarina['rokzanaplatu'],
-                        "status_id" => 13,
-                        "napomena" => $osoba->napomena,
-                    ];
-                    $result = $this->updateMCreateRD($data);*/
+//                    $req = $osoba->requests->where('request_category_id',2)->first();
+                    if ($licence->isNotEmpty() and $licence->count() > 0) {
+                        $this->counter++;
+//                        dd($licence->toArray());
+                        $cond = TRUE;
+                        $licstr = '';
+                        foreach ($licence as $licenca) {
+                            if ($licenca->status == 'D') {
 
-                    $this->counter++;
-                    /*if ($result) {
-                        $this->ok++;
-                    } else {
-                        $this->error++;
-                        break;
-                    }*/
+                                $cond &= TRUE;
+                            } else {
+//                                break;
+                                $cond &= FALSE;
+                            }
+
+                            $licstr .= " $licenca->id ($licenca->status) | ";
+                        }
+//                        echo "$this->counter | {$req->id} | {$req->status->naziv} | $cond | $osoba->id | $licstr<br>";
+                        echo "$this->counter | $cond | $osoba->id | $licstr<br>";
+                        if (!$cond) {
+                            continue;
+                        } else {
+                            $this->ok++;
+                            $data = [
+                                "osoba_id" => $osoba->id,
+                                "datum_prijema" => $licence[0]['datumukidanja'],
+                                "app_korisnik_id" => 14,
+                                "zavodni_broj" => "",
+                                "barcode" => NULL,
+                                "created_at" => date('Y-m-d H:i:s', strtotime($licence[0]['datumukidanja'])),
+                                "updated_at" => Carbon::now()->format("Y-m-d H:i:s"),
+                                "broj_odluke_uo" => "",
+                                "datum_odluke_uo" => $licence[0]['datumukidanja'],
+                                "status_id" => 13,
+                                "napomena" =>str_contains($osoba->napomena,'Broj rešenja o prestanku članstva')? $osoba->napomena . "##" . $licence[0]['razlogukidanja'] : $licence[0]['razlogukidanja'],
+                            ];
+//                            $result = $this->updateMCreateRD($data);
+
+                            /*if ($result) {
+                                $this->ok++;
+                            } else {
+                                $this->error++;
+                                break;
+                            }*/
+                        }
+
+                    }
                 }
                 echo "<br>Kreirano: $this->ok od $this->counter";
                 echo "<br>Nije kreirano: $this->error od $this->counter";
+//                    if ($this->counter == 1000) dd('kraj');
             })
 //        limit(2)
 //            ->pluck('osoba')->toArray()
-            ->get();
-        dd($query->count());
+//            ->get()
+        ;
+//        dd($query->count());
+        dd($query);
     }
 
     private function osobeClanarinaNotMembership()
@@ -1269,13 +1309,238 @@ class ZahtevController extends Controller
         return $message;
     }
 
-    private function updateMCreateRD(array $modelFrom)
+    private function updateMCreateRD(array $data)
     {
-        //update membership
+        //1. create requests
+        //2. create documents
+        //3. update membership
 
-        //create requests
+        DB::beginTransaction();
 
-        //create documents
+        $created = FALSE;
+
+        $membershipOK = FALSE;
+        $requestOK = FALSE;
+        $documentOK = FALSE;
+
+        $membershipData = []; //reset array
+
+        $requestsMapPrijaveClanstvo = [
+//  REQUEST
+            'osoba_id' => 'osoba_id',
+            'request_category_id' => 1,
+            'status_id' => [50 => 10, 51 => 11, 52 => 12, 53 => 13, 54 => 14],
+            'note' => 'napomena',
+//            'requestable_id' => '',   //membership.id
+//            'requestable_type' => '', //\App\Models\Membership
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+        ];
+        $membershipsMapPrijaveClanstvo = [
+//  MEMBERSHIP
+            'osoba_id' => 'osoba_id',
+            'started_at' => 'datum_odluke_uo',
+            'ended_at' => 'datum_odluke_uo',
+            'updated_at' => 'updated_at',
+            'note' => 'napomena',
+            'status_id' => MEMBERSHIP_ENDED,
+        ];
+
+        $oldData = $data;
+        echo "<BR>";
+        echo "<BR>OLD DATA";
+        echo "<PRE>";
+        print_r($oldData);
+        echo "</PRE>";
+
+        try {
+
+            $membership = Membership::where('osoba_id', $data['osoba_id'])->where('status_id', MEMBERSHIP_STARTED)->latest()->first();
+//        REQUESTS
+            foreach ($requestsMapPrijaveClanstvo as $newKey => $oldKey) {
+                //modifikacija vrednosti
+                if ($newKey == 'request_category_id') {
+                    $requestData[$newKey] = $oldKey;
+                } else if ($newKey == 'status_id') {
+                    $requestData[$newKey] = array_search($oldData['status_id'], $oldKey);
+                } else if ($newKey == 'note') {
+                    $requestData[$newKey] = isEmpty($oldData[$oldKey]) ? "Kreiran za osobe iz clanarinaod2006 kojih nema u tabeli memberships." : "##Kreiran za osobe iz clanarinaod2006 kojih nema u tabeli memberships.";
+                } else {
+                    $requestData[$newKey] = $oldData[$oldKey];
+                }
+            }
+            echo "<BR>";
+            echo "<BR>REQUEST";
+            echo "<PRE>";
+            print_r($requestData);
+            echo "</PRE>";
+            $request = \App\Models\Request::firstOrNew($requestData);
+            /*            if ($request->save()) {
+                            $request->requestable()->associate($membership);
+                            $request->save();
+                            $requestOK = TRUE;
+                            echo "<BR>Model Request $request->id " . (($request->wasRecentlyCreated) ? " created" : " updated");
+                        }*/
+
+//      DOCUMENTS KAD JE ZAHTEV
+            $documentMapPrijaveClanstvo['zahtev_za_brisanje_iz_clanstva'] = [
+//      DOCUMENT KAD JE ZAHTEV
+                'document_category_id' => 1,
+                'document_type_id' => 4,
+                'registry_id' => 1,
+                'registry_number' => '',
+                'registry_date' => 'datum_prijema',
+                'status_id' => [56 => 11, 57 => 13, 58 => 14],
+                'barcode' => 'barcode',
+                'user_id' => 'app_korisnik_id',
+                'metadata' => [
+                    "title" => "Zahtev za brisanje iz članstva u IKS #$request->id",
+                    "author" => $request->osoba->ime_roditelj_prezime,
+                    "author_id" => $request->osoba->lib,
+                    "description" => "",
+                    "category" => "Članstvo",
+                    "created_at" => $oldData['datum_odluke_uo'],
+                ],
+                'note' => 'napomena',
+                //            'documentable_id' => '',  // request.id
+                //            'documentable_type' => '',    //\App\Models\Membership
+                'created_at' => 'datum_prijema',
+                'updated_at' => 'updated_at',
+                'valid_from' => 'datum_prijema',
+            ];
+//      DOCUMENT KAD JE RESENJE O PRESTANKU CLANSTVA
+            $documentMapPrijaveClanstvo['Resenje_o_prestanku_clanstva'] = [
+                'document_category_id' => 3,
+                'document_type_id' => 4,
+                'registry_id' => 1,
+                'registry_number' => '',
+                'registry_date' => 'datum_odluke_uo',
+
+                'status_id' => [56 => 11, 57 => 13, 58 => 14],
+                'barcode' => 'barcode',
+                'user_id' => 'app_korisnik_id',
+                'metadata' => [
+                    "title" => "Rešenje o prestanku članstva u IKS #$request->id",
+                    "author" => 'Inženjerska komora Srbije',
+                    "author_id" => '',
+                    "description" => "Za osobu: " . $request->osoba->ime_roditelj_prezime . ", id: " . $request->osoba->lib,
+                    "category" => "Članstvo",
+                    "created_at" => $oldData['datum_odluke_uo'],
+                ],
+                'note' => 'napomena',
+//            'documentable_id' => '',  // request.id
+//            'documentable_type' => '',    //\App\Models\Membership
+                'created_at' => 'datum_odluke_uo',
+                'updated_at' => 'updated_at',
+                'valid_from' => 'datum_odluke_uo',
+
+            ];
+//      DOCUMENT KAD JE RESENJE O BRISANJU IZ EVIDENCIJE
+            $documentMapPrijaveClanstvo['Resenje_o_brisanju_iz_evidencije'] = [
+                'document_category_id' => 3,
+                'document_type_id' => 4,
+                'registry_id' => 1,
+                'registry_number' => '',
+                'registry_date' => 'datum_odluke_uo',
+
+                'status_id' => [56 => 11, 57 => 13, 58 => 14],
+                'barcode' => 'barcode',
+                'user_id' => 'app_korisnik_id',
+                'metadata' => [
+                    "title" => "Rešenje o brisanju iz evidencije IKS #$request->id",
+                    "author" => 'Inženjerska komora Srbije',
+                    "author_id" => '',
+                    "description" => "Za osobu: " . $request->osoba->ime_roditelj_prezime . ", id: " . $request->osoba->lib,
+                    "category" => "Članstvo",
+                    "created_at" => $oldData['datum_odluke_uo'],
+                ],
+                'note' => 'napomena',
+//            'documentable_id' => '',  // request.id
+//            'documentable_type' => '',    //\App\Models\Membership
+                'created_at' => 'datum_odluke_uo',
+                'updated_at' => 'updated_at',
+                'valid_from' => 'datum_odluke_uo',
+
+            ];
+            foreach ($documentMapPrijaveClanstvo as $key => $document) {
+                $zg = $request->osoba->zvanjeId->zvanje_grupa_id;
+                $reg = Registry::where('base_number', 0)->whereHas('registryDepartmentUnit', function ($q) use ($zg) {
+                    $q->where('label', "02-$zg");
+                })->get()[0];
+                $reg->counter++;
+//                    $reg->save();
+                foreach ($document as $newKey => $oldKey) {
+                    //modifikacija vrednosti
+                    if ($newKey == 'document_category_id' or $newKey == 'document_type_id' or $newKey == 'registry_id' or $newKey == 'path') {
+                        $documentOdlukaData[$newKey] = $oldKey;
+                    } else if ($newKey == 'status_id') {
+                        $documentOdlukaData[$newKey] = array_search($oldData['status_id'], $oldKey);
+                    } else if ($newKey == 'registry_id') {
+                        $documentOdlukaData[$newKey] = $reg->id;
+                    } else if ($newKey == 'registry_number') {
+                        $documentOdlukaData[$newKey] = $reg->registryDepartmentUnit->label . "-" . $reg->base_number . "/" . date("Y", strtotime($oldData['datum_odluke_uo'])) . "-" . $reg->counter;
+                    } else if ($newKey == 'metadata') {
+                        $documentOdlukaData[$newKey] = json_encode($oldKey, JSON_UNESCAPED_UNICODE);
+                    } else if ($newKey == 'note') {
+                        $documentOdlukaData[$newKey] = isEmpty($oldData[$oldKey]) ? "Automatski kreiran na osnovu odluke UO o izdavanju licenci." : "##Automatski kreiran na osnovu odluke UO o izdavanju licenci.";
+                    } else {
+                        $documentOdlukaData[$newKey] = $oldData[$oldKey];
+                    }
+                }
+                echo "<BR>";
+                echo "<BR>DOCUMENT " . strtoupper($key);
+                echo "<PRE>";
+                print_r($documentOdlukaData);
+                echo "</PRE>";
+
+                $document = Document::firstOrNew($documentOdlukaData);
+                /*if ($document->save()) {
+                    $document->documentable()->associate($request);
+                    $document->save();
+                    $documentOK = TRUE;
+                    echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
+                }*/
+            }
+//        MEMBERSHIPS
+            foreach ($membershipsMapPrijaveClanstvo as $newKey => $oldKey) {
+                //modifikacija vrednosti
+                if ($newKey == 'status_id') {
+                    $membershipData[$newKey] = $oldKey;
+                } else if ($newKey == 'note') {
+                    $membershipData[$newKey] = !isEmpty($membership->note) ? (!isEmpty($oldData[$oldKey]) ? $membership->note . "##" . $oldData[$oldKey] : $membership->note) : $oldData[$oldKey];
+                } else {
+                    $membershipData[$newKey] = $oldData[$oldKey];
+                }
+            }
+            echo "<BR>";
+            echo "<BR>MEMBERSHIP";
+            echo "<PRE>";
+            print_r($membershipData);
+            echo "</PRE>";
+
+            /*            if ($membership->save()) {
+                            $membershipOK = TRUE;
+                            echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
+                        }*/
+
+
+            if ($membershipOK && $requestOK && $documentOK) {
+                DB::commit();
+                $created = TRUE;
+            } else {
+                DB::rollBack();
+                $created = FALSE;
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            echo "<br>" . $e->getMessage();
+            $errorInfo = $e->getMessage();
+        }
+        dd('kraj');
+
+        return $created;
+//        }); //transaction
     }
 
     private function copyArray(array $modelFrom)

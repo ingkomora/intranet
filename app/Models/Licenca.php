@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $broj_resenja
  * @property string $licencatip
  * @property Osoba $osobaId
+ * @property LicencaTip $tipLicence
  * @property ZahtevLicenca $zahtevId
  */
 class Licenca extends Model
