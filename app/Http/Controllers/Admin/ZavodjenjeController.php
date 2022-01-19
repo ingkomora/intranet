@@ -90,6 +90,7 @@ class ZavodjenjeController extends Controller
     {
         $result = [];
         $log = new Log();
+        $log->type = 'INFO';
 
         $nameSpace = 'App\Models\\';
         $model = $nameSpace . $this->zavodjenje[$type]['model'];
@@ -99,21 +100,21 @@ class ZavodjenjeController extends Controller
         $this->brprijava = $ids;
         $prijave = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
         foreach ($prijave as $prijava) {
-            if ($prijava->status_id == REQUEST_SUBMITED) {
-                $documents = $prijava->documents->where('document_category_id', 1)->where('status_id', DOCUMENT_CREATED);
+            $documents = $prijava->documents->where('document_category_id', 1)->whereIn('status_id', [DOCUMENT_CREATED, DOCUMENT_REGISTERED]);
 //                    dd($documents);
-                if ($documents->isNotEmpty()) {
-                    if ($documents->count() > 1) {
-                        //GRESKA IMA VISE OD JEDNOG ZAHTEVA
+            if ($documents->isNotEmpty()) {
+                if ($documents->count() > 1) {
+                    //GRESKA IMA VISE OD JEDNOG ZAHTEVA
 //                    echo "ima vise od jednog zahteva";
-                        return FALSE;
-                    }
-                    foreach ($documents as $doc) {
+                    return FALSE;
+                }
+                foreach ($documents as $doc) {
 //                    echo $document->id;
-
-                        $document = $doc;
-                    }
-                } else {
+                    $document = $doc;
+                }
+            }
+            if ($prijava->status_id == REQUEST_SUBMITED) {
+                if ($documents->isEmpty()) {
                     $document = new Document();
                     $document->document_category_id = 1;
                     $document->documentable()->associate($prijava);
@@ -128,7 +129,6 @@ class ZavodjenjeController extends Controller
                     $reg->counter++;
                     $reg->save();
                     $regnum = $reg->registryDepartmentUnit->label . "-" . $reg->base_number . "/" . date("Y", strtotime($registry_date)) . "-" . $reg->counter;
-                    $log->type = 'INFO';
 
                     $document->document_type_id = 1;
                     $document->registry_id = $reg->id;
@@ -138,21 +138,21 @@ class ZavodjenjeController extends Controller
 
                     $document->save();
                 }
+            }
 
 //            echo("<br>$regnum");
-                $result['category'] = ucfirst($prijava->requestCategory->name);
-                $result[$log->type][$prijava->id] = "{$prijava->osoba->ime} {$prijava->osoba->prezime}";
+            $result['category'] = ucfirst($prijava->requestCategory->name);
+            $result[$log->type][$prijava->id] = "{$prijava->osoba->ime} {$prijava->osoba->prezime}";
 
-                $prijava->status_id = REQUEST_IN_PROGRESS;
-                $prijava->save();
+            $prijava->status_id = REQUEST_IN_PROGRESS;
+            $prijava->save();
 
-                $data['result'][] = array(
-                    $prijava->id,
-                    $prijava->osoba->ime . " " . $prijava->osoba->prezime,
-                    $document->registry_number,
-                    $document->registry_date,
-                );
-            }
+            $data['result'][] = array(
+                $prijava->id,
+                $prijava->osoba->ime . " " . $prijava->osoba->prezime,
+                $document->registry_number,
+                $document->registry_date,
+            );
         }
 //        dd();
         $result['pdf'] = $this->zavodneNalepnicePDF($data);
@@ -178,6 +178,7 @@ class ZavodjenjeController extends Controller
                 }*/
         $data['oblast'] = '';
         $filename = date("Ymd") . "_test";
+//        dd($data);
         $pdf = PDF::loadView('nalepniceRamipa89x43', $data);
 //        return $pdf->stream("$filename.pdf");
 //        return $pdf->download("$filename.pdf");

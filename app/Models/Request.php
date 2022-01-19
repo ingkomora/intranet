@@ -32,7 +32,7 @@ class Request extends Model
 
     protected $table = 'requests';
     // protected $primaryKey = 'id';
-    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
+//    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
     protected $guarded = ['id'];
 //    protected $guarded = [];
     // protected $fillable = [];
