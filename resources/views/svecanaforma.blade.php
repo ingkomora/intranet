@@ -25,7 +25,7 @@
                 <div id="imalac">{{$vrstaLicence}} из</div>
             @endif
             <div id="oblast"><strong>СТРУЧНЕ ОБЛАСТИ</strong> <br> {{$strucnaOblast}}</div>
-            @if(!in_array($uzaStrucnaOblastId, [1, 2, 4, 21, 29]))
+            @if(!in_array($uzaStrucnaOblastId, [1, 2, 4, 21, 29]) AND $podOblastVisible)
                 <div id="podoblast"><strong>УЖЕ СТРУЧНЕ ОБЛАСТИ</strong> <br> {{$uzaStrucnaOblast}}</div>
             @else
                 <div id="podoblast">&nbsp; <br> &nbsp;</div>

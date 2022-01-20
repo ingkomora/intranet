@@ -149,6 +149,7 @@ class ZahtevController extends Controller
                 }
 //                $licencaTip = $this->h->getLicencaTipFromLicencaBroj($licencaO);
                 $licencaTip = $licencaO->tipLicence;
+                $data->podOblastVisible = $licencaTip->podOblast->visible;
                 $data->osobaImeRPrezime = $this->h->iso88592_to_cirUTF($osoba->ime . " " . $osoba->roditelj . ". " . $osoba->prezime);
                 $data->zvanje = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->naziv);
                 $data->zvanjeskr = $this->h->iso88592_to_cirUTF($osoba->zvanjeId->skrnaziv);
@@ -1134,7 +1135,6 @@ class ZahtevController extends Controller
                         if (!$cond) {
                             continue;
                         } else {
-                            $this->ok++;
                             $data = [
                                 "osoba_id" => $osoba->id,
                                 "datum_prijema" => $licence[0]['datumukidanja'],
@@ -1148,9 +1148,9 @@ class ZahtevController extends Controller
                                 "status_id" => 13,
                                 "napomena" =>str_contains($osoba->napomena,'Broj rešenja o prestanku članstva')? $osoba->napomena . "##" . $licence[0]['razlogukidanja'] : $licence[0]['razlogukidanja'],
                             ];
-//                            $result = $this->updateMCreateRD($data);
+                            $result = $this->updateMCreateRD($data);
 
-                            /*if ($result) {
+/*                            if ($result) {
                                 $this->ok++;
                             } else {
                                 $this->error++;
@@ -1364,7 +1364,7 @@ class ZahtevController extends Controller
                 } else if ($newKey == 'status_id') {
                     $requestData[$newKey] = array_search($oldData['status_id'], $oldKey);
                 } else if ($newKey == 'note') {
-                    $requestData[$newKey] = isEmpty($oldData[$oldKey]) ? "Kreiran za osobe iz clanarinaod2006 kojih nema u tabeli memberships." : "##Kreiran za osobe iz clanarinaod2006 kojih nema u tabeli memberships.";
+                    $requestData[$newKey] = isEmpty($oldData[$oldKey]) ? "Kreiran automatski za osobu koja je prestala da bude clan (ima clanarinu), ima memebership i ima sve licence sa statusom D." : "Kreiran automatski za osobu koja je prestala da bude clan (ima clanarinu), ima memebership i ima sve licence sa statusom D.##" . $oldData[$oldKey];
                 } else {
                     $requestData[$newKey] = $oldData[$oldKey];
                 }
@@ -1482,7 +1482,7 @@ class ZahtevController extends Controller
                     } else if ($newKey == 'metadata') {
                         $documentOdlukaData[$newKey] = json_encode($oldKey, JSON_UNESCAPED_UNICODE);
                     } else if ($newKey == 'note') {
-                        $documentOdlukaData[$newKey] = isEmpty($oldData[$oldKey]) ? "Automatski kreiran na osnovu odluke UO o izdavanju licenci." : "##Automatski kreiran na osnovu odluke UO o izdavanju licenci.";
+                        $documentOdlukaData[$newKey] = "Automatski kreiran na osnovu zahteva retroaktivno.";
                     } else {
                         $documentOdlukaData[$newKey] = $oldData[$oldKey];
                     }
@@ -1537,7 +1537,7 @@ class ZahtevController extends Controller
             echo "<br>" . $e->getMessage();
             $errorInfo = $e->getMessage();
         }
-        dd('kraj');
+//        dd('kraj');
 
         return $created;
 //        }); //transaction
