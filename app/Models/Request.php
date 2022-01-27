@@ -47,14 +47,22 @@ class Request extends Model
     |--------------------------------------------------------------------------
     */
 
-    public static function existingStatuses($type = '')
+    public static function existingStatuses(int $type = NULL) : array
     {
-        if (!empty($type)) {
-            $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests', function ($query) use ($type){
+        if (!is_null($type)) {
+            $statusi = Status::where('id', '<>', NEAKTIVAN)
+                ->whereHas('requests', function ($query) use ($type) {
                 $query->where('request_category_id', $type);
-            })->pluck('naziv', 'id')->toArray();
+            })
+                ->orderBy('id')
+                ->pluck('naziv', 'id')
+                ->toArray();
         } else {
-            $statusi = Status::where('id', '<>', NEAKTIVAN)->whereHas('requests')->pluck('naziv', 'id')->toArray();
+            $statusi = Status::where('id', '<>', NEAKTIVAN)
+                ->whereHas('requests')
+                ->orderBy('id')
+                ->pluck('naziv', 'id')
+                ->toArray();
         }
 
         return $statusi;

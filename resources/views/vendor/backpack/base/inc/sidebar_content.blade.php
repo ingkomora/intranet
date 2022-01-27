@@ -68,11 +68,7 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-handshake"></i>ČLANSTVO</a>
     <ul class="nav-dropdown-items">
-        @role('korisnik|urednik|admin')
-        <li class="nav-title">PRIJEM U ČLANSTVO</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('prijavaclanstvo') }}'> Zahtevi</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinoveclanove') }}'> Obrada zahteva</a></li>
-        @endrole
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('requestmembership') }}'> Zahtevi</a></li>
         @role('admin')
 {{--        <li class="nav-title">MIROVANJA</li>--}}
 {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>--}}

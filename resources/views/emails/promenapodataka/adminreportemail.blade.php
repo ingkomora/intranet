@@ -1,4 +1,4 @@
-@component('vendor.mail.html.message_promena_podataka')
+@component('vendor.mail.html.message_iks')
 # Backpack/Promena podataka
 
 @component('mail::table')

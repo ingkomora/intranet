@@ -84,6 +84,7 @@ Route::group([
     Route::crud('request-category-type', 'RequestCategoryTypeCrudController');
     Route::crud('request-category', 'RequestCategoryCrudController');
     Route::crud('request', 'RequestCrudController');
+    Route::crud('requestmembership', 'RequestMembershipCrudController');
     Route::crud('osoba-edit', 'OsobaEditCrudController');
     Route::crud('registry-department-unit', 'RegistryDepartmentUnitCrudController');
     Route::crud('registry', 'RegistryCrudController');
