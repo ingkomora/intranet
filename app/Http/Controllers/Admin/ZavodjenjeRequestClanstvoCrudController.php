@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RequestRequest;
 use App\Models\Document;
-use App\Models\DocumentCategory;
+use App\Models\DocumentCategoryType;
 use App\Models\Request;
 use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -35,7 +35,7 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Request::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/zavodjenjerequestclanstvo');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi');
+        CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem u članstvo');
 
 //        samo zahtevi za prijem u clanstvo
         $this->crud->addClause('where', 'request_category_id', 1);
@@ -68,24 +68,15 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
                 'label' => 'Ime prezime (jmbg)',
                 'attribute' => 'ime_prezime_jmbg',
             ],
-            /*            'request_category_id' => [
-                            'name' => 'requestCategory',
-                            'type' => 'relationship',
-                            'label' => 'Kategorija zahteva',
-                        ],*/
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
                 'attribute' => 'naziv',
             ],
-            /*            'note' => [
-                            'name' => 'note',
-                            'label' => 'Napomena',
-                        ],*/
             'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
-                'attribute' => 'category_name_status_registry_number',
+                'attribute' => 'category_type_name_status_registry_number',
             ],
 
         ]);
@@ -135,25 +126,12 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
-                // 'element' => 'a', // the element will default to "a" so you can skip it here
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
                 'class' => 'btn btn-sm btn-outline-info m-1',
-//                'target' => '_blank',
             ]
         ]);
-
-        // simple filter
-        /*        $this->crud->addFilter([
-                    'type' => 'simple',
-                    'name' => 'active',
-                    'label' => 'Neažurirani'
-                ],
-                    FALSE,
-                    function () { // if the filter is active
-                        $this->crud->addClause('where', 'status_id', KREIRAN); // apply the "active" eloquent scope
-                    });*/
 
 
         // dropdown filter
@@ -167,22 +145,6 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
             function ($value) { // if the filter is active
                 $this->crud->addClause('where', 'status_id', $value);
             });
-
-        // dropdown filter
-/*        $this->crud->addFilter([
-            'name' => 'document_category',
-            'type' => 'dropdown',
-            'label' => 'Vrsta dokumenta'
-        ], function () {
-            return DocumentCategory::whereHas('documents', function ($q) {
-                $q->whereHasMorph('documentable', Request::class, function ($q) {
-                    $q->where('request_category_id', 1);
-                });
-            })->pluck('name', 'id')->toArray();
-        },
-            function ($value) { // if the filter is active
-                $this->crud->addClause('where', 'request_category_id', $value);
-            });*/
     }
 
     /**
@@ -201,47 +163,38 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
                 'label' => 'Ime prezime (jmbg)',
                 'attribute' => 'ime_prezime_jmbg',
             ],
-            /*            'request_category_id' => [
-                            'name' => 'requestCategory',
-                            'type' => 'relationship',
-                            'label' => 'Kategorija zahteva',
-                        ],*/
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
                 'attribute' => 'naziv',
             ],
-            /*            'note' => [
-                            'name' => 'note',
-                            'label' => 'Napomena',
-                        ],*/
             'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
-                'attribute' => 'category_name_status_registry_number',
+                'attribute' => 'category_type_name_status_registry_number',
+            ],
+            'note' => [
+                'name' => 'note',
+                'label' => 'napomena',
             ],
 
         ]);
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
-                // 'element' => 'a', // the element will default to "a" so you can skip it here
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info m-1',
-//                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info',
             ]
         ]);
 
         $this->crud->setColumnDetails('osoba', [
             'wrapper' => [
-                // 'element' => 'a', // the element will default to "a" so you can skip it here
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('osoba/' . $related_key . '/show');
                 },
                 'class' => 'btn btn-sm btn-outline-info',
-//                'target' => '_blank',
             ]
         ]);
 
@@ -257,7 +210,6 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
     {
         CRUD::setValidation(RequestRequest::class);
 
-//        $this->crud->setFromDb();
         $this->crud->addFields([
             'id',
             'osoba_id' => [
