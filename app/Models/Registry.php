@@ -88,6 +88,17 @@ class Registry extends Model
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Get the user's Document category name and registry number.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getIdSubjectAttribute()
+    {
+        return "{$this->id} ($this->subject)";
+    }
+
     /*
     |--------------------------------------------------------------------------
     | MUTATORS

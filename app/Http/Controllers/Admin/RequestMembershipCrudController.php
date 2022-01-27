@@ -149,10 +149,10 @@ class RequestMembershipCrudController extends CrudController
 
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update', 'membershipsigning']);
+            $this->crud->denyAccess(['create', 'delete', 'update', 'membershipapproving']);
         }
         if (backpack_user()->hasPermissionTo('odobri clanstvo')) {
-            $this->crud->allowAccess(['membershipsigning']);
+            $this->crud->allowAccess(['membershipapproving']);
         }
 
         $this->crud->set('show.setFromDb', FALSE);
