@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $updated_at
  * @property string $sent_at
  * @property string $valid_from
- * @property DocumentCategory $documentCategory
+ * @property DocumentCategoryType $documentCategory
  * @property DocumentType $documentType
  * @property Registry $registry
  * @property Status $status
@@ -51,7 +51,7 @@ class Document extends Model
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
-//    protected $appends = ['category_name_registry_number', 'category_name_status_registry_number'];
+//    protected $appends = ['category_name_registry_number', 'category_name_status_registry_number', 'category_type_name_status_registry_number'];
 
     /*
     |--------------------------------------------------------------------------
@@ -111,8 +111,7 @@ class Document extends Model
      */
     public function status()
     {
-        return $this->belongsTo(Status::class, 'status_id')//            ->where('log_status_grupa_id', DOKUMENTA)
-            ;
+        return $this->belongsTo(Status::class, 'status_id');
     }
 
     /**
@@ -161,6 +160,17 @@ class Document extends Model
     public function getCategoryNameStatusRegistryNumberAttribute()
     {
         return "{$this->documentCategory->name} ({$this->status->naziv} | $this->registry_number)";
+    }
+
+    /**
+     * Get the user's Document category type name, status and registry number.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getCategoryTypeNameStatusRegistryNumberAttribute()
+    {
+        return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $this->registry_number)";
     }
     /*
     |--------------------------------------------------------------------------

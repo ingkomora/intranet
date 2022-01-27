@@ -11,10 +11,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $note
  * @property string $created_at
  * @property string $updated_at
- * @property Document[] $documents
- * @property DocumentCategory $documentCategoryType
+ * @property DocumentCategory[] $documentCategories
  */
-class DocumentCategory extends Model
+class DocumentCategoryType extends Model
 {
     use CrudTrait;
 
@@ -24,7 +23,7 @@ class DocumentCategory extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'document_categories';
+    protected $table = 'document_category_types';
     // protected $primaryKey = 'id';
 //    public $timestamps = TRUE;
     protected $guarded = ['id'];
@@ -45,18 +44,11 @@ class DocumentCategory extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function documents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function documentCategories()
     {
-        return $this->hasMany(Document::class);
+        return $this->hasMany(DocumentCategory::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function documentCategoryType(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(DocumentCategoryType::class);
-    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES

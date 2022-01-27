@@ -26,7 +26,7 @@ class DocumentCategoryCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\DocumentCategory::class);
+        CRUD::setModel(\App\Models\DocumentCategoryType::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/document-category');
         CRUD::setEntityNameStrings('document category', 'document categories');
     }

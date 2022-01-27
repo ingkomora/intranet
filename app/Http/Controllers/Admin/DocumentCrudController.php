@@ -33,8 +33,12 @@ class DocumentCrudController extends CrudController
         $this->crud->set('show.setFromDb', FALSE);
 
 
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update']);
+        if (backpack_user()->hasRole('admin')) {
+            $this->crud->allowAccess(['create', 'delete', 'update']);
+        }
+
+        if (backpack_user()->hasRole('sluzba_maticne_sekcije')){
+            $this->crud->allowAccess(['update']);
         }
 
 //        $this->crud->enableDetailsRow();
@@ -213,22 +217,26 @@ class DocumentCrudController extends CrudController
 
         $this->crud->addFields([
             'id',
-            'document_category_id',
-            'document_type_id',
-            'registry_id',
-            'status_id',
-            'user_id',
+//            'document_category_id',
+//            'document_type_id',
+            'registry_id' => [
+                'name' => 'registry',
+                'type' => 'relationship',
+                'attribute' => 'id_subject',
+            ],
+//            'status_id',
+//            'user_id',
             'registry_number',
             'registry_date',
-            'path',
-            'location',
-            'barcode',
-            'metadata',
-            'note',
-            'documentable_type',
-            'documentable_id',
-            'created_at',
-            'updated_at',
+//            'path',
+//            'location',
+//            'barcode',
+//            'metadata',
+//            'note',
+//            'documentable_type',
+//            'documentable_id',
+//            'created_at',
+//            'updated_at',
         ]);
 
         /**
