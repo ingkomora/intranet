@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\RegisterRequestRequest;
 use App\Http\Requests\RequestRequest;
 use App\Models\Document;
 use App\Models\DocumentCategoryType;
+use App\Models\DocumentCategory;
 use App\Models\Request;
 use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -15,7 +17,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class ZavodjenjeRequestClanstvoCrudController extends CrudController
+class RegisterRequestCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -24,7 +26,7 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
 
-    use Operations\RequestZavodjenjeBulkOperation;
+    use Operations\RegisterRequestBulkOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -34,11 +36,45 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
     public function setup()
     {
         CRUD::setModel(\App\Models\Request::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/zavodjenjerequestclanstvo');
-        CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem u članstvo');
-
-//        samo zahtevi za prijem u clanstvo
-        $this->crud->addClause('where', 'request_category_id', 1);
+        /*        CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem u članstvo');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestclanstvo');
+                CRUD::addClause('where', 'request_category_id', 1);*/
+        $type = \Request::segment(2);
+//        dd($type);
+        switch ($type) {
+            case 'registerrequestclanstvo':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem i prekid članstva');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestclanstvo');
+                CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
+                break;
+            case 'registerrequestmirovanjeclanstva':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za mirovanje');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestmirovanjeclanstva');
+                CRUD::addClause('whereIn', 'request_category_id', [4, 5]);
+                break;
+            case 'registerrequestlicence':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
+                CRUD::addClause('where', 'request_category_id', 8); //ubaciti kategorije za licence
+                break;
+            case 'registerrequestuverenjeregistar':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje uverenja o upisu u registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestuverenjeregistar');
+                CRUD::addClause('where', 'request_category_id', 3);
+                break;
+            case 'registerrequestsfl':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje svečane forme licence');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestsfl');
+                CRUD::addClause('where', 'request_category_id', 3);
+                break;
+            case 'registerrequestresenjeclanstvo':
+                CRUD::setEntityNameStrings('zahtev', 'Rešenja o prestanku i brisanju iz članstva');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestresenjeclanstvo');
+                CRUD::addClause('where', 'request_category_id', 2);//todo document_category_id
+//                CRUD::addClause('whereHas', 'documents');
+//todo document_category_id
+                break;
+        }
 
         $this->crud->set('show.setFromDb', FALSE);
 
@@ -67,6 +103,11 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
                 'type' => 'relationship',
                 'label' => 'Ime prezime (jmbg)',
                 'attribute' => 'ime_prezime_jmbg',
+            ],
+            'request_category_id' => [
+                'name' => 'requestCategory',
+                'type' => 'relationship',
+                'label' => 'Kategorija zahteva',
             ],
             'status_id' => [
                 'name' => 'status',
@@ -133,6 +174,28 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setColumnDetails('osoba', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+                }
+            }
+        ]);
 
         // dropdown filter
         $this->crud->addFilter([
@@ -145,6 +208,27 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
             function ($value) { // if the filter is active
                 $this->crud->addClause('where', 'status_id', $value);
             });
+        // simple filter
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'active',
+            'label' => 'Nezavršeni'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('where', 'status_id', '<>', REQUEST_FINISHED); // apply the "active" eloquent scope
+            });
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'documents',
+            'label' => 'Ima dokumente'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                CRUD::addClause('whereHas', 'documents', function ($q) {
+                    $q->whereIn('document_category_id', [12, 13]);
+                });
+        });
     }
 
     /**
@@ -163,6 +247,11 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
                 'label' => 'Ime prezime (jmbg)',
                 'attribute' => 'ime_prezime_jmbg',
             ],
+            'request_category_id' => [
+                'name' => 'requestCategory',
+                'type' => 'relationship',
+                'label' => 'Kategorija zahteva',
+            ],
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
@@ -175,7 +264,19 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
             ],
             'note' => [
                 'name' => 'note',
-                'label' => 'napomena',
+                'label' => 'Napomena',
+            ],
+            'created_at' => [
+                'name' => 'created_at',
+                'label' => 'Kreiran',
+                'type' => 'datetime',
+
+            ],
+            'updated_at' => [
+                'name' => 'updated_at',
+                'label' => 'Ažuriran',
+                'type' => 'datetime',
+
             ],
 
         ]);
@@ -208,10 +309,10 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(RequestRequest::class);
+        CRUD::setValidation(RegisterRequestRequest::class);
 
         $this->crud->addFields([
-            'id',
+//            'id',
             'osoba_id' => [
                 'name' => 'osoba',
                 'type' => 'relationship',
@@ -234,28 +335,14 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
                 'name' => 'note',
                 'label' => 'Napomena',
             ],
-            'created_at' => [
-                'name' => 'created_at',
-                'label' => 'Kreiran',
-                'attributes' => ['disabled' => 'disabled'],
-                'type' => 'datetime_picker',
-                'datetime_picker_options' => [
-                    'format' => 'DD.MM.YYYY. HH:mm:ss',
-                    'language' => 'sr_latin'
-                ],
-            ],
-            'updated_at' => [
-                'name' => 'updated_at',
-                'label' => 'Ažuriran',
-                'attributes' => ['disabled' => 'disabled'],
-                'type' => 'datetime_picker',
-                'datetime_picker_options' => [
-                    'format' => 'DD.MM.YYYY. HH:mm:ss',
-                    'language' => 'sr_latin'
-                ],
-            ],
+
         ]);
 
+        $this->crud->modifyField('status', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->where('log_status_grupa_id', 11)->get(); // samo grupa statusa "Zahtevi"
+            }),
+        ]);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
@@ -283,6 +370,10 @@ class ZavodjenjeRequestClanstvoCrudController extends CrudController
         return view('crud::osoba_clanarina_details_row', $this->data);
     }
 
+    /*
+     * Fetch operations
+     * start
+     */
     public function fetchOsoba()
     {
         return $this->fetch([
