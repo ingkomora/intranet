@@ -59,11 +59,10 @@
             <div class="row mx-0">
                 @endif
                 <div class="col-6">
-                    <p>INŽENJERSKA KOMORA SRBIJE
-                        <br>Ime i prezime: {{$item[1]}}
-                        <br>Broj prijave: {{$item[0]}}
-                        <br>Zavodni broj: {{$item[2]}}
-                        <br>Datum prijema: {{$item[3]}}
+                    <p><span style="font-size: smaller">{{$item['category']}} ({{$item['id']}})</span>
+                        <br>Ime i prezime: <strong>{{$item['osoba']}}</strong>
+                        <br>Zavodni broj: <strong>{{$item['registry_number']}}</strong>
+                        <br>Datum prijema: <strong>{{$item['registry_date']}}</strong>
                         <br>Prilog:</p>
                 </div>
                 <?php $count++; ?>

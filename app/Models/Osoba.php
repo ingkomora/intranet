@@ -28,6 +28,8 @@ use Tesla\JMBG\JMBG;
  * @property Licenca[] $licence
  * @property Request[] $requests
  * @property Membership[] $memberships
+ * @property Clanarina $prvaClanarina
+ * @property Clanarina $poslednjaClanarina
  */
 class Osoba extends Model
 {

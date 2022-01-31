@@ -18,6 +18,7 @@ class DocumentCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -37,7 +38,7 @@ class DocumentCrudController extends CrudController
             $this->crud->allowAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasRole('sluzba_maticne_sekcije')){
+        if (backpack_user()->hasRole('sluzba_maticne_sekcije')) {
             $this->crud->allowAccess(['update']);
         }
 
@@ -62,6 +63,7 @@ class DocumentCrudController extends CrudController
             ],
             'documentable_id' => [
                 'name' => 'documentable_id',
+                'type' => 'text',
                 'label' => 'Broj zahteva'
             ],
             'status_id' => [
@@ -83,14 +85,25 @@ class DocumentCrudController extends CrudController
                 'type' => 'date',
                 'format' => 'DD.MM.Y.'
             ],
-            'documentable_type',
-            'document_type_id' => [
+//            'documentable_type',
+/*            'document_type_id' => [
                 'name' => 'documentType',
                 'label' => 'Tip dokumenta',
                 'type' => 'relationship',
-            ],
+            ],*/
         ]);
 
+        $this->crud->setColumnDetails('documentable_id', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+
+                    $query->orWhereHas('documentable.osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('documentable', function ($q) use ($column, $searchTerm) {
+                            $q->where('id', 'ilike', $searchTerm . '%');
+                        });
+            }
+        ]);
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -165,16 +178,16 @@ class DocumentCrudController extends CrudController
             ],
             'path',
             'location',
-            'documentable_type'=>[
-                'name'=> 'documentable_type',
+            'documentable_type' => [
+                'name' => 'documentable_type',
                 'label' => 'Model',
 //                'type'=> 'function_model',
 //                'function_name'=> 'relatedModel',
             ],
-            'documentable_id'=>[
-                'name'=> 'documentable_id',
+            'documentable_id' => [
+                'name' => 'documentable_id',
 //                'label' => 'Documentable id',
-                'type'=> 'text',
+                'type' => 'text',
 //                'function_name'=> 'relatedModel',
             ],
             'barcode',
@@ -184,18 +197,6 @@ class DocumentCrudController extends CrudController
                 'function_name' => 'metadataFormating'
             ],
             'note',
-            'created_at' => [
-                'name' => 'created_at',
-                'label' => 'Kreiran',
-                'type' => 'datetime',
-                'format' => 'DD.MM.YYYY. HH:mm:ss'
-            ],
-            'updated_at' => [
-                'name' => 'updated_at',
-                'label' => 'Ažuriran',
-                'type' => 'datetime',
-                'format' => 'DD.MM.YYYY. HH:mm:ss'
-            ],
         ]);
 
         /**
@@ -216,27 +217,61 @@ class DocumentCrudController extends CrudController
         CRUD::setValidation(DocumentRequest::class);
 
         $this->crud->addFields([
-            'id',
-//            'document_category_id',
-//            'document_type_id',
+//            'id',
+
+            'document_category_id' => [
+                'name' => 'documentCategory',
+                'type' => 'relationship',
+//                'attribute' => 'id_subject',
+            ],
+            'document_type_id' => [
+                'name' => 'documentType',
+                'type' => 'relationship',
+//                'attribute' => 'id_subject',
+            ],
             'registry_id' => [
                 'name' => 'registry',
                 'type' => 'relationship',
                 'attribute' => 'id_subject',
             ],
-//            'status_id',
-//            'user_id',
+            'status_id' => [
+                'name' => 'status',
+                'label' => 'Status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
+            //            'user_id',
             'registry_number',
-            'registry_date',
+            'registry_date'=>[
+                'name' => 'registry_date',
+                'label' => 'datum zavođenja',
+                'type' => 'date_picker',
+                'date_picker_options' => [
+                    'todayBtn' => 'linked',
+                    'format' => 'dd.mm.yyyy.',
+                    'language' => 'rs-latin'
+                ],
+            ],
 //            'path',
 //            'location',
 //            'barcode',
 //            'metadata',
 //            'note',
-//            'documentable_type',
-//            'documentable_id',
+            'documentable' => [
+                'name' => 'documentable',
+                'type' => 'relationship',
+                'model' => '\App\Models\Request',
+                'attribute' => 'id',
+                'ajax' => TRUE
+            ],
 //            'created_at',
 //            'updated_at',
+        ]);
+
+        $this->crud->modifyField('status', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->where('log_status_grupa_id', 12)->get(); // samo grupa statusa "DOCUMENTS"
+            }),
         ]);
 
         /**
@@ -256,4 +291,22 @@ class DocumentCrudController extends CrudController
     {
         $this->setupCreateOperation();
     }
+
+    /*
+     * Fetch operations
+     * start
+     */
+    public function fetchDocumentable()
+    {
+        return $this->fetch([
+            'model' => \App\Models\Request::class, // required
+            'searchable_attributes' => [],
+            'paginate' => 10, // items to show per page
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? FALSE;
+                    return $model->where('id', 'ilike', $searchTerm . '%');
+            } // to filter the results that are returned
+        ]);
+    }
+
 }

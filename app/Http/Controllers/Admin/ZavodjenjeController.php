@@ -11,6 +11,8 @@ use App\Models\SiStruka;
 use App\Models\User;
 use DNS1D;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,11 +23,12 @@ class ZavodjenjeController extends Controller
     protected $result;
     protected $brprijava;
     protected $zavodjenje = [
-        'si' => ['url' => 'si', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
-        'licence' => ['url' => 'licence', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
-//        'clanstvo' => ['url' => 'clanstvo', 'model' => 'PrijavaClanstvo', 'title' => 'Zavođenje prijava za prijem u članstvo'],
-        'clanstvo' => ['url' => 'clanstvo', 'model' => 'Request', 'title' => 'Zavođenje prijava za prijem u članstvo'],
-        'sfl' => ['url' => 'sfl', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
+        'si' => ['document_category_id' => 10, 'registry_type' => 'oblast', 'url' => 'si', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
+        'licence' => ['document_category_id' => 5, 'registry_type' => 'oblast', 'url' => 'licence', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
+        'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
+        'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
+        'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
+        'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
     ];
 
     public function show($type)
@@ -89,8 +92,11 @@ class ZavodjenjeController extends Controller
     public function zavedi($type, array $data)
     {
         $result = [];
+        $data['result'] = [];
         $log = new Log();
         $log->type = 'INFO';
+        $documentsOK = TRUE;
+        $requestOK = FALSE;
 
         $nameSpace = 'App\Models\\';
         $model = $nameSpace . $this->zavodjenje[$type]['model'];
@@ -98,68 +104,153 @@ class ZavodjenjeController extends Controller
         $ids = array_map('trim', $data['entries']);
         $registry_date = (!empty($data['registry_date'])) ? Carbon::parse($data['registry_date'])->format('Y-m-d') : now()->toDateString();
         $this->brprijava = $ids;
-        $prijave = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
-        foreach ($prijave as $prijava) {
-            $documents = $prijava->documents->where('document_category_id', 1)->whereIn('status_id', [DOCUMENT_CREATED, DOCUMENT_REGISTERED]);
-//                    dd($documents);
-            if ($documents->isNotEmpty()) {
-                if ($documents->count() > 1) {
-                    //GRESKA IMA VISE OD JEDNOG ZAHTEVA
-//                    echo "ima vise od jednog zahteva";
-                    return FALSE;
+        $requests = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
+        foreach ($requests as $request) {
+            try {
+                if (is_array($this->zavodjenje[$type]['document_category_id'])) {
+                    $document_category_id = array_keys($this->zavodjenje[$type]['document_category_id'], $request->request_category_id);
+                } else {
+                    $document_category_id = (array)$this->zavodjenje[$type]['document_category_id'];
                 }
-                foreach ($documents as $doc) {
-//                    echo $document->id;
-                    $document = $doc;
+                DB::beginTransaction();
+                foreach ($document_category_id as $cat) {
+                    $resultDocument = $this->registerDocuments($request, $cat, $registry_date, $type);
+                    if (isset($result['ERROR']) and $resultDocument['ERROR'][$request->id]['status']) {
+                        DB::rollBack();
+                        $result['ERROR'][$request->id] = $resultDocument['ERROR'][$request->id]['message'];
+                        return $result;
+                    }
+
+                    array_push($data['result'], $resultDocument['data']);
+                    $documentsOK &= $resultDocument['registerDocumentOK'];
                 }
+
+                if ($request->status_id == REQUEST_SUBMITED) {
+                    $request->status_id = REQUEST_IN_PROGRESS;
+                    if ($request->save()) {
+                        $requestOK = TRUE;
+                    }
+                } else {
+                    $requestOK = TRUE;
+                }
+                if ($documentsOK && $requestOK) {
+                    DB::commit();
+                } else {
+                    DB::rollBack();
+                    $result['ERROR'][$request->id] = "Greška 3! ROLLBACK: Nije snimljen";
+                }
+                $result['category'] = ucfirst($request->requestCategory->name);
+                $result[$log->type][$request->id] = "{$request->osoba->ime} {$request->osoba->prezime}";
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $result['ERROR'][$request->id] = "Greška 4! {$e->getMessage()}<br>Greška prilikom zavođenja dokumenta.<br>Kontaktirajte službu za informacione tehnologije";
+                return $result;
             }
-            if ($prijava->status_id == REQUEST_SUBMITED) {
-                if ($documents->isEmpty()) {
-                    $document = new Document();
-                    $document->document_category_id = 1;
-                    $document->documentable()->associate($prijava);
-                }
-                if (is_null($document->registry_number) and is_null($document->registry_date)) {
-                    $zg = $prijava->osoba->zvanjeId->zvanje_grupa_id;
-                    $reg = Registry::whereHas('registryDepartmentUnit', function ($q) use ($zg) {
-                        $q->where('label', "02-$zg");
-                    })->whereHas('requestCategories', function ($q) use ($prijava) {
-                        $q->where('registry_request_category.request_category_id', 1);
-                    })->get()[0];
-                    $reg->counter++;
-                    $reg->save();
-                    $regnum = $reg->registryDepartmentUnit->label . "-" . $reg->base_number . "/" . date("Y", strtotime($registry_date)) . "-" . $reg->counter;
-
-                    $document->document_type_id = 1;
-                    $document->registry_id = $reg->id;
-                    $document->registry_number = $regnum;
-                    $document->registry_date = $registry_date;
-                    $document->status_id = DOCUMENT_REGISTERED;
-
-                    $document->save();
-                }
-            }
-
-//            echo("<br>$regnum");
-            $result['category'] = ucfirst($prijava->requestCategory->name);
-            $result[$log->type][$prijava->id] = "{$prijava->osoba->ime} {$prijava->osoba->prezime}";
-
-            $prijava->status_id = REQUEST_IN_PROGRESS;
-            $prijava->save();
-
-            $data['result'][] = array(
-                $prijava->id,
-                $prijava->osoba->ime . " " . $prijava->osoba->prezime,
-                $document->registry_number,
-                $document->registry_date,
-            );
         }
-//        dd();
         $result['pdf'] = $this->zavodneNalepnicePDF($data);
 
-//        return TRUE;
         return $result;
 
+    }
+
+    /**
+     * @param \App\Models\Request $request
+     * @param $document_category_id
+     * @param $registry_date
+     * @return array|\Illuminate\Http\RedirectResponse
+     */
+    protected function registerDocuments(\App\Models\Request $request, $document_category_id, $registry_date, $type)
+    {
+        $result = array();
+        $registryOK = $documentOK = FALSE;
+
+        $documents = $request->documents;
+        if ($documents->isNotEmpty()) {
+//            $documents->where('document_category_id', $document_category_id)->whereIn('status_id', [DOCUMENT_CREATED, DOCUMENT_REGISTERED]);
+            $documents = $documents->filter(function ($value, $key) use ($document_category_id) {
+                return $value->document_category_id == $document_category_id and ($value->status_id == DOCUMENT_CREATED or $value->status_id == DOCUMENT_REGISTERED);
+            });
+            if ($documents->count() > 1) {
+                //GRESKA IMA VISE OD JEDNOG ZAHTEVA
+//                    echo "ima vise od jednog zahteva";
+                $result['ERROR'][$request->id] = "Greška 1! Ima više od jednog dokumenta za kategoriju $document_category_id";
+                return $result;
+            } else {
+                $document = $documents->first();
+            }
+        } else {
+            $document = new Document();
+            $document->document_category_id = $document_category_id;
+            $document->status_id = DOCUMENT_CREATED;
+        }
+        if ($document->status_id == DOCUMENT_CREATED and is_null($document->registry_number) and is_null($document->registry_date)) {
+            if ($this->zavodjenje[$type]['registry_type'] == 'sekcija') {
+                $label = '02-' . $request->osoba->zvanjeId->zvanje_grupa_id;
+            } else if ($this->zavodjenje[$type]['registry_type'] == 'oblast') {
+//                $label = licenca;
+            } else {
+                $label = $this->zavodjenje[$type]['registry_type'];
+            }
+            $registry = Registry::where('status_id', AKTIVAN)
+                ->whereHas('registryDepartmentUnit', function ($q) use ($label) {
+                    $q->where('label', "$label");
+                })
+                ->whereHas('requestCategories', function ($q) use ($request, $document_category_id) {
+                    $q->where('registry_request_category.request_category_id', $request->request_category_id) // prijem u clanstvo
+//                            ->where('registry_request_category.document_category_id', $document_category_id) // odluka
+                    ;
+                })
+                ->get();
+            if ($registry->count() != 1) {
+                $result['ERROR'][$request->id]['status'] = TRUE;
+                $result['ERROR'][$request->id]['message'] = "Greška 2! \nGreška prilikom odabira skraćenog delovodnika. Kontaktirajte službu za informacione tehnologije";
+                return $result;
+            } else {
+                $registry = $registry->first();
+            }
+            if ($document->status_id == DOCUMENT_CREATED and empty($document->registry_number) and empty($document->registry_date)) {
+                $registry->counter++;
+            }
+            if ($registry->save()) {
+                $registryOK = TRUE;
+            }
+            $regnum = $registry->registryDepartmentUnit->label . "-" . $registry->base_number . "/" . date("Y", strtotime($registry_date)) . "-" . $registry->counter;
+            $document->document_type_id = 1;
+            $document->registry_id = $registry->id;
+            $document->registry_number = $regnum;
+            $document->registry_date = $registry_date;
+            $document->status_id = DOCUMENT_REGISTERED;
+            $document->user_id = backpack_user()->id;
+            $document->valid_from = $registry_date;
+            if ($document->save()) {
+                $document->barcode = empty($document->barcode) ? "{$request->id}#{$document->id}#{$document->registry_number}#{$document->registry_date}" : $document->barcode;
+                $document->documentable()->associate($request);
+                $document->metadata = json_encode([
+                    "title" => "{$document->documentCategory->name} za $request->request_category_id #{$request->id}",
+                    "author" => $request->osoba->ime_roditelj_prezime,
+                    "author_id" => $request->osoba->lib,
+                    "description" => "",
+                    "category" => ucfirst($request->requestCategory->name),
+                    "created_at" => $registry_date,
+                ], JSON_UNESCAPED_UNICODE);
+                $document->save();
+                $documentOK = TRUE;
+            }
+            if ($registryOK && $documentOK) {
+                $result['registerDocumentOK'] = TRUE;
+            }
+        } else {
+            //ako je dokument zaveden onda je sve ok
+            $result['registerDocumentOK'] = TRUE;
+        }
+        $result['data'] = array(
+            'category' => $document->documentCategory->name,
+            'osoba' => $request->osoba->getImeRoditeljPrezimeAttribute(),
+            'id' => $request->id,
+            'registry_number' => $document->registry_number,
+            'registry_date' => Carbon::parse($document->registry_date)->format('d.m.Y.'),
+        );
+        return $result;
     }
 
     /**
@@ -167,7 +258,8 @@ class ZavodjenjeController extends Controller
      *
      * @return string|\Illuminate\Http\Response
      */
-    public function zavodneNalepnicePDF($data)
+    public
+    function zavodneNalepnicePDF($data)
     {
         $prijave = \App\Models\Request::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
 
@@ -197,7 +289,8 @@ class ZavodjenjeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function nalepnicePDF()
+    public
+    function nalepnicePDF()
     {
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         $data['result'] = $prijave->map(function ($prijava) {
@@ -224,7 +317,8 @@ class ZavodjenjeController extends Controller
     /**
      * @param $prijava_id
      */
-    public function prijavaPDF($prijava_id, $type = 'stream')
+    public
+    function prijavaPDF($prijava_id, $type = 'stream')
     {
         $prijava = SiPrijava::findOrFail($prijava_id);
         $zahtev = $prijava->zahtevLicenca;

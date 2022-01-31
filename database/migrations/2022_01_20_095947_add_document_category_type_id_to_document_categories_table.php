@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRegistryRequestCategoryTable extends Migration
+class AddDocumentCategoryTypeIdToDocumentCategoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,12 @@ class CreateRegistryRequestCategoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('registry_request_category', function (Blueprint $table) {
-            $table->foreignId('registry_id')
+        Schema::table('document_categories', function (Blueprint $table) {
+            $table->foreignId('document_category_type_id')
+                ->nullable()
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
-            $table->foreignId('request_category_id')
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('restrict');
-            $table->timestamps();
         });
     }
 
@@ -33,6 +29,8 @@ class CreateRegistryRequestCategoryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('registry_request_category');
+        Schema::table('document_categories', function (Blueprint $table) {
+            $table->dropForeign('document_category_document_category_type_id_foreign');
+        });
     }
 }

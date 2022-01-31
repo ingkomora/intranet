@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use function Composer\Autoload\includeFile;
 
-trait RequestZavodjenjeBulkOperation
+trait RegisterRequestBulkOperation
 {
     /**
      * Define which routes are needed for this operation.
@@ -18,26 +18,26 @@ trait RequestZavodjenjeBulkOperation
      * @param string $routeName Prefix of the route name.
      * @param string $controller Name of the current CrudController.
      */
-    protected function setupRequestZavodjenjeBulkRoutes($segment, $routeName, $controller)
+    protected function setupRegisterRequestBulkRoutes($segment, $routeName, $controller)
     {
-        Route::post($segment . '/requestzavodjenjebulk', [
-            'as' => $routeName . '.requestzavodjenjebulk',
-            'uses' => $controller . '@requestzavodjenjebulk',
-            'operation' => 'requestzavodjenjebulk',
+        Route::post($segment . '/registerrequestbulk', [
+            'as' => $routeName . '.registerrequestbulk',
+            'uses' => $controller . '@registerrequestbulk',
+            'operation' => 'registerrequestbulk',
         ]);
     }
 
     /**
      * Add the default settings, buttons, etc that this operation needs.
      */
-    protected function setupRequestZavodjenjeBulkDefaults()
+    protected function setupRegisterRequestBulkDefaults()
     {
-        $this->crud->allowAccess('requestzavodjenjebulk');
+        $this->crud->allowAccess('registerrequestbulk');
 
         $this->crud->operation('list', function () {
             if (backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) {
                 $this->crud->enableBulkActions();
-                $this->crud->addButtonFromView('top', 'requestzavodjenjebulkbutton', 'requestzavodjenjebulkbutton', 'end');
+                $this->crud->addButtonFromView('top', 'registerrequestbulkbutton', 'registerrequestbulkbutton', 'end');
             }
         });
     }
@@ -47,14 +47,14 @@ trait RequestZavodjenjeBulkOperation
      *
      * @return array
      */
-    public function requestzavodjenjebulk()
+    public function registerrequestbulk()
     {
-        $this->crud->hasAccessOrFail('requestzavodjenjebulk');
+        $this->crud->hasAccessOrFail('registerrequestbulk');
 //        $entries = $this->crud->getRequest()->input('entries');
 
         // declaration
         $data = $this->crud->getRequest()->all();
-        $type = str_replace('admin/zavodjenjerequest', '', $data['route']);
+        $type = str_replace('admin/registerrequest', '', $data['route']);
         $result = [];
         $mail_data = new \stdClass();
         $log = new Log();

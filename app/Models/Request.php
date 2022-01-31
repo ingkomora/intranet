@@ -136,6 +136,7 @@ class Request extends Model
         return $this->belongsToMany('App\Models\Registry', 'registry_request_category', 'request_category_id', 'registry_id')
             ->using('App\Models\RegistryRequestCategory')
             ->withPivot([
+                'document_category_id',
                 'created_at',
                 'updated_at',
             ]);

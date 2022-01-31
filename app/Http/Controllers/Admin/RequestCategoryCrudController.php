@@ -42,12 +42,10 @@ class RequestCategoryCrudController extends CrudController
         CRUD::column('id');
         CRUD::column('name');
         CRUD::column('note');
-        CRUD::column('request_category_type_id');
-        CRUD::column('status_id');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+        CRUD::column('requestCategoryType')->type('relationship');
+        CRUD::column('status_id')->type('relationship')->attribute('naziv');
 
-        /**
+                /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
@@ -64,14 +62,33 @@ class RequestCategoryCrudController extends CrudController
     {
         CRUD::setValidation(RequestCategoryRequest::class);
 
-        CRUD::field('id');
-        CRUD::field('name');
-        CRUD::field('note');
-        CRUD::field('request_category_type_id');
-        CRUD::field('status_id');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
+        $this->crud->addFields([
+//            'id',
+            'name',
+            'request_category_type_id' => [
+                'name' => 'requestCategoryType',
+                'type' => 'relationship',
+                'label' => 'Tip kategorija zahteva',
+            ],
+            //TODO samo OPSTI statusi !!!
+            'status_id' => [
+                'name' => 'status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
+            'note' => [
+                'name' => 'note',
+                'label' => 'Napomena',
+            ],
 
+        ]);
+
+
+        $this->crud->modifyField('status', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->where('log_status_grupa_id', 1)->get(); // samo grupa statusa "Zahtevi"
+            }),
+        ]);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');

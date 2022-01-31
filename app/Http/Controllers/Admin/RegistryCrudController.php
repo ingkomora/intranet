@@ -40,15 +40,15 @@ class RegistryCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
+        CRUD::column('registryDepartmentUnit')->attribute('label');
         CRUD::column('base_number');
-        CRUD::column('copy');
-        CRUD::column('subject');
-        CRUD::column('sub_base_number');
-        CRUD::column('registry_department_unit_id');
         CRUD::column('counter');
+        CRUD::column('subject');
+        CRUD::column('copy');
+//        CRUD::column('sub_base_number');
         CRUD::column('status_id');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+//        CRUD::column('created_at');
+//        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:

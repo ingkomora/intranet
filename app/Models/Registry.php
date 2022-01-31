@@ -71,6 +71,7 @@ class Registry extends Model
         return $this->belongsToMany('App\Models\Request', 'registry_request_category', 'registry_id', 'request_category_id')
             ->using('App\Models\RegistryRequestCategory')
             ->withPivot([
+                'document_category_id',
                 'created_at',
                 'updated_at',
             ]);

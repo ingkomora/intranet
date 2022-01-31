@@ -1,4 +1,4 @@
-@if ($crud->hasAccess('requestzavodjenjebulk') && $crud->get('list.bulkActions'))
+@if ($crud->hasAccess('registerrequestbulk') && $crud->get('list.bulkActions'))
     <a
         href="javascript:void(0)"
         onclick="requestZavodjenjeBulkEntries(this)"
@@ -68,7 +68,7 @@
                     // swal('You typed:' + input.value);
                     if (value) {
                         var ajax_calls = [];
-                        var request_zavodjenje_route = "{{ url($crud->route) }}/requestzavodjenjebulk";
+                        var request_zavodjenje_route = "{{ url($crud->route) }}/registerrequestbulk";
 
                         // submit an AJAX delete call
                         $.ajax({
@@ -102,9 +102,9 @@
 
                                 }
                                 if (result['ERROR']) {
-                                    var errors = "<strong>Zahtevi koji nisu ažurirani:</strong> <br>| ";
-                                    $.each(result['ERROR'], function (id, item) {
-                                        errors += id + " | ";
+                                    var errors = "<strong>Zahtevi koji nisu ažurirani:</strong> <br> ";
+                                    $.each(result['ERROR'], function (id, message) {
+                                        errors += "<strong>" + id + "</strong>: " + message + "<br>";
                                     });
                                     new Noty({
                                         type: "warning",

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\RequestMembershipRequest;
+use App\Http\Requests\RegisterRequestRequest;
 use App\Models\RequestCategory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -324,7 +324,7 @@ class RequestMembershipCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(RequestMembershipRequest::class);
+        CRUD::setValidation(RegisterRequestRequest::class);
 
         $this->crud->addFields($this->fields_definition_array);
         $this->crud->removeFields(['id', 'requestCategory', 'created_at', 'updated_at']);

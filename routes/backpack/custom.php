@@ -93,5 +93,11 @@ Route::group([
     Route::crud('membership', 'MembershipCrudController');
     Route::crud('clanarina', 'ClanarinaCrudController');
     Route::crud('clanarina-old', 'ClanarinaOldCrudController');
-    Route::crud('zavodjenjerequestclanstvo', 'ZavodjenjeRequestClanstvoCrudController');
+    //ZAVOĐENJE
+    Route::crud('registerrequestclanstvo', 'RegisterRequestCrudController');
+    Route::crud('registerrequestmirovanjeclanstva', 'RegisterRequestCrudController');
+    Route::crud('registerrequestlicence', 'RegisterRequestCrudController');
+    Route::crud('registerrequestuverenjeregistar', 'RegisterRequestCrudController');
+    Route::crud('registerrequestsfl', 'RegisterRequestCrudController');
+    Route::crud('registerrequestresenjeclanstvo', 'RegisterRequestCrudController');
 }); // this should be the absolute last line of this file

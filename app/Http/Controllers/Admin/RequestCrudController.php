@@ -68,10 +68,90 @@ class RequestCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'naziv',
             ],
+            'documents' => [
+                'name' => 'documents',
+                'type' => 'relationship',
+                'attribute' => 'category_type_name_status_registry_number',
+            ],
             'note' => [
                 'name' => 'note',
                 'label' => 'Napomena',
             ],
+        ]);
+
+        $this->crud->modifyColumn('id', [
+            'name' => 'id',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+//                    dd($searchTerm);
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+                    $query->whereIn('id', $searchTermArray);
+                } else {
+                    $query->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            }
+        ]);
+
+
+        $this->crud->modifyColumn('status', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($entry->status_id) {
+//                        case OBRADJEN:
+//                            return 'bg-success text-white px-2 rounded';
+//                        case PROBLEM:
+//                            return 'bg-danger text-white px-2 rounded';
+//                        case OTKAZAN:
+//                            return 'border border-danger text-white px-2 rounded';
+//                        case REQUEST_CREATED:
+//                            return 'border border-info text-white px-2 rounded';
+                        case REQUEST_SUBMITED:
+                            return 'text-success';
+//                        case REQUEST_IN_PROGRESS:
+//                            return 'border border-warning text-white px-2 rounded';
+//                        case REQUEST_FINISHED:
+//                            return 'border border-success text-white px-2 rounded';
+//                        case REQUEST_PROBLEM:
+//                            return 'border border-danger text-white px-2 rounded';
+//                        case REQUEST_CANCELED:
+//                            return 'border border-info text-white px-2 rounded';
+                    }
+                }
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info m-1',
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('osoba', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+                }
+            }
         ]);
 
         /*        $this->crud->modifyColumn('status_id', [
@@ -169,7 +249,10 @@ class RequestCrudController extends CrudController
 
 //        $this->crud->setFromDb();
         $this->crud->addFields([
-            'id',
+            'id' =>[
+                'name'=>'id',
+                'attributes' => ['disabled' => 'disabled', 'readonly' => 'readonly'],
+            ],
             'osoba_id' => [
                 'name' => 'osoba',
                 'type' => 'relationship',
@@ -195,7 +278,7 @@ class RequestCrudController extends CrudController
             'created_at' => [
                 'name' => 'created_at',
                 'label' => 'Kreiran',
-                'attributes' => ['disabled' => 'disabled'],
+//                'attributes' => ['disabled' => 'disabled'],
                 'type' => 'datetime_picker',
                 'datetime_picker_options' => [
                     'format' => 'DD.MM.YYYY. HH:mm:ss',
@@ -205,7 +288,7 @@ class RequestCrudController extends CrudController
             'updated_at' => [
                 'name' => 'updated_at',
                 'label' => 'Ažuriran',
-                'attributes' => ['disabled' => 'disabled'],
+//                'attributes' => ['disabled' => 'disabled'],
                 'type' => 'datetime_picker',
                 'datetime_picker_options' => [
                     'format' => 'DD.MM.YYYY. HH:mm:ss',

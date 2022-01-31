@@ -119,6 +119,7 @@ php artisan krlove:generate:model Membership
 php artisan krlove:generate:model DocumentType
 
 php artisan krlove:generate:model RegistryRequestCategory --table-name=registry_request_category
+php artisan krlove:generate:model RequestImport --table-name=request_imports
 
 
 
