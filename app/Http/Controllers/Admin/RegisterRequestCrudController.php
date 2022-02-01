@@ -36,11 +36,8 @@ class RegisterRequestCrudController extends CrudController
     public function setup()
     {
         CRUD::setModel(\App\Models\Request::class);
-        /*        CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem u članstvo');
-                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestclanstvo');
-                CRUD::addClause('where', 'request_category_id', 1);*/
         $type = \Request::segment(2);
-//        dd($type);
+
         switch ($type) {
             case 'registerrequestclanstvo':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem i prekid članstva');
@@ -52,11 +49,11 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestmirovanjeclanstva');
                 CRUD::addClause('whereIn', 'request_category_id', [4, 5]);
                 break;
-            case 'registerrequestlicence':
+            /*case 'registerrequestlicence':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
                 CRUD::addClause('where', 'request_category_id', 8); //ubaciti kategorije za licence
-                break;
+                break;*/
             case 'registerrequestuverenjeregistar':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje uverenja o upisu u registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestuverenjeregistar');
@@ -197,7 +194,6 @@ class RegisterRequestCrudController extends CrudController
             }
         ]);
 
-        // dropdown filter
         $this->crud->addFilter([
             'name' => 'status',
             'type' => 'dropdown',
@@ -208,27 +204,28 @@ class RegisterRequestCrudController extends CrudController
             function ($value) { // if the filter is active
                 $this->crud->addClause('where', 'status_id', $value);
             });
+
         // simple filter
         $this->crud->addFilter([
             'type' => 'simple',
             'name' => 'active',
-            'label' => 'Nezavršeni'
+            'label' => 'Za zavođenje'
         ],
             FALSE,
             function () { // if the filter is active
-                $this->crud->addClause('where', 'status_id', '<>', REQUEST_FINISHED); // apply the "active" eloquent scope
+                $this->crud->addClause('where', 'status_id', REQUEST_SUBMITED); // apply the "active" eloquent scope
             });
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'documents',
-            'label' => 'Ima dokumente'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                CRUD::addClause('whereHas', 'documents', function ($q) {
-                    $q->whereIn('document_category_id', [12, 13]);
-                });
-        });
+        /*        $this->crud->addFilter([
+                    'type' => 'simple',
+                    'name' => 'documents',
+                    'label' => 'Ima dokumente'
+                ],
+                    FALSE,
+                    function () { // if the filter is active
+                        CRUD::addClause('whereHas', 'documents', function ($q) {
+                            $q->whereIn('document_category_id', [12, 13]);
+                        });
+                });*/
     }
 
     /**
