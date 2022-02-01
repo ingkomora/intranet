@@ -80,6 +80,9 @@ class RegisterRequestCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
+        if (backpack_user()->hasPermissionTo('zavedi')) {
+            $this->crud->allowAccess(['create']);
+        }
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();

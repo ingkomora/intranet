@@ -290,6 +290,11 @@ class Osoba extends Model
         return "{$this->ime} {$this->prezime} ($this->id)";
     }
 
+    public function getImePrezimeLibAttribute()
+    {
+        return "{$this->ime} {$this->prezime} ($this->lib)";
+    }
+
     /**
      * Get the user's Full name with roditelj.
      *
