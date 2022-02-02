@@ -4,6 +4,8 @@
             <p>
                 <strong>{{$entry->ime ?? ''}} {{$entry->prezime ?? ''}}</strong>, {{$entry->zvanjeId->naziv ?? ''}}
                 <br>
+                <strong>Članstvo:</strong> {{$entry->clan == 1 ? $entry->clan = "Član IKS" : "Nije član IKS"}}
+                <br>
                 <b>LIB:</b>
                 @if($entry->lib)
                     <a

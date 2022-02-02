@@ -43,9 +43,11 @@ class RequestMembershipCrudController extends CrudController
             'type' => 'relationship',
             'attribute' => 'naziv',
         ],
-        'note' => [
-            'name' => 'note',
-            'label' => 'Napomena',
+        'documents' => [
+            'name' => 'documents',
+            'type' => 'relationship',
+            'label' => 'Dokumenta',
+            'attribute' => 'category_type_name_status_registry_number',
         ],
     ],
         $fields_definition_array = [
@@ -211,6 +213,16 @@ class RequestMembershipCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
+            ]
+        ]);
+
         $this->crud->addFilter([
             'name' => 'request_category',
             'type' => 'dropdown',
@@ -259,16 +271,6 @@ class RequestMembershipCrudController extends CrudController
 
 //        na definisane colone dodajemo jos ove
         $this->crud->addColumns([
-            /*            'requestable_type' => [
-                            'name' => 'requestable_type',
-                            'label' => 'Model',
-                            'type' => 'text',
-                        ],
-                        'requestable_id' => [
-                            'name' => 'requestable_id',
-                            'label' => 'Broj iz modela',
-                            'type' => 'text',
-                        ],*/
             'requestable' => [
                 'name' => 'requestable',
 //                'label' => 'Broj iz modela',
@@ -309,7 +311,7 @@ class RequestMembershipCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mx-1',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
                 'target' => '_blank',
             ]
         ]);

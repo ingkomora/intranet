@@ -127,7 +127,7 @@ class RequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info m-1',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
 

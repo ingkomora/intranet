@@ -12,16 +12,17 @@ class AdminReportEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $request;
+    protected $request, $error;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, array $error)
     {
         $this->request = $request;
+        $this->error = $error;
     }
 
     /**
@@ -34,6 +35,7 @@ class AdminReportEmail extends Mailable
         return $this
             ->markdown('emails.memberships.adminreportemail')
             ->from(backpack_user()->email, 'IKS - Stručna služba za poslove matičnih sekcija')
-            ->with(['data' => $this->request]);
+            ->with(['data' => $this->request, 'error' => $this->error]);
     }
 }
+
