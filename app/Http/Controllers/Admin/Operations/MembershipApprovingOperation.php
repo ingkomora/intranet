@@ -81,7 +81,7 @@ trait MembershipApprovingOperation
         $this->crud->hasAccessOrFail('membershipapproving');
         CRUD::setValidation(RequestMembershipApprovingRequest::class);
 
-        if (!backpack_user()->hasRole('admin') && !backpack_user()->hasPermissionTo('odobri clana')) {
+        if (!backpack_user()->hasRole('admin') && !backpack_user()->hasPermissionTo('odobri clanstvo')) {
             $this->crud->denyAccess(['create', 'delete', 'update', 'membershipapproving']);
         }
 
