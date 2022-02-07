@@ -26,12 +26,12 @@ class ZavodjenjeController extends Controller
     protected $result;
     protected $brprijava;
     protected $zavodjenje = [
-        'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblast', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
+        'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblast', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
         'licence' => ['document_category_id' => [5, 25], 'registry_type' => 'oblast', 'url' => 'licence', 'statusRel' => 'statusId', 'statusCol' => 'status', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
-        'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
-        'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
-        'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'statusRel' => 'status', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
-        'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
+        'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
+        'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status_id', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
+        'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
+        'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
     ];
 
     public function show($type)
@@ -172,7 +172,6 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
-                    DB::rollBack();
                     $result['ERROR'][1] = "Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
                     return $result;
                 }
@@ -187,7 +186,6 @@ class ZavodjenjeController extends Controller
 
                 if (isset($data['prilog'])) {
                     if (!($request->{$requestStatusColumnName} == REQUEST_IN_PROGRESS or $request->{$requestStatusColumnName} == REQUEST_FINISHED)) {
-                        DB::rollBack();
                         $result['ERROR'][1] = "Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
