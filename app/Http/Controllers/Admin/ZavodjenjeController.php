@@ -157,7 +157,6 @@ class ZavodjenjeController extends Controller
 
         if (isset($data['prilog'])) {
             if (count($ids) > 1) {
-                DB::rollBack();
                 $result['ERROR'][1] = "Zavođenje dopune je moguće samo za jedan izabrani zahtev";
                 return $result;
             } else {
@@ -201,6 +200,8 @@ class ZavodjenjeController extends Controller
 //                    ZAVEDI ILI ODSTAMPAJ SAMO ZAHTEV
                     $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', '<>', 11)->pluck('id')->toArray();
                 }
+
+                $documents=[];
 
                 foreach ($document_category_ids as $document_category_id) {
                     $existingDocuments = $request->documents;
