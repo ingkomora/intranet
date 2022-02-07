@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 class Clanarina extends Model
 {
     use CrudTrait;
-    use Traits\HasCompositePrimaryKey; // *** THIS!!! ***
+//    use Traits\HasCompositePrimaryKey; // *** THIS!!! ***
 //    const CREATED_AT = 'date_created';
     const UPDATED_AT = 'datumazuriranja';
 
