@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ZahtevLicencaRequest;
 use App\Models\Status;
+use App\Models\ZahtevLicenca;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -19,6 +20,7 @@ class ZahtevLicencaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use Operations\RegisterRequestBulkOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -27,9 +29,13 @@ class ZahtevLicencaCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\ZahtevLicenca::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
-        CRUD::setEntityNameStrings('zahtevlicenca', 'Zahtevi Licence');
+        CRUD::setModel(ZahtevLicenca::class);
+//        CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
+//        CRUD::setEntityNameStrings('zahtevlicenca', 'Zahtevi Licence');
+
+        CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
+//        CRUD::addClause('where', 'request_category_id', 8); //ubaciti kategorije za licence
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete']);
@@ -42,16 +48,16 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::enableExportButtons();
 
 
-        CRUD::setColumns(['id', 'osoba', 'licencatip', 'datum', 'statusId', 'prijem', 'prijava_clan_id', 'licenca_broj', 'licenca_broj_resenja', 'licenca_datum_resenja', 'created_at', 'updated_at']);
+        CRUD::setColumns(['id', 'osoba', 'licencatip', 'datum', 'statusId', 'prijem', 'documents', 'prijava_clan_id', 'licenca_broj', 'licenca_broj_resenja', 'licenca_datum_resenja', 'created_at', 'updated_at']);
 
-        /*       $this->crud->setColumnDetails('osoba', [
-                    'name' => 'osoba',
-                    'type' => 'select',
-                    'label' => 'Osoba',
-                    'entity' => 'osobaId',
-                    'attribute' => 'ime_prezime_jmbg',
-                    'model' => 'App\Models\Osoba',
-                ]);*/
+        /*$this->crud->setColumnDetails('osoba', [
+            'name' => 'osoba',
+            'type' => 'select',
+            'label' => 'Osoba',
+            'entity' => 'osobaId',
+            'attribute' => 'ime_prezime_jmbg',
+            'model' => 'App\Models\Osoba',
+        ]);*/
 
         /*        $this->crud->setColumnDetails('status', [
                     'name' => 'status',
@@ -72,7 +78,6 @@ class ZahtevLicencaCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('osoba');
         CRUD::column('licencatip');
 //        CRUD::column('strucniispit');
 //        CRUD::column('referenca1');
@@ -84,7 +89,7 @@ class ZahtevLicencaCrudController extends CrudController
             'name' => 'statusId',
             'type' => 'relationship',
             'label' => 'Status',
-            'attribute' => 'naziv',
+            'attribute' => 'const',
 
         ]);
 //        CRUD::column('razlog');
@@ -98,15 +103,23 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::column('licenca_broj');
         CRUD::column('licenca_broj_resenja');
         CRUD::column('licenca_datum_resenja');
+        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
-
 
         CRUD::addFilter([
             'type' => 'select2',
@@ -141,7 +154,7 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::field('referenca2');
         CRUD::field('pecat');
         CRUD::field('datum');
-        CRUD::field('status');
+        CRUD::field('statusId')->attribute('naziv');
         CRUD::field('razlog');
         CRUD::field('prijem');
         CRUD::field('preporuka2');
@@ -159,6 +172,11 @@ class ZahtevLicencaCrudController extends CrudController
          * - CRUD::field('price')->type('number');
          * - CRUD::addField(['name' => 'price', 'type' => 'number']));
          */
+        $this->crud->modifyField('statusId', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->where('log_status_grupa_id', 11)->get(); // samo grupa statusa "Zahtevi"
+            }),
+        ]);
     }
 
     /**

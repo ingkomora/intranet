@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $status_pregleda
  * @property string $datum_statusa_pregleda
  * @property string $licenca_datum_resenja
+ * @property int $request_category_id
  * @property Licencatip $tipLicence
  * @property Osoba $osobaId
  * @property Licenca $licenca
@@ -34,6 +35,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property RegOblast $regOblast
  * @property RegPodoblast $regPodoblast
  * @property PrijavaClanstvo $prijavaClan
+ * @property RequestCategory $requestCategory
+ * @property Document[] $documents
 
  */
 class ZahtevLicenca extends Model
@@ -49,7 +52,7 @@ class ZahtevLicenca extends Model
     /**
      * @var array
      */
-    protected $fillable = ['osoba', 'licencatip', 'strucniispit', 'prijava_clan_id', 'referenca1', 'referenca2', 'pecat', 'datum', 'status', 'razlog', 'prijem', 'preporuka2', 'preporuka1', 'mestopreuzimanja', 'status_pregleda', 'datum_statusa_pregleda', 'licenca_broj', 'licenca_broj_resenja', 'licenca_datum_resenja', 'created_at', 'updated_at'];
+    protected $guarded = ['id'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -124,5 +127,21 @@ class ZahtevLicenca extends Model
     public function statusId()
     {
         return $this->belongsTo('App\Models\Status', 'status');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function requestCategory()
+    {
+        return $this->belongsTo('App\Models\RequestCategory');
+    }
+
+    /**
+     * Get all of the request's documents.
+     */
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }
