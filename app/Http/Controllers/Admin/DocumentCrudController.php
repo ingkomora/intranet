@@ -257,13 +257,14 @@ class DocumentCrudController extends CrudController
 //            'barcode',
 //            'metadata',
 //            'note',
-            'documentable' => [
+            /*'documentable' => [
                 'name' => 'documentable',
                 'type' => 'relationship',
-                'model' => '\App\Models\Request',
+//                'model' => '\App\Models\Request', //todo ne moze ovako
+                'model' => '\App\Models\ZahtevLicenca',
                 'attribute' => 'id',
                 'ajax' => TRUE
-            ],
+            ],*/
 //            'created_at',
 //            'updated_at',
         ]);
@@ -299,7 +300,7 @@ class DocumentCrudController extends CrudController
     public function fetchDocumentable()
     {
         return $this->fetch([
-            'model' => \App\Models\Request::class, // required
+            'model' => \App\Models\Request::class, // required  TODO mora da se izabere u zavisnosti morph tabele
             'searchable_attributes' => [],
             'paginate' => 10, // items to show per page
             'query' => function ($model) {
