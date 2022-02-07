@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property integer $id
  * @property string $name
  * @property string $note
+ * @property integer $document_category_type_id
  * @property string $created_at
  * @property string $updated_at
  * @property Document[] $documents
- * @property DocumentCategory $documentCategoryType
+ * @property DocumentCategoryType $documentCategoryType
  */
 class DocumentCategory extends Model
 {

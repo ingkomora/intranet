@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $updated_at
  * @property string $sent_at
  * @property string $valid_from
- * @property DocumentCategoryType $documentCategory
+ * @property DocumentCategory $documentCategory
  * @property DocumentType $documentType
  * @property Registry $registry
  * @property Status $status
@@ -45,7 +45,7 @@ class Document extends Model
 
     protected $table = 'documents';
     // protected $primaryKey = 'id';
-    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
+//    public $timestamps = FALSE; //PRIVEREMENO ZBOG KOPIRANJA
     protected $guarded = ['id'];
 //    protected $guarded = [];
     // protected $fillable = [];

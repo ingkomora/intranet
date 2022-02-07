@@ -70,6 +70,20 @@ class RequestCategory extends Model
     {
         return $this->hasMany('App\Models\Request');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function registries()
+    {
+        return $this->belongsToMany('App\Models\Registry', 'registry_request_category', 'request_category_id', 'registry_id')
+            ->using('App\Models\RegistryRequestCategory')
+            ->withPivot([
+                'document_category_id',
+                'created_at',
+                'updated_at',
+            ]);
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -81,7 +95,16 @@ class RequestCategory extends Model
     | ACCESSORS
     |--------------------------------------------------------------------------
     */
-
+    /**
+     * Get the Registry category
+     *
+     * @param string $value
+     * @return string
+     */
+/*    public function getRegistryCategoryDocumentAttribute()
+    {
+        return "$this->, $this->prebivalistebroj, $this->prebivalistemesto";
+    }*/
     /*
     |--------------------------------------------------------------------------
     | MUTATORS

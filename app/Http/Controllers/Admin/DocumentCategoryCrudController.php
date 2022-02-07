@@ -41,9 +41,10 @@ class DocumentCategoryCrudController extends CrudController
     {
         CRUD::column('id');
         CRUD::column('name');
+        CRUD::column('documentCategoryType');
         CRUD::column('note');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+//        CRUD::column('created_at');
+//        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -63,6 +64,7 @@ class DocumentCategoryCrudController extends CrudController
         CRUD::setValidation(DocumentCategoryRequest::class);
 
         CRUD::field('name');
+        CRUD::field('documentCategoryType');
         CRUD::field('note');
 //        CRUD::field('created_at');
 //        CRUD::field('updated_at');

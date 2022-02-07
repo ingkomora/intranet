@@ -63,7 +63,7 @@
                         <br>Ime i prezime: <strong>{{$item['osoba']}}</strong>
                         <br>Zavodni broj: <strong>{{$item['registry_number']}}</strong>
                         <br>Datum prijema: <strong>{{$item['registry_date']}}</strong>
-                        <br>Prilog:</p>
+                        <br>{{$item['prilogilidopuna']}}: <strong>{{$item['prilog']}}</strong></p>
                 </div>
                 <?php $count++; ?>
                 @if($count%2 == 0)

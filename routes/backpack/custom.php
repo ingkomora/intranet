@@ -39,9 +39,6 @@ Route::group([
     Route::get('/licencatip/{id}', 'ZahtevController@getLicencaTip');
     Route::get('/checkzahtev/{licenca}/{jmbg}', 'ZahtevController@checkZahtev');
     Route::get('/checklicencatip', 'ZahtevController@checkLicencaTip');
-    Route::get('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@show');
-    Route::post('/zavodjenje/zavedi/si', 'ZavodjenjeController@store');
-    Route::post('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@zavedi');
 
     Route::get('/splitaddress', 'ZahtevController@splitAddress');
     Route::get('/joinaddress', 'ZahtevController@joinAddress');
@@ -94,10 +91,18 @@ Route::group([
     Route::crud('clanarina', 'ClanarinaCrudController');
     Route::crud('clanarina-old', 'ClanarinaOldCrudController');
     //ZAVOĐENJE
+    Route::post('/zavodjenje/zavedi/si', 'ZavodjenjeController@store');
+    Route::post('/zavodjenje/zavedi/licence', 'ZavodjenjeController@storeLicence');
+    Route::get('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@show');
+    Route::post('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@zavedi');
+
+    Route::crud('registerrequestpromenapodataka', 'RegisterRequestCrudController');
     Route::crud('registerrequestclanstvo', 'RegisterRequestCrudController');
     Route::crud('registerrequestmirovanjeclanstva', 'RegisterRequestCrudController');
-    Route::crud('registerrequestlicence', 'RegisterRequestCrudController');
-    Route::crud('registerrequestuverenjeregistar', 'RegisterRequestCrudController');
+    Route::crud('registerrequestlicence', 'ZahtevLicencaCrudController');
+    Route::crud('registerrequestregistar', 'RegisterRequestCrudController');
     Route::crud('registerrequestsfl', 'RegisterRequestCrudController');
     Route::crud('registerrequestresenjeclanstvo', 'RegisterRequestCrudController');
+    Route::crud('registry-request-category', 'RegistryRequestCategoryCrudController');
+    Route::crud('document-category-type', 'DocumentCategoryTypeCrudController');
 }); // this should be the absolute last line of this file

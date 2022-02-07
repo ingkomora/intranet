@@ -41,6 +41,7 @@ class RegistryCrudController extends CrudController
     {
         CRUD::column('id');
         CRUD::column('registryDepartmentUnit')->attribute('label');
+        CRUD::column('requestCategories');
         CRUD::column('base_number');
         CRUD::column('counter');
         CRUD::column('subject');
@@ -72,11 +73,12 @@ class RegistryCrudController extends CrudController
         CRUD::field('copy');
         CRUD::field('subject');
         CRUD::field('sub_base_number');
-        CRUD::field('registry_department_unit_id');
+        CRUD::field('registryDepartmentUnit');
+        CRUD::field('requestCategories')/*->type('relationship')->pivot(TRUE)->pivotFields(['documentCategories'=> 'docCat'])*/;
         CRUD::field('counter');
-        CRUD::field('status_id');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
+        CRUD::field('statusi');
+//        CRUD::field('created_at');
+//        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:

@@ -60,15 +60,16 @@ class Registry extends Model
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function statusi()
+//        TODO RENAME statusi => status
     {
-        return $this->belongsTo('App\Models\Statusi', 'status_id');
+        return $this->belongsTo('App\Models\Status', 'status_id');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function requestCategories() {
-        return $this->belongsToMany('App\Models\Request', 'registry_request_category', 'registry_id', 'request_category_id')
+        return $this->belongsToMany('App\Models\RequestCategory', 'registry_request_category', 'registry_id', 'request_category_id')
             ->using('App\Models\RegistryRequestCategory')
             ->withPivot([
                 'document_category_id',

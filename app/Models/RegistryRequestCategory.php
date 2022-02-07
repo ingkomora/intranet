@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class RegistryRequestCategory extends Pivot
 {
+    use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     /**
      * The table associated with the model.
      *
@@ -22,6 +23,13 @@ class RegistryRequestCategory extends Pivot
     /**
      * @var array
      */
-    protected $fillable = ['registry_id', 'request_category_id', 'created_at', 'updated_at'];
+    protected $fillable = ['registry_id', 'request_category_id', 'document_category_id', 'created_at', 'updated_at'];
 
+    public function registry(){
+        return $this->hasOne('App\Models\Registry', 'id', 'registry_id');
+    }
+
+    public function requestCategory(){
+        return $this->hasOne('App\Models\RequestCategory', 'id', 'request_category_id');
+    }
 }

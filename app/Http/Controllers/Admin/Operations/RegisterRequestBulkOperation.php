@@ -58,10 +58,8 @@ trait RegisterRequestBulkOperation
         $result = [];
         $mail_data = new \stdClass();
         $log = new Log();
-
         $contoller = new ZavodjenjeController();
         $result = $contoller->zavedi($type, $data);
-
 
         return $result;
     }
