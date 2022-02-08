@@ -29,7 +29,7 @@ class ZavodjenjeController extends Controller
         'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblast', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
         'licence' => ['document_category_id' => [5, 25], 'registry_type' => 'oblast', 'url' => 'licence', 'statusRel' => 'statusId', 'statusCol' => 'status', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
         'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
-        'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status_id', 'statusCol' => 'status', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
+        'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
         'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
         'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
     ];
@@ -190,8 +190,11 @@ class ZavodjenjeController extends Controller
                     }
                     if (isset($data['prilog_text'])) {
 //                        ZAVEDI SAMO DOPUNU
-
-                        $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
+                        if (strlen($data['prilog_text']) > 90) {
+                            $result['ERROR'][1] = "Naziv dopune ne sme imati više od 90 karaktera!";
+                            return $result;
+                        }
+                            $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
                     } else {
 //                        ODSTAMPAJ SVE
 //                        dd($document_category_ids);
@@ -201,7 +204,7 @@ class ZavodjenjeController extends Controller
                     $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', '<>', 11)->pluck('id')->toArray();
                 }
 
-                $documents=[];
+                $documents = [];
 
                 foreach ($document_category_ids as $document_category_id) {
                     $existingDocuments = $request->documents;
@@ -215,7 +218,7 @@ class ZavodjenjeController extends Controller
                                 return $value->document_category_id == $document_category_id and ($value->status_id == DOCUMENT_CREATED or $value->status_id == DOCUMENT_REGISTERED);
                             });
                             //HTEO SI DOPUNU A NEMA TEXTA???!!
-                            $prilog['text'] = '/';
+//                            $prilog['text'] = '/';
                         }
                         if ($existingDocuments->count() > 1) {
                             $dopunaCategory = DocumentCategory::where('document_category_type_id', 11)->pluck('id')->toArray();
@@ -278,7 +281,8 @@ class ZavodjenjeController extends Controller
                 }
                 $result['category'] = ucfirst($resultDocument['requestCategory']);
                 $result[$log->type][$request->id] = $resultDocument['osoba']->getImeRoditeljPrezimeAttribute();
-            } catch (\Exception $e) {
+            } catch
+            (\Exception $e) {
                 DB::rollBack();
                 $result['ERROR'][$request->id] = "Greška 4! {$e->getMessage()}<br>Greška prilikom zavođenja dokumenta.<br>Kontaktirajte službu za informacione tehnologije";
                 return $result;
@@ -297,7 +301,8 @@ class ZavodjenjeController extends Controller
      * @param $prilog
      * @return array|\Illuminate\Http\RedirectResponse
      */
-    protected function registerDocuments($request, $document, $registry_date, $type, $prilog)
+    protected
+    function registerDocuments($request, $document, $registry_date, $type, $prilog)
     {
         $result = array();
         $registryOK = $documentOK = FALSE;
@@ -387,7 +392,7 @@ class ZavodjenjeController extends Controller
             'registry_number' => $document->registry_number,
             'registry_date' => Carbon::parse($document->registry_date)->format('d.m.Y.'),
 //            'prilog' => $prilog['text'],
-            'prilog' => $dopuna,
+            'prilog' => $dopuna ?? '/',
             'prilogilidopuna' => $document->documentCategory->document_category_type_id == 11 ? 'Dopuna' : 'Prilog'
         );
         $result['osoba'] = $osoba;
@@ -401,7 +406,8 @@ class ZavodjenjeController extends Controller
      *
      * @return string|\Illuminate\Http\Response
      */
-    public function zavodneNalepnicePDF($data)
+    public
+    function zavodneNalepnicePDF($data)
     {
         $data['oblast'] = '';
         $filename = date("Ymd") . "_test";
@@ -424,7 +430,8 @@ class ZavodjenjeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function nalepnicePDF()
+    public
+    function nalepnicePDF()
     {
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         $data['result'] = $prijave->map(function ($prijava) {
@@ -451,7 +458,8 @@ class ZavodjenjeController extends Controller
     /**
      * @param $prijava_id
      */
-    public function prijavaPDF($prijava_id, $type = 'stream')
+    public
+    function prijavaPDF($prijava_id, $type = 'stream')
     {
         $prijava = SiPrijava::findOrFail($prijava_id);
         $zahtev = $prijava->zahtevLicenca;
