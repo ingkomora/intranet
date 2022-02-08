@@ -95,6 +95,7 @@
                                     });
                                     new Noty({
                                         type: "error",
+                                        timeout: 20000,
                                         text: errors
                                     }).show();
                                 } else if (result['INFO']) {
