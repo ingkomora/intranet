@@ -90,13 +90,12 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>
-{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/licence') }}'> Zahtevi za licence</a></li>--}}
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestpromenapodataka') }}'> Zahtevi za promenu podataka</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestlicence') }}'> Zahtevi za licence</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestclanstvo') }}'> Zahtevi članstvo</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestmirovanjeclanstva') }}'> Zahtevi mirovanje</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
         @role('admin')
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestlicence') }}'> Zahtevi za licence novo</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestpromenapodataka') }}'> Zahtevi za promenu podataka</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestresenjeclanstvo') }}'> Rešenja članstvo</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistar') }}'> Registar</a></li>
         @endrole
