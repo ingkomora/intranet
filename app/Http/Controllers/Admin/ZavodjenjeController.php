@@ -52,7 +52,7 @@ class ZavodjenjeController extends Controller
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         foreach ($prijave as $prijava) {
 //            ZAVEDI SAMO PRIJAVE KOJE SU GENERISANE
-            if ($prijava->status_prijave == PRIJAVA_GENERISANA) {
+            if ($prijava->status_prijave == REQUEST_SUBMITED) {
                 if ($prijava->reg_oblast_id == 'E') {
 
                     $prijava->reg_pod_oblast_id = $prijava->zvanje->reg_oblast_id;
@@ -69,7 +69,7 @@ class ZavodjenjeController extends Controller
                 $prijava->datum_prijema = (!empty($request->datum_prijema)) ? Carbon::parse($request->datum_prijema)->format('Y-m-d') : now()->toDateString();
                 $prijava->app_korisnik_id = backpack_user()->id;
 //            STATUS PRIJAVE ZAVEDENA = 3
-                $prijava->status_prijave = PRIJAVA_ZAVEDENA;
+                $prijava->status_prijave = REQUEST_IN_PROGRESS;
                 $prijava->save();
             }
 
@@ -97,7 +97,7 @@ class ZavodjenjeController extends Controller
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         foreach ($prijave as $prijava) {
 //            ZAVEDI SAMO PRIJAVE KOJE SU GENERISANE
-            if ($prijava->status_prijave == PRIJAVA_GENERISANA) {
+            if ($prijava->status_prijave == REQUEST_SUBMITED) {
                 if ($prijava->reg_oblast_id == 'E') {
 
                     $prijava->reg_pod_oblast_id = $prijava->zvanje->reg_oblast_id;
@@ -114,7 +114,7 @@ class ZavodjenjeController extends Controller
                 $prijava->datum_prijema = (!empty($request->datum_prijema)) ? Carbon::parse($request->datum_prijema)->format('Y-m-d') : now()->toDateString();
                 $prijava->app_korisnik_id = backpack_user()->id;
 //            STATUS PRIJAVE ZAVEDENA = 3
-                $prijava->status_prijave = PRIJAVA_ZAVEDENA;
+                $prijava->status_prijave = REQUEST_IN_PROGRESS;
                 $prijava->save();
             }
 
