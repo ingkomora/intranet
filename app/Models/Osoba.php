@@ -25,6 +25,7 @@ use Tesla\JMBG\JMBG;
  * @property int $clan
  * @property string $lib
  * @property Zvanje $zvanjeId
+ * @property Titula $titulaId
  * @property Licenca[] $licence
  * @property Request[] $requests
  * @property Membership[] $memberships

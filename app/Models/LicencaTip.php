@@ -113,4 +113,14 @@ class LicencaTip extends Model
     public function getTipNazivAttribute() {
         return "{$this->id} - {$this->naziv}";
     }
+
+    /**
+     * Get the user's Full name.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getGenTipNazivAttribute() {
+        return "{$this->id} - {$this->naziv} [Generacija: {$this->generacija}]";
+    }
 }
