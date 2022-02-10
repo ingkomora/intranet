@@ -157,7 +157,7 @@ class ZavodjenjeController extends Controller
 
         if (isset($data['prilog_text'])) {
             if (count($ids) > 1) {
-                $result['ERROR'][1] = "Zavođenje dopune je moguće samo za jedan izabrani zahtev";
+                $result['ERROR'][1] = "Greška 1! Zavođenje dopune je moguće samo za jedan izabrani zahtev";
                 return $result;
             } else {
                 if (isset($data['prilog'])) {
@@ -168,7 +168,7 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
-                    $result['ERROR'][1] = "Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
+                    $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
                     return $result;
                 }
                 if (is_array($this->zavodjenje[$type]['document_category_id'])) {
@@ -182,13 +182,13 @@ class ZavodjenjeController extends Controller
 
                 if (isset($data['prilog'])) {
                     if (!($request->{$requestStatusColumnName} == REQUEST_IN_PROGRESS or $request->{$requestStatusColumnName} == REQUEST_FINISHED)) {
-                        $result['ERROR'][1] = "Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
+                        $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
                     if (isset($data['prilog_text'])) {
 //                        ZAVEDI SAMO DOPUNU
                         if (strlen($data['prilog_text']) > 90) {
-                            $result['ERROR'][1] = "Naziv dopune ne sme imati više od 90 karaktera!";
+                            $result['ERROR'][1] = "Greška 4! Naziv dopune ne sme imati više od 90 karaktera!";
                             return $result;
                         }
                         $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
@@ -222,7 +222,7 @@ class ZavodjenjeController extends Controller
                             if (!in_array($document_category_id, $dopunaCategory)) {
                                 //GRESKA IMA VISE OD JEDNOG ZAHTEVA ALI MOZE VISE PRILOGA
 //                    echo "ima vise od jednog zahteva";
-                                $result['ERROR'][$request->id] = "Greška 1! Ima više od jednog dokumenta za kategoriju $document_category_id";
+                                $result['ERROR'][$request->id] = "Greška 5! Ima više od jednog dokumenta za kategoriju $document_category_id";
                                 return $result;
                             } else {
                                 foreach ($existingDocuments as $document) {
@@ -274,14 +274,14 @@ class ZavodjenjeController extends Controller
                     DB::commit();
                 } else {
                     DB::rollBack();
-                    $result['ERROR'][$request->id] = "Greška 3! ROLLBACK: Nije snimljen";
+                    $result['ERROR'][$request->id] = "Greška 7! ROLLBACK: Nije snimljen";
                 }
                 $result['category'] = ucfirst($resultDocument['requestCategory']);
                 $result[$log->type][$request->id] = $resultDocument['osoba']->getImeRoditeljPrezimeAttribute();
             } catch
             (\Exception $e) {
                 DB::rollBack();
-                $result['ERROR'][$request->id] = "Greška 4! {$e->getMessage()}<br>Greška prilikom zavođenja dokumenta.<br>Kontaktirajte službu za informacione tehnologije";
+                $result['ERROR'][$request->id] = "Greška 8! {$e->getMessage()}<br>Greška prilikom zavođenja dokumenta.<br>Kontaktirajte službu za informacione tehnologije";
                 return $result;
             }
         }
@@ -342,7 +342,7 @@ class ZavodjenjeController extends Controller
 //            dd($registry);
             if ($registry->count() != 1) {
                 $result['ERROR'][$request->id]['status'] = TRUE;
-                $result['ERROR'][$request->id]['message'] = "Greška 2! \nGreška prilikom odabira skraćenog delovodnika. Kontaktirajte službu za informacione tehnologije";
+                $result['ERROR'][$request->id]['message'] = "Greška 6! \nGreška prilikom odabira skraćenog delovodnika. Kontaktirajte službu za informacione tehnologije";
                 return $result;
             } else {
                 $registry = $registry->first();
