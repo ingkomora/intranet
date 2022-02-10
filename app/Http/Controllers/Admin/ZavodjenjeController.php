@@ -140,6 +140,7 @@ class ZavodjenjeController extends Controller
     public function zavedi($type, array $data)
     {
         $result = [];
+        $prilog = [];
         $data['result'] = [];
         $log = new Log();
         $log->type = 'INFO';
@@ -149,13 +150,12 @@ class ZavodjenjeController extends Controller
         $model = $nameSpace . $this->zavodjenje[$type]['model'];
         $requestStatusRelationName = $this->zavodjenje[$type]['statusRel'];
         $requestStatusColumnName = $this->zavodjenje[$type]['statusCol'];
-//        echo "$model<br>";
         $ids = array_map('trim', $data['entries']);
         $registry_date = (!empty($data['registry_date'])) ? Carbon::parse($data['registry_date'])->format('Y-m-d') : now()->toDateString();
         $this->brprijava = $ids;
         $requests = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
 
-        if (isset($data['prilog'])) {
+        if (isset($data['prilog_text'])) {
             if (count($ids) > 1) {
                 $result['ERROR'][1] = "Zavođenje dopune je moguće samo za jedan izabrani zahtev";
                 return $result;
@@ -164,9 +164,6 @@ class ZavodjenjeController extends Controller
                     $prilog['text'] = $data['prilog_text'];
                 }
             }
-        } else {
-            $prilog['text'] = '';
-//            $document_category_id = NULL;
         }
         foreach ($requests as $request) {
             try {
@@ -194,7 +191,7 @@ class ZavodjenjeController extends Controller
                             $result['ERROR'][1] = "Naziv dopune ne sme imati više od 90 karaktera!";
                             return $result;
                         }
-                            $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
+                        $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
                     } else {
 //                        ODSTAMPAJ SVE
 //                        dd($document_category_ids);
@@ -301,9 +298,9 @@ class ZavodjenjeController extends Controller
      * @param $prilog
      * @return array|\Illuminate\Http\RedirectResponse
      */
-    protected
-    function registerDocuments($request, $document, $registry_date, $type, $prilog)
+    protected function registerDocuments($request, $document, $registry_date, $type, $prilog)
     {
+        $registerDocument = FALSE;
         $result = array();
         $registryOK = $documentOK = FALSE;
         if ($type == 'licence') {
@@ -311,8 +308,15 @@ class ZavodjenjeController extends Controller
         } else {
             $osoba = $request->osoba;
         }
-
-        if ($document->status_id == DOCUMENT_CREATED and is_null($document->registry_number) and is_null($document->registry_date)) {
+        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_IN_PROGRESS) {
+            if ($document->documentCategory->document_category_type_id == 11 and isset($prilog['text'])) {
+                $registerDocument = TRUE;
+            }
+        }
+        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_SUBMITED and $document->status_id == DOCUMENT_CREATED and is_null($document->registry_number) and is_null($document->registry_date)) {
+            $registerDocument = TRUE;
+        }
+        if ($registerDocument) {
             if ($this->zavodjenje[$type]['registry_type'] == 'sekcija') {
                 $label = '02-' . $osoba->zvanjeId->zvanje_grupa_id;
             } else if ($this->zavodjenje[$type]['registry_type'] == 'oblast') {
@@ -365,7 +369,7 @@ class ZavodjenjeController extends Controller
                     "author" => $osoba->ime_roditelj_prezime,
                     "author_id" => $osoba->lib,
                     "description" => "",
-                    "dopuna" => $prilog['text'] ?? '',
+                    "dopuna" => isset($prilog['text']) ? $prilog['text'] : '',
                     "category" => ucfirst($request->requestCategory->name),
                     "created_at" => $registry_date,
                 ], JSON_UNESCAPED_UNICODE);
