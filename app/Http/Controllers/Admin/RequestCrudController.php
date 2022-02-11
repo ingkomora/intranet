@@ -247,25 +247,23 @@ class RequestCrudController extends CrudController
     {
         CRUD::setValidation(RequestRequest::class);
 
-//        $this->crud->setFromDb();
         $this->crud->addFields([
-            'id' =>[
+            /*'id' =>[
                 'name'=>'id',
                 'attributes' => ['disabled' => 'disabled', 'readonly' => 'readonly'],
-            ],
+            ],*/
             'osoba_id' => [
                 'name' => 'osoba',
                 'type' => 'relationship',
                 'label' => 'Ime prezime (licence)',
                 'attribute' => 'ime_prezime_licence',
-                'ajax' => true
+                'ajax' => TRUE
             ],
             'request_category_id' => [
                 'name' => 'requestCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
             ],
-            //TODO samo OPSTI statusi !!!
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
@@ -275,26 +273,13 @@ class RequestCrudController extends CrudController
                 'name' => 'note',
                 'label' => 'Napomena',
             ],
-            'created_at' => [
-                'name' => 'created_at',
-                'label' => 'Kreiran',
-//                'attributes' => ['disabled' => 'disabled'],
-                'type' => 'datetime_picker',
-                'datetime_picker_options' => [
-                    'format' => 'DD.MM.YYYY. HH:mm:ss',
-                    'language' => 'sr_latin'
-                ],
-            ],
-            'updated_at' => [
-                'name' => 'updated_at',
-                'label' => 'Ažuriran',
-//                'attributes' => ['disabled' => 'disabled'],
-                'type' => 'datetime_picker',
-                'datetime_picker_options' => [
-                    'format' => 'DD.MM.YYYY. HH:mm:ss',
-                    'language' => 'sr_latin'
-                ],
-            ],
+
+        ]);
+
+        $this->crud->modifyField('status', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
+            }),
         ]);
 
         /**
@@ -313,6 +298,28 @@ class RequestCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+
+        $this->crud->addField([
+            'name' => 'created_at',
+            'label' => 'Kreiran',
+            'attributes' => ['disabled' => 'disabled'],
+            'type' => 'datetime_picker',
+            'datetime_picker_options' => [
+                'format' => 'DD.MM.YYYY. HH:mm:ss',
+                'language' => 'sr_latin'
+            ],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'updated_at',
+            'label' => 'Ažuriran',
+//                'attributes' => ['disabled' => 'disabled'],
+            'type' => 'datetime_picker',
+            'datetime_picker_options' => [
+                'format' => 'DD.MM.YYYY. HH:mm:ss',
+                'language' => 'sr_latin'
+            ],
+        ]);
     }
 
     protected function showDetailsRow($id)
