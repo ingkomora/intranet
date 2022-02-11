@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ZahtevLicencaRequest;
+use App\Models\LicencaTip;
+use App\Models\RegOblast;
+use App\Models\RegPodoblast;
 use App\Models\Status;
+use App\Models\VrstaPosla;
 use App\Models\ZahtevLicenca;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -55,11 +59,15 @@ class ZahtevLicencaCrudController extends CrudController
         }
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update']);
+            $this->crud->denyAccess(['create', 'delete', 'update', 'registerrequestbulk']);
+        }
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create', 'delete', 'update', 'registerrequestbulk']);
         }
 
         if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
-            $this->crud->denyAccess(['create', 'update']);
+            $this->crud->allowAccess(['registerrequestbulk']);
         }
         CRUD::enableExportButtons();
 
@@ -76,8 +84,8 @@ class ZahtevLicencaCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('osobaId')->attribute('ime_prezime_jmbg');
-        CRUD::column('licencatip');
+        CRUD::column('osobaId')->label('Osoba')->attribute('ime_prezime_jmbg');
+        CRUD::column('tipLicence')->label('Oznaka (tip)')->attribute('oznaka_tip');
 //        CRUD::column('strucniispit');
 //        CRUD::column('referenca1');
 //        CRUD::column('referenca2');
@@ -111,25 +119,6 @@ class ZahtevLicencaCrudController extends CrudController
             }
         ]);
 
-        $this->crud->setColumnDetails('documents', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('document/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
-        ]);
-
-        $this->crud->modifyColumn('statusId', [
-            'wrapper' => [
-                'class' => function ($crud, $column, $entry, $related_key) {
-                    if ($entry->status == REQUEST_SUBMITED) {
-                        return 'text-success';
-                    }
-                }
-            ]
-        ]);
-
         $this->crud->setColumnDetails('osobaId', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -153,6 +142,25 @@ class ZahtevLicencaCrudController extends CrudController
             }
         ]);
 
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->modifyColumn('statusId', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    if ($entry->status == REQUEST_SUBMITED) {
+                        return 'text-success';
+                    }
+                }
+            ]
+        ]);
+
         CRUD::addFilter([
             'type' => 'select2',
             'name' => 'statusId',
@@ -166,15 +174,56 @@ class ZahtevLicencaCrudController extends CrudController
             }
         );
 
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'active',
-            'label' => 'Za zavođenje'
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'vrstaPosla',
+            'label' => 'Vrsta stručnih poslova'
         ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('where', 'status', REQUEST_SUBMITED); // apply the "active" eloquent scope
-            });
+            function () {
+                return VrstaPosla::orderBy('id')->pluck('naziv', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'vrsta_posla_id', $value);
+            }
+        );
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'oblast',
+            'label' => 'Stručna oblast'
+        ],
+            function () {
+                return RegOblast::orderBy('id')->pluck('naziv', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'reg_oblast_id', $value);
+            }
+        );
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'podOblast',
+            'label' => 'Uža stručna oblast'
+        ],
+            function () {
+                return RegPodoblast::orderBy('id')->pluck('naziv', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'reg_pod_oblast_id', $value);
+            }
+        );
+
+        if ($this->allowRegister) {
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'active',
+                'label' => 'Za zavođenje'
+            ],
+                FALSE,
+                function () { // if the filter is active
+                    $this->crud->addClause('where', 'status', REQUEST_SUBMITED); // apply the "active" eloquent scope
+                });
+        }
 
     }
 
@@ -188,26 +237,26 @@ class ZahtevLicencaCrudController extends CrudController
     {
 
         CRUD::column('id');
-        CRUD::column('osobaId')->attribute('ime_prezime_jmbg');
-        CRUD::column('tipLicence')->attribute('gen_tip_naziv')->limit(500);
-        CRUD::column('licenca_broj');
+        CRUD::column('osobaId')->label('Osoba')->attribute('ime_prezime_jmbg');
+        CRUD::column('tipLicence')->label('Licenca')->attribute('tip_naziv_oznaka_gen')->limit(500);
+        CRUD::column('licenca');
         CRUD::column('licenca_broj_resenja');
         CRUD::column('licenca_datum_resenja')->type('date')->format('DD.MM.Y.');
         CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
         CRUD::column('datum')->type('date')->format('DD.MM.Y.');
         CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
         CRUD::column('statusId')->attribute('naziv')->label('Status');
+//        CRUD::column('prijava_clan_id');
         CRUD::column('razlog');
         CRUD::column('strucniispit');
-        CRUD::column('preporuka2');
-        CRUD::column('preporuka1');
-        CRUD::column('mestopreuzimanja');
-        CRUD::column('status_pregleda');
-        CRUD::column('datum_statusa_pregleda');
-        CRUD::column('prijava_clan_id');
+//        CRUD::column('preporuka2');
+//        CRUD::column('preporuka1');
+//        CRUD::column('mestopreuzimanja');
+//        CRUD::column('status_pregleda');
+//        CRUD::column('datum_statusa_pregleda');
         CRUD::column('referenca1');
         CRUD::column('referenca2');
-        CRUD::column('pecat');
+//        CRUD::column('pecat');
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
@@ -227,6 +276,25 @@ class ZahtevLicencaCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setColumnDetails('licenca', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('licenca/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info',
+                'target' => '_blank',
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
     }
 
 
@@ -240,9 +308,7 @@ class ZahtevLicencaCrudController extends CrudController
     {
         CRUD::setValidation(ZahtevLicencaRequest::class);
 
-        CRUD::field('osobaId')
-            ->ajax(TRUE)
-            ->attribute('ime_prezime_jmbg');
+        CRUD::field('osobaId')->ajax(TRUE)->attribute('ime_prezime_jmbg');
         CRUD::field('licencatip')->attribute('gen_tip_naziv');
         CRUD::field('licenca_broj');
         CRUD::field('licenca_broj_resenja');
@@ -256,8 +322,7 @@ class ZahtevLicencaCrudController extends CrudController
             ->type('relationship')
             ->ajax(TRUE)
             ->attribute('category_type_name_status_registry_number');
-        CRUD::field('datum')
-            ->type('date_picker')
+        CRUD::field('datum')->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',
                 'format' => 'dd.mm.yyyy.',
@@ -295,7 +360,7 @@ class ZahtevLicencaCrudController extends CrudController
          */
         $this->crud->modifyField('statusId', [
             'options' => (function ($query) {
-                return $query->orderBy('id')->where('log_status_grupa_id', 11)->get(); // samo grupa statusa "Zahtevi"
+                return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
             }),
         ]);
     }

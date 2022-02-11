@@ -5,6 +5,11 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property float $id
+ * @property string $naziv
+ */
+
 class RegOblast extends Model
 {
     use CrudTrait;

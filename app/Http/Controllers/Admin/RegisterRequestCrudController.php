@@ -31,6 +31,7 @@ class RegisterRequestCrudController extends CrudController
 
     protected $requestCategoryType;
     protected $requestCategory;
+
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
      *
@@ -40,7 +41,7 @@ class RegisterRequestCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Request::class);
         $type = \Request::segment(2);
-                $allowCreate = FALSE;
+        $allowCreate = FALSE;
 
         switch ($type) {
             case 'registerrequestpromenapodataka':
@@ -66,13 +67,13 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategory = [4, 5];
                 $allowCreate = TRUE;
                 break;
-/*            case 'registerrequestlicence':
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
-                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
-                CRUD::addClause('where', 'request_category_id', 7); //ubaciti kategorije za licence
-                $this->requestCategoryType = 2;
-                $this->requestCategory = [7];
-                break;*/
+            /*            case 'registerrequestlicence':
+                            CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
+                            CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
+                            CRUD::addClause('where', 'request_category_id', 7); //ubaciti kategorije za licence
+                            $this->requestCategoryType = 2;
+                            $this->requestCategory = [7];
+                            break;*/
             case 'registerrequestregistar':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje uverenja o upisu u registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistar');
@@ -196,7 +197,7 @@ class RegisterRequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info m-1',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
 
@@ -255,23 +256,24 @@ class RegisterRequestCrudController extends CrudController
             function () { // if the filter is active
                 $this->crud->addClause('where', 'status_id', REQUEST_SUBMITED); // apply the "active" eloquent scope
             });
-        /*        $this->crud->addFilter([
-                    'type' => 'simple',
-                    'name' => 'documents',
-                    'label' => 'Ima dokumente'
-                ],
-                    FALSE,
-                    function () { // if the filter is active
-                        CRUD::addClause('whereHas', 'documents', function ($q) {
-                            $q->whereIn('document_category_id', [12, 13]);
-                        });
-                });*/
+
+        /*$this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'documents',
+            'label' => 'Ima dokumente'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                CRUD::addClause('whereHas', 'documents', function ($q) {
+                    $q->whereIn('document_category_id', [12, 13]);
+                });
+            });*/
     }
 
     /**
-     * Define what happens when the List operation is loaded.
+     * Define what happens when the Show operation is loaded.
      *
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
+     * @see  https://backpackforlaravel.com/docs/crud-operation-show-entries
      * @return void
      */
     protected function setupShowOperation()
@@ -323,7 +325,7 @@ class RegisterRequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
 
@@ -357,12 +359,16 @@ class RegisterRequestCrudController extends CrudController
                 'attribute' => 'ime_prezime_licence',
                 'ajax' => TRUE
             ],
+            'documents' => [
+                'name' => 'documents',
+                'type' => 'relationship',
+                'attribute' => 'category_type_name_status_registry_number',
+            ],
             'request_category_id' => [
                 'name' => 'requestCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
             ],
-            //TODO samo OPSTI statusi !!!
             'status_id' => [
                 'name' => 'status',
                 'type' => 'relationship',
@@ -375,9 +381,24 @@ class RegisterRequestCrudController extends CrudController
 
         ]);
 
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->modifyField('requestCategory', [
+            'options' => (function ($query) {
+                return $query->orderBy('id')->whereIn('id', $this->requestCategory)->get();
+            }),
+        ]);
+
         $this->crud->modifyField('status', [
             'options' => (function ($query) {
-                return $query->orderBy('id')->where('log_status_grupa_id', 11)->get(); // samo grupa statusa "Zahtevi"
+                return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
             }),
         ]);
         /**
