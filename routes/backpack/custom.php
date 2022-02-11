@@ -100,6 +100,7 @@ Route::group([
     Route::crud('registerrequestclanstvo', 'RegisterRequestCrudController');
     Route::crud('registerrequestmirovanjeclanstva', 'RegisterRequestCrudController');
     Route::crud('registerrequestlicence', 'ZahtevLicencaCrudController');
+    Route::crud('registerrequestsi', 'SiPrijavaCrudController');
     Route::crud('registerrequestregistar', 'RegisterRequestCrudController');
     Route::crud('registerrequestsfl', 'RegisterRequestCrudController');
     Route::crud('registerrequestresenjeclanstvo', 'RegisterRequestCrudController');
