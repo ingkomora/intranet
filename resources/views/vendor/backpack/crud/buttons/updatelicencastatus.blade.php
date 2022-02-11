@@ -1,4 +1,4 @@
-@if ($crud->hasAccess('create') AND $entry->licence->isNotEmpty())
+@if ($crud->hasAccess('updatelicencastatus') AND $entry->licence->isNotEmpty())
     <a href="javascript:void(0)" onclick="updateLicencaStatus(this)" data-route="{{ url($crud->route.'/'.$entry->getKey().'/updatelicencastatus') }}" class="btn btn-sm btn-link" data-button-type="clone"><i class="la la-certificate"></i> Ažuriraj Licence</a>
 @endif
 

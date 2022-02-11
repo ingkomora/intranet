@@ -5,7 +5,7 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje osoba</a></li>
+{{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje osoba</a></li>--}}
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba') }}'> Osobe</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zvanje') }}'> Zvanja</a></li>
 
@@ -144,10 +144,10 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category-type') }}'>Document category types</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina') }}'> Članarine</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('clanarina-old') }}'> Članarine Old</a></li>
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-request-category') }}'> RegReqCat</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanarina') }}'> Članarine</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanarina-old') }}'> Članarine Old</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> RegReqCat</a></li>
+<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>
 @endrole
 
-<li class='nav-item'><a class='nav-link' href='{{ backpack_url('registry-request-category') }}'><i class='nav-icon la la-question'></i> Registry request categories</a></li>
 
