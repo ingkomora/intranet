@@ -154,31 +154,20 @@ class RequestCrudController extends CrudController
             }
         ]);
 
-        /*        $this->crud->modifyColumn('status_id', [
-                    'wrapper' => [
-                        'class' => function ($crud, $column, $entry, $related_key) {
-                            switch ($entry->status_id) {
-                                case OBRADJEN:
-                                    return 'bg-success text-white px-2 rounded';
-                                case PROBLEM:
-                                    return 'bg-danger text-white px-2 rounded';
-                                case OTKAZAN:
-                                    return 'border border-danger text-white px-2 rounded';
-                            }
-                        }
-                    ]
-                ]);*/
-
-        // simple filter
         $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'active',
-            'label' => 'Neažurirani'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('where', 'status_id', KREIRAN); // apply the "active" eloquent scope
+            'type' => 'dropdown',
+            'name' => 'clan',
+            'label' => 'Član'
+        ], function () {
+            return [
+                1 => 'Član je',
+                0 => 'Nije član',
+            ];
+        }, function ($value) {
+            $this->crud->addClause('whereHas', 'osoba', function ($q) use ($value) {
+                $q->where('clan', $value);
             });
+        });
 
         // simple filter
         $this->crud->addFilter([
@@ -193,18 +182,24 @@ class RequestCrudController extends CrudController
                 }); // apply the "active" eloquent scope
             });
         // simple filter
-        /*        $this->crud->addFilter([
-                    'type' => 'simple',
-                    'name' => 'nisuplatili',
-                    'label' => 'Nisu platili članarinu'
-                ],
-                    FALSE,
-                    function () { // if the filter is active
-                        $this->crud->addClause('whereHas', 'clanarine', function ($query) {
-                            $query->where('rokzanaplatu', '<', 'now()')
-                                ->where('iznoszanaplatu', 'iznosuplate + pretplata');
-                        }); // apply the "active" eloquent scope
-                    });*/
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'nisuplatili',
+            'label' => 'Nisu platili članarinu'
+        ],
+            FALSE,
+            function () {
+                // if the filter is active
+                // apply the "active" eloquent scope
+                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '<', 'now()')
+                        ->whereRaw('iznoszanaplatu = iznosuplate + pretplata');
+                });
+                $this->crud->addClause('whereDoesntHave', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '>=', 'now()');
+                });
+
+            });
 
         // dropdown filter
         $this->crud->addFilter([
@@ -219,22 +214,24 @@ class RequestCrudController extends CrudController
             });
 
         // dropdown filter
-        $this->crud->addFilter([
-            'name' => 'clanarina',
-            'type' => 'select2_multiple',
-            'label' => 'Plaćena članarina za godinu:'
-        ],
-            function () {
-                return \DB::table('requests')
-                    ->select('id', 'note')
-                    ->distinct('note')
-                    ->orderBy('note', 'DESC')
-                    ->pluck('note', 'note')
-                    ->toArray();
-            },
-            function ($values) { // if the filter is active
-                $this->crud->addClause('whereIn', 'note', json_decode($values));
-            });
+        if (backpack_user()->hasRole('admin')) {
+            $this->crud->addFilter([
+                'name' => 'clanarina',
+                'type' => 'select2_multiple',
+                'label' => 'Plaćena članarina za godinu:'
+            ],
+                function () {
+                    return \DB::table('requests')
+                        ->select('id', 'note')
+                        ->distinct('note')
+                        ->orderBy('note', 'DESC')
+                        ->pluck('note', 'note')
+                        ->toArray();
+                },
+                function ($values) { // if the filter is active
+                    $this->crud->addClause('whereIn', 'note', json_decode($values));
+                });
+        }
     }
 
     /**
@@ -302,8 +299,8 @@ class RequestCrudController extends CrudController
         $this->crud->addField([
             'name' => 'created_at',
             'label' => 'Kreiran',
-            'attributes' => ['disabled' => 'disabled'],
-            'type' => 'datetime_picker',
+//            'attributes' => ['disabled' => 'disabled'],
+//            'type' => 'datetime_picker',
             'datetime_picker_options' => [
                 'format' => 'DD.MM.YYYY. HH:mm:ss',
                 'language' => 'sr_latin'
