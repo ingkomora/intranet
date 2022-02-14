@@ -107,7 +107,7 @@ class RegisterRequestCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasPermissionTo('zavedi') AND $allowCreate) {
+        if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
             $this->crud->allowAccess(['create']);
         }
 
@@ -363,6 +363,7 @@ class RegisterRequestCrudController extends CrudController
                 'name' => 'documents',
                 'type' => 'relationship',
                 'attribute' => 'category_type_name_status_registry_number',
+                'ajax' => TRUE,
             ],
             'request_category_id' => [
                 'name' => 'requestCategory',

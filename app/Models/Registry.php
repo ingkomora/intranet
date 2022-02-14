@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $created_at
  * @property string $updated_at
  * @property RegistryDepartmentUnit $registryDepartmentUnit
+ * @property Status $status
  */
 class Registry extends Model
 {
@@ -59,8 +60,7 @@ class Registry extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function statusi()
-//        TODO RENAME statusi => status
+    public function status(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo('App\Models\Status', 'status_id');
     }
@@ -99,6 +99,11 @@ class Registry extends Model
     public function getIdSubjectAttribute()
     {
         return "{$this->id} ($this->subject)";
+    }
+
+    public function getBaseNumberSubjectAttribute()
+    {
+        return "{$this->base_number} ($this->subject)";
     }
 
     /*

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DocumentRequest;
+use App\Models\DocumentCategory;
+use App\Models\DocumentCategoryType;
+use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -72,12 +75,12 @@ class DocumentCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'naziv',
             ],
-            'user_id' => [
-                'name' => 'user',
-                'label' => 'Zaveo',
-                'type' => 'relationship',
-                'attribute' => 'name',
-            ],
+            /*            'user_id' => [
+                            'name' => 'user',
+                            'label' => 'Zaveo',
+                            'type' => 'relationship',
+                            'attribute' => 'name',
+                        ],*/
             'registry_number',
             'registry_date' => [
                 'name' => 'registry_date',
@@ -86,24 +89,76 @@ class DocumentCrudController extends CrudController
                 'format' => 'DD.MM.Y.'
             ],
 //            'documentable_type',
-/*            'document_type_id' => [
-                'name' => 'documentType',
-                'label' => 'Tip dokumenta',
-                'type' => 'relationship',
-            ],*/
+            /*            'document_type_id' => [
+                            'name' => 'documentType',
+                            'label' => 'Tip dokumenta',
+                            'type' => 'relationship',
+                        ],*/
+        ]);
+
+        $this->crud->modifyColumn('status', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    if ($entry->status_id == DOCUMENT_REGISTERED) {
+                        return 'text-success';
+                    }
+                }
+            ]
         ]);
 
         $this->crud->setColumnDetails('documentable_id', [
             'searchLogic' => function ($query, $column, $searchTerm) {
 
-                    $query->orWhereHas('documentable.osoba', function ($q) use ($column, $searchTerm) {
+                $query->orWhereHas('documentable.osoba', function ($q) use ($column, $searchTerm) {
+                    $q->where('id', 'ilike', $searchTerm . '%');
+                })
+                    ->orWhereHas('documentable', function ($q) use ($column, $searchTerm) {
                         $q->where('id', 'ilike', $searchTerm . '%');
-                    })
-                        ->orWhereHas('documentable', function ($q) use ($column, $searchTerm) {
-                            $q->where('id', 'ilike', $searchTerm . '%');
-                        });
+                    });
             }
         ]);
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'documentCategoryType',
+            'label' => 'Tip kategorije'
+        ],
+            function () {
+                return DocumentCategoryType::orderBy('id')->pluck('name', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('whereHas', 'documentCategory', function ($q) use ($value) {
+                    $q->where('document_category_type_id', $value);
+                });
+            }
+        );
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'documentCategory',
+            'label' => 'Kategorija'
+        ],
+            function () {
+                return DocumentCategory::orderBy('id')->pluck('name', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'document_category_id', $value);
+            }
+        );
+
+        CRUD::addFilter([
+            'type' => 'select2',
+            'name' => 'status',
+            'label' => 'Status'
+        ],
+            function () {
+                return Status::where('log_status_grupa_id', DOCUMENTS)->orderBy('id')->pluck('naziv', 'id')->toArray();
+            },
+            function ($value) { // if the filter is active
+                CRUD::addClause('where', 'status_id', $value);
+            }
+        );
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -130,26 +185,22 @@ class DocumentCrudController extends CrudController
                     'href' => function ($crud, $column, $entry, $related_key) {
                         return backpack_url('document-category/' . $related_key . '/show');
                     },
-                ],
-            ],
-            'document_type_id' => [
-                'name' => 'documentType',
-                'type' => 'relationship',
-                'label' => 'Tip dokumenta',
-                'wrapper' => [
-                    'href' => function ($crud, $column, $entry, $related_key) {
-                        return backpack_url('document-type/' . $related_key . '/show');
-                    },
+                    'target' => '_blank',
+                    'class' => 'btn btn-sm btn-outline-info mr-1',
                 ],
             ],
             'registry_id' => [
                 'name' => 'registry',
                 'type' => 'relationship',
                 'label' => 'Delovodnik',
+                'attribute' => 'base_number_subject',
+                'limit'=>500,
                 'wrapper' => [
                     'href' => function ($crud, $column, $entry, $related_key) {
                         return backpack_url('registry/' . $related_key . '/show');
                     },
+                    'target' => '_blank',
+                    'class' => 'btn btn-sm btn-outline-info mr-1',
                 ],
             ],
             'status_id' => [
@@ -161,20 +212,34 @@ class DocumentCrudController extends CrudController
                     'href' => function ($crud, $column, $entry, $related_key) {
                         return backpack_url('status/' . $related_key . '/show');
                     },
+                    'target' => '_blank',
+                    'class' => 'btn btn-sm btn-outline-info mr-1',
                 ],
             ],
             'user_id' => [
                 'name' => 'user',
-                'label' => 'Zaveo',
+                'label' => 'Zaveo korisnik',
                 'type' => 'relationship',
                 'attribute' => 'name',
             ],
             'registry_number',
             'registry_date' => [
                 'name' => 'registry_date',
-                'label' => 'Delovodnik',
+                'label' => 'Zaveden',
                 'type' => 'date',
                 'format' => 'DD.MM.Y.'
+            ],
+            'document_type_id' => [
+                'name' => 'documentType',
+                'type' => 'relationship',
+                'label' => 'Tip dokumenta',
+                'wrapper' => [
+                    'href' => function ($crud, $column, $entry, $related_key) {
+                        return backpack_url('document-type/' . $related_key . '/show');
+                    },
+                    'target' => '_blank',
+                    'class' => 'btn btn-sm btn-outline-info mr-1',
+                ],
             ],
             'path',
             'location',
@@ -242,7 +307,7 @@ class DocumentCrudController extends CrudController
             ],
             //            'user_id',
             'registry_number',
-            'registry_date'=>[
+            'registry_date' => [
                 'name' => 'registry_date',
                 'label' => 'datum zavođenja',
                 'type' => 'date_picker',
@@ -305,7 +370,7 @@ class DocumentCrudController extends CrudController
             'paginate' => 10, // items to show per page
             'query' => function ($model) {
                 $searchTerm = request()->input('q') ?? FALSE;
-                    return $model->where('id', 'ilike', $searchTerm . '%');
+                return $model->where('id', 'ilike', $searchTerm . '%');
             } // to filter the results that are returned
         ]);
     }
