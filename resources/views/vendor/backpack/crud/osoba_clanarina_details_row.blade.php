@@ -6,6 +6,8 @@
                 <br>
                 <strong>Članstvo:</strong> {{$entry->clan == 1 ? $entry->clan = "Član IKS" : "Nije član IKS"}}
                 <br>
+                <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
+                <br>
                 <b>LIB:</b>
                 @if($entry->lib)
                     <a

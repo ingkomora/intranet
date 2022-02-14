@@ -30,7 +30,9 @@ use Tesla\JMBG\JMBG;
  * @property Request[] $requests
  * @property Membership[] $memberships
  * @property Clanarina $prvaClanarina
+ * @property Clanarina $poslednjaPlacenaClanarina
  * @property Clanarina $poslednjaClanarina
+ * @property Clanarina $aktivanClan
  */
 class Osoba extends Model
 {
@@ -203,6 +205,24 @@ class Osoba extends Model
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')
             ->orderBy('rokzanaplatu','desc')->limit(1);
+    }
+
+    public function poslednjaPlacenaClanarina()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu','desc')->whereRaw('iznoszanaplatu = iznosuplate + pretplata')->limit(1);
+    }
+
+    public function aktivanClan()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu','desc')->whereRaw('rokzanaplatu >= now()')->limit(1);
+    }
+
+    public function poslednjeDveClanarine()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu','desc')->limit(2);
     }
 
     /**

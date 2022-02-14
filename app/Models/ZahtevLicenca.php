@@ -144,4 +144,12 @@ class ZahtevLicenca extends Model
     {
         return $this->morphMany(Document::class, 'documentable');
     }
+
+    /**
+     * Get all of the licence's requests.
+     */
+        public function requests()
+        {
+            return $this->morphMany(Request::class, 'requestable');
+        }
 }

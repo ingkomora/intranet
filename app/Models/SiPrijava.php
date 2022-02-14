@@ -32,8 +32,9 @@ use Illuminate\Support\Str;
  * @property ZahtevLicenca $zahtevLicenca
  * @property LicencaTip $tipLicence
  * @property User $user
- * @property Document $dokumenti
+ * @property Document $documents
  * @property Status $status
+ * @property RequestCategory $requestCategory
  */
 
 class SiPrijava extends Model
@@ -49,8 +50,8 @@ class SiPrijava extends Model
     protected $table = 'si_prijava';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
-    protected $guarded = []; //PRIVREMENO ZBOG KOPIRANJA
-//    protected $guarded = ['id'];
+//    protected $guarded = []; //PRIVREMENO ZBOG KOPIRANJA
+    protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
@@ -183,9 +184,9 @@ class SiPrijava extends Model
     /**
      * Get all of the post's comments.
      */
-    public function dokumenti()
+    public function documents()
     {
-        return $this->morphMany(Dokument::class, 'dokumentable');
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     /**
@@ -206,6 +207,14 @@ class SiPrijava extends Model
     public function status()
     {
         return $this->belongsTo('App\Models\Status', 'status_prijave');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function requestCategory()
+    {
+        return $this->belongsTo('App\Models\RequestCategory');
     }
 
     /*
