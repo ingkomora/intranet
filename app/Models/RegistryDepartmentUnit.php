@@ -70,6 +70,11 @@ class RegistryDepartmentUnit extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function getNameLabelAttribute(): string
+    {
+        return "$this->name ($this->label)";
+    }
+
     /*
     |--------------------------------------------------------------------------
     | MUTATORS

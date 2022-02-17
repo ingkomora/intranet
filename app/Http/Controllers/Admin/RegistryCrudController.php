@@ -29,6 +29,8 @@ class RegistryCrudController extends CrudController
         CRUD::setModel(\App\Models\Registry::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/registry');
         CRUD::setEntityNameStrings('registry', 'registries');
+
+        CRUD::set('show.setFromDb', FALSE);
     }
 
     /**
@@ -45,11 +47,65 @@ class RegistryCrudController extends CrudController
         CRUD::column('base_number');
         CRUD::column('counter');
         CRUD::column('subject');
-        CRUD::column('copy');
+//        CRUD::column('copy');
 //        CRUD::column('sub_base_number');
         CRUD::column('status_id');
 //        CRUD::column('created_at');
 //        CRUD::column('updated_at');
+
+        /**
+         * Columns can be defined using the fluent syntax or array syntax:
+         * - CRUD::column('price')->type('number');
+         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
+         */
+    }
+
+    protected function setupShowOperation()
+    {
+        CRUD::column('id');
+        CRUD::column('subject');
+        CRUD::column('registryDepartmentUnit')->attribute('name_label');
+        CRUD::column('requestCategories');
+        CRUD::column('base_number');
+        CRUD::column('counter');
+        CRUD::column('copy');
+        CRUD::column('sub_base_number');
+        CRUD::column('status')->attribute('naziv');
+        CRUD::column('created_at')->type('datetime')->format('DD.MM.Y. HH:mm:ss');
+        CRUD::column('updated_at')->type('datetime')->format('DD.MM.Y. HH:mm:ss');
+
+        CRUD::modifyColumn('registryDepartmentUnit', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('registry-department-unit/' . $related_key . '/show');
+                },
+                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+
+            ],
+        ]);
+
+        CRUD::modifyColumn('requestCategories', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('request-category/' . $related_key . '/show');
+                },
+                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+
+            ],
+        ]);
+
+        CRUD::modifyColumn('status', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('status/' . $related_key . '/show');
+                },
+                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+
+            ],
+        ]);
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -74,9 +130,10 @@ class RegistryCrudController extends CrudController
         CRUD::field('subject');
         CRUD::field('sub_base_number');
         CRUD::field('registryDepartmentUnit');
-        CRUD::field('requestCategories')/*->type('relationship')->pivot(TRUE)->pivotFields(['documentCategories'=> 'docCat'])*/;
+        CRUD::field('requestCategories')/*->type('relationship')->pivot(TRUE)->pivotFields(['documentCategories'=> 'docCat'])*/
+        ;
         CRUD::field('counter');
-        CRUD::field('statusi');
+        CRUD::field('status')->attribute('naziv');
 //        CRUD::field('created_at');
 //        CRUD::field('updated_at');
 
