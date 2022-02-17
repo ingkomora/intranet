@@ -76,6 +76,24 @@ class Document extends Model
 //        echo $this->documentable_type;
 //    }
 
+
+    /**
+     * Model-function for backpack crud morph relation.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getOsobaImePrezimeJmbg()
+    {
+        if ($this->documentable_type == "App\Models\ZahtevLicenca") {
+            return $this->documentable->osobaId->ime_prezime_jmbg;
+        } else if ($this->documentable_type == "App\Models\SiPrijava") {
+            return $this->documentable->osoba->ime_prezime_jmbg;
+        } else {
+            return $this->documentable->osoba->ime_prezime_jmbg;
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

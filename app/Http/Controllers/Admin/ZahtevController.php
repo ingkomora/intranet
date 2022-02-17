@@ -252,7 +252,7 @@ class ZahtevController extends Controller
 
 //        Storage::put("public/pdf/Report_$filename.pdf", $pdf->output());
 
-//                $this->log($zahtev, $status_grupa, "$naziv zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN);
+//                $this->log($zahtev, $status_grupa, "$naziv zahtev: $zahtev->id, status: " . REQUEST_SUBMITED);
 //            TODO prikazati status licence u toasteru
         /*            if ($this->kreirajlicencu($osoba)) {
                         $messageLicencaOK .= $licenca['broj'] . ', ';
@@ -455,7 +455,7 @@ class ZahtevController extends Controller
             $respZ = $this->getZahtevLicenca($broj, $tip);
 
             if ($respZ->status) {
-                if ($respZ->zahtev->status <= ZAHTEV_LICENCA_PRIMLJEN) {
+                if ($respZ->zahtev->status <= REQUEST_IN_PROGRESS) {
 //                  AZURIRAJ ZAHTEV
                     $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
                 } else {
@@ -618,12 +618,12 @@ class ZahtevController extends Controller
         $zahtev->reg_oblast_id = $tipLicence->podOblast->oblast_id;
         $zahtev->reg_pod_oblast_id = $tipLicence->pod_oblast_id;
         //todo treba zahtev status da bude zavrsen ako je kreirana licenca => azurira se prilikom azuriranja licence
-        $zahtev->status = ZAHTEV_LICENCA_GENERISAN;
+        $zahtev->status = REQUEST_SUBMITED;
         $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
         $zahtev->datum = date("Y-m-d");
         if ($zahtev->isDirty()) {
             $zahtev->save();
-            $response->message = "Ažuriran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
+            $response->message = "Ažuriran zahtev: $zahtev->id, status: " . REQUEST_SUBMITED;
             $response->status = TRUE;
         } else {
             $response->message = "Nema promena";
@@ -644,7 +644,7 @@ class ZahtevController extends Controller
         $zahtev = new ZahtevLicenca();
         $zahtev->request_category_id = 7; //todo add constant
         $response = $this->azurirajZahtevLicenca($zahtev, $licenca);
-        $response->message = "Kreiran zahtev: $zahtev->id, status: " . ZAHTEV_LICENCA_GENERISAN;
+        $response->message = "Kreiran zahtev: $zahtev->id, status: " . REQUEST_SUBMITED;
         return $response;
     }
 
@@ -715,10 +715,10 @@ class ZahtevController extends Controller
         $licenca = new Licenca();
         $response = $this->azurirajLicencu($licenca, $zahtev);
 
-        $zahtev->status = ZAHTEV_LICENCA_ZAVRSEN;
+        $zahtev->status = REQUEST_FINISHED;
 
         $zahtev->save();
-        $this->log($zahtev, LICENCE, "Ažuriran datum prijema zahteva: $zahtev->prijem, status: " . ZAHTEV_LICENCA_ZAVRSEN);
+        $this->log($zahtev, LICENCE, "Ažuriran datum prijema zahteva: $zahtev->prijem, status: " . REQUEST_FINISHED);
 
         $response->message = "Kreirana licenca: $licenca->id($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
         return $response;
@@ -906,102 +906,9 @@ class ZahtevController extends Controller
     public function splitAddress()
     {
         $saved = 0;
-        $jmbgs = ['0103972733524',
-            '0106974845027',
-            '0201967761023',
-            '0202993805078',
-            '0205976747012',
-            '0205980773648',
-            '0206963714014',
-            '0206993800020',
-            '0207985781072',
-            '0308983710284',
-            '0308987710254',
-            '0308990782843',
-            '0311967800118',
-            '0406991710198',
-            '0407989710225',
-            '0502987727824',
-            '0506990800066',
-            '0507979742018',
-            '0508976820111',
-            '0511990183753',
-            '0601985198059',
-            '0604959805043',
-            '0609965715244',
-            '0609984720038',
-            '0705956780024',
-            '0705987782858',
-            '0709984715004',
-            '0709988737525',
-            '0801990788963',
-            '0808980715156',
-            '0811993715253',
-            '0912972733511',
-            '1009990775010',
-            '1010992710216',
-            '1102988780058',
-            '1103988895005',
-            '1105993710229',
-            '1110992772011',
-            '1207985710209',
-            '1212977722234',
-            '1301981710189',
-            '1303986710295',
-            '1305989762027',
-            '1309988722825',
-            '1310990382118',
-            '1311992785038',
-            '1404978865043',
-            '1408987710279',
-            '1410988772027',
-            '1505988783933',
-            '1512954710127',
-            '1512984710083',
-            '1605980805010',
-            '1702994795021',
-            '1707993710318',
-            '1710983747028',
-            '1710991800124',
-            '1711988710102',
-            '1807980782012',
-            '1901987710080',
-            '1908991780020',
-            '1911990890036',
-            '2002991785019',
-            '2003992783954',
-            '2008987772024',
-            '2011991747035',
-            '2101986730050',
-            '2107986710333',
-            '2111988825011',
-            '2203967790015',
-            '2205990781018',
-            '2303958793413',
-            '2405981715362',
-            '2502980735055',
-            '2505991860012',
-            '2506955782818',
-            '2601994751019',
-            '2602973835014',
-            '2602984150072',
-            '2605975710048',
-            '2610992790016',
-            '2704980130023',
-            '2704990775049',
-            '2705979775033',
-            '2706991715220',
-            '2710986723220',
-            '2804985780810',
-            '2805992715141',
-            '2806992778611',
-            '2901982110003',
-            '2906976710378',
-            '3008992910013',
-            '3101973805047',
-            '3103974715311',
-            '3105987770020',
-            '3110989375025'];
+        $jmbgs = [
+            '0103972733524',
+        ];
         $osobe = Osoba::whereIn('id', $jmbgs)
 //        $requests = \App\Models\Request::where('request_category_id', 3)
 //            ->where('note', 'SFL_20211130')
@@ -1106,6 +1013,8 @@ class ZahtevController extends Controller
 //        $this->osobaClanRequestResenje();//6           samo clan =0 i napomena Usled neplacanja clanarine
 //        $this->osobaObrisanaAktivnaRequest();//7
         $this->prekiniClanstvo();//pojedinacno dok se ne sredi sve
+//        $this->nereseniAktivni();//pojedinacno dok se ne sredi sve
+//        $this->copyZahteviLicenceRequest();//pojedinacno dok se ne sredi sve
 
 //        potrebno je svima iz stavke 6 kreirati odgovarajuca dokumenta i podesiti statuse zahteva i membershipa
 
@@ -1577,12 +1486,48 @@ class ZahtevController extends Controller
         dd($query);
     }
 
-    private function prekiniClanstvo()
+    private function copyZahteviLicenceRequest()
     {
+        $query = \App\Models\ZahtevLicenca::whereNotNull('prijem')
+
+//SVI
+            /*->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
+            ->where('note', 'ilike', '%platio%')
+            ->whereHas('osoba', function ($q) {
+                $q->where('clan', 1);
+            })*/
+            ->orderBy('id')
+            ->chunkById(1000, function ($requests) {
+                foreach ($requests as $request) {
+
+                }
+                echo "<br>Kreirano: $this->ok od $this->counter";
+                echo "<br>Nije kreirano: $this->error od $this->counter";
+
+            });
+        dd($query);
+
+    }
+
+    private function nereseniAktivni()
+    {
+        /*
+         * 1. neresene zalbe uplatio
+         *
+         * 2. preziveli: oni koji su trebali da budu izbrisani a nisu a platili
+         *
+         * 3. resene zalbe(usvojene), ponisteni, clanovi a nisu uplatili?
+         *
+         * 4. da li ima zalbi koje su odbijene
+         */
         $query = \App\Models\Request::where('request_category_id', 2)
 //POJEDINACNO
+            ->where('status_id', 41)
             ->whereHas('osoba', function ($q) {
-                $q->whereIn('id', ['0203970793419', '2106966913053', '0912985793912', '1711987780026', '0304970710115', '2211958870017', '2106992715030', '0211993715000', '1704990773654', '2308989800010', '1207975710413', '2503981795058', '1705979797610', '0702952762014', '1810959772016', '0405952710532', '1408970765029', '2402971710231', '1311970767613', '1611992742014', '1001973382721', '0608948780044']);
+                $q->where('clan', 0)
+//                    ->whereHas('poslednjaPlacenaClanarina')
+//                    ->whereHas('aktivanClan')
+                ;
             })
 //SVI
             /*->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
@@ -1592,6 +1537,90 @@ class ZahtevController extends Controller
             })*/
             ->orderBy('id')
             ->chunkById(1000, function ($requests) {
+                foreach ($requests as $request) {
+                    $osoba = $request->osoba;
+                    $clanarine = $osoba->poslednjeDveClanarine->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
+                    $clanarinPlacena = $osoba->poslednjaPlacenaClanarina->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
+//                    $aktivan = $osoba->aktivanClan;
+                    $clanarineStr = http_build_query($clanarine, '', '; ');
+                    $clanarinPlacenaStr = http_build_query($clanarinPlacena, '', '; ');
+//                    dd($clanarineStr);
+                    $allRequests = implode(',', $osoba->requests->pluck('id')->toArray());
+                    $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
+//                    $requests = $osoba->requests;
+                    $document = [];
+                    $reqStr = '';
+
+                    $reqStr .= " <strong>REQ:$request->id</strong>($request->request_category_id), ";
+                    $reqStr .= "(DOC:" . implode(',', $request->documents->pluck('document_category_id')->toArray()) . ");";
+                    $documents = implode(' # ', $document);
+                    $requestsStr = implode(',', $requests->pluck('status_id', 'id')->toArray());
+//                    $req = $osoba->requests->where('request_category_id',2)->first();
+//                        dd($licence->toArray());
+
+                    $reqStr .= " Članarine 2: $clanarineStr";
+//                    $reqStr .= " Članarina poslednja placena: $clanarinPlacenaStr";
+                    $reqStr .= " svi REQ: $allRequests";
+                    $reqStr .= " napomena: $osoba->napomena";
+
+
+                    $this->counter++;
+//                    echo "<BR>$osoba->napomena";
+                    echo "$this->counter | član: $osoba->clan |  MEMB: $memberships | $osoba->id | $reqStr<br>";
+
+                }
+                echo "<br>Kreirano: $this->ok od $this->counter";
+                echo "<br>Nije kreirano: $this->error od $this->counter";
+//                    if ($this->counter == 1000) dd('kraj');
+            })
+//        limit(2)
+//            ->pluck('osoba')->toArray()
+//            ->get()
+        ;
+//        dd($query->count());
+        dd($query);
+    }
+
+    private function prekiniClanstvo()
+    {
+        $query = \App\Models\Request::where('request_category_id', 2)
+//POJEDINACNO
+            ->whereHas('osoba', function ($q) {
+                $q->whereIn('id', [
+
+                    /*'0203970793419', '2106966913053', '0912985793912', '1711987780026', '0304970710115', '2211958870017', '2106992715030', '0211993715000', '1704990773654', '2308989800010', '1207975710413', '2503981795058', '1705979797610', '0702952762014', '1810959772016', '0405952710532', '1408970765029', '2402971710231', '1311970767613', '1611992742014', '1001973382721', '0608948780044',*/
+
+
+
+                    '0110974715090',
+                    '0409986715261',
+                    '1106979710158',
+                    '2503976725076',
+                    '2704993788931',
+                    '1603983715338',
+                    '1605980805010',
+                    '0110955715144',
+                    '2101971781015',
+                    '0301986910018',
+                    '1104994850214',
+                    '1212965780026',
+                    '1710943710229',
+                    '2005993855005',
+                    '2908982835002',
+                    '2303962780040',
+                    '2802976730042',
+                    '2803950710112'
+                ]);
+            })
+//SVI
+            /*->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
+            ->where('note', 'ilike', '%platio%')
+            ->whereHas('osoba', function ($q) {
+                $q->where('clan', 1);
+            })*/
+            ->orderBy('id')
+            ->chunkById(1000, function ($requests) {
+                    $errorStr = '';
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
                     $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
@@ -1604,46 +1633,50 @@ class ZahtevController extends Controller
                     $requestsStr = implode(',', $requests->pluck('status_id', 'id')->toArray());
 //                    $req = $osoba->requests->where('request_category_id',2)->first();
 //                        dd($licence->toArray());
+
                     preg_match("/Broj rešenja o prestanku članstva\s(.*)\sod.*i broj rešenja o brisanju iz evidencije\s(.*)\sod\s(\d\d\.\d\d\.\d\d\d\d\.)/", $osoba->napomena, $match);
+//
+                    if (!empty($match)) {
+//                        samo za one koji imaju napomenu sa brojem resenje
+//                        dd($request);
+
 //                    dd($match);
-                    $broj_resenja_prestanak = $match[1];
-                    $broj_resenja_brisanje = $match[2];
-                    $datum_resenja = date('Y-m-d', strtotime($match[3]));
-                    $datum_resenjaPlusOneMonth = Carbon::parse($datum_resenja)->addMonth()->format("Y-m-d");
-                    $datum_resenja = Carbon::parse($datum_resenja)->format("Y-m-d");
-                    $this->counter++;
+                        $broj_resenja_prestanak = $match[1];
+                        $broj_resenja_brisanje = $match[2];
+                        $datum_resenja = date('Y-m-d', strtotime($match[3]));
+                        $datum_resenjaPlusOneMonth = Carbon::parse($datum_resenja)->addMonth()->format("Y-m-d");
+                        $datum_resenja = Carbon::parse($datum_resenja)->format("Y-m-d");
+                        $this->counter++;
 //                    echo "<BR>$osoba->napomena";
-                    echo "$this->counter | $docreqStr | MEMB: $memberships | $osoba->id | broj_resenja_prestanak: $broj_resenja_prestanak | broj_resenja_brisanje: $broj_resenja_brisanje | datum_resenja: $datum_resenja<br>";
-                    $data = [
-                        "osoba_id" => $osoba->id,
-                        "datum_prijema" => $datum_resenja,
-                        "request_category_id" => $request->request_category_id,
-                        "app_korisnik_id" => 14,
-                        "zavodni_broj" => "",
-                        "barcode" => NULL,
-                        "created_at" => date('Y-m-d H:i:s', strtotime($datum_resenja)),
-                        "updated_at" => Carbon::now()->format("Y-m-d H:i:s"),
-                        'ended_at' => $datum_resenjaPlusOneMonth,
-                        "broj_odluke_uo" => "",
-                        "broj_resenja_prestanak" => $broj_resenja_prestanak,
-                        "broj_resenja_brisanje" => $broj_resenja_brisanje,
-                        "datum_odluke_uo" => $datum_resenja,
-                        'status_id_membership' => MEMBERSHIP_ENDED,
-                        "status_id" => REQUEST_FINISHED,
-                        "napomena" => str_contains($osoba->napomena, 'Broj rešenja o prestanku članstva') ? $osoba->napomena : "",
-                    ];
+
+                        echo "$this->counter | $docreqStr | MEMB: $memberships | $osoba->id | broj_resenja_prestanak: $broj_resenja_prestanak | broj_resenja_brisanje: $broj_resenja_brisanje | datum_resenja: $datum_resenja<br>";
+                        $data = [
+                            "osoba_id" => $osoba->id,
+                            "datum_prijema" => $datum_resenja,
+                            "request_category_id" => $request->request_category_id,
+                            "app_korisnik_id" => 14,
+                            "zavodni_broj" => "",
+                            "barcode" => NULL,
+                            "created_at" => date('Y-m-d H:i:s', strtotime($datum_resenja)),
+                            "updated_at" => Carbon::now()->format("Y-m-d H:i:s"),
+                            'ended_at' => $datum_resenjaPlusOneMonth,
+                            "broj_odluke_uo" => "",
+                            "broj_resenja_prestanak" => $broj_resenja_prestanak,
+                            "broj_resenja_brisanje" => $broj_resenja_brisanje,
+                            "datum_odluke_uo" => $datum_resenja,
+                            'status_id_membership' => MEMBERSHIP_ENDED,
+                            "status_id" => REQUEST_FINISHED,
+                            "napomena" => str_contains($osoba->napomena, 'Broj rešenja o prestanku članstva') ? $osoba->napomena : "",
+                        ];
                     $result = $this->updateMRCreateD($data);
 
-                    /*                            if ($result) {
-                                                    $this->ok++;
-                                                } else {
-                                                    $this->error++;
-                                                    break;
-                                                }*/
-
+                    } else{
+                        $errorStr .= "<br>$osoba->id";
+                    }
                 }
                 echo "<br>Kreirano: $this->ok od $this->counter";
                 echo "<br>Nije kreirano: $this->error od $this->counter";
+                echo "<br>Greska, nisu azurirani: $errorStr";
 //                    if ($this->counter == 1000) dd('kraj');
             })
 //        limit(2)
