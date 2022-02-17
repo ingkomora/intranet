@@ -41,7 +41,6 @@ class ZahtevLicencaCrudController extends CrudController
 
         switch ($segment) {
             case 'zahtevlicenca':
-                //ZA SADA SE ZAHTEVI NE ZAVODE DOK SE NE PREPRAVI APLIKACIJA ZA PROMENU PODATAKA
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
 //                CRUD::addClause('where', 'request_category_id', 7);
@@ -59,14 +58,10 @@ class ZahtevLicencaCrudController extends CrudController
         }
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update', 'registerrequestbulk']);
+            $this->crud->denyAccess(['create', 'delete', 'update']);
         }
-
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update', 'registerrequestbulk']);
-        }
-
-        if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
+// NE RADI KAD JE ADMIN
+        if ((backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
             $this->crud->allowAccess(['registerrequestbulk']);
         }
         CRUD::enableExportButtons();
@@ -93,7 +88,7 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::column('datum')->type('date')->format('DD.MM.Y.');
         CRUD::column('statusId')->attribute('naziv')->label('Status');
 //        CRUD::column('razlog');
-//        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
+        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
 //        CRUD::column('preporuka2');
 //        CRUD::column('preporuka1');
 //        CRUD::column('mestopreuzimanja');
@@ -321,7 +316,8 @@ class ZahtevLicencaCrudController extends CrudController
         CRUD::field('documents')
             ->type('relationship')
             ->ajax(TRUE)
-            ->attribute('category_type_name_status_registry_number');
+            ->attribute('category_type_name_status_registry_number')
+        ;
         CRUD::field('datum')->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',

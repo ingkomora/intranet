@@ -11,6 +11,7 @@ use App\Models\SiPrijava;
 use App\Models\SiVrsta;
 use App\Models\VrstaPosla;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Backpack\CRUD\app\Library\CrudPanel\CrudPanel;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
 /**
@@ -26,6 +27,7 @@ class SiPrijavaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use Operations\RegisterRequestBulkOperation;
 
     protected
         $column_deffinition_array = [
@@ -39,7 +41,7 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ime prezime (jmbg)',
             'attribute' => 'ime_prezime_jmbg',
         ],
-        'vrsta_posla_id' => [
+/*        'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
             'label' => 'Vrsta posla',
             'type' => 'relationship',
@@ -117,7 +119,7 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ažurirana',
             'type' => 'datetime',
             'format' => 'DD.MM.Y. HH:mm:ss',
-        ],
+        ],*/
     ],
         $field_deffinition_array = [
         'id' => [
@@ -224,6 +226,7 @@ class SiPrijavaCrudController extends CrudController
             ]
         ],
     ];
+    protected $allowRegister = FALSE;
 
     public function setup()
     {
@@ -233,11 +236,27 @@ class SiPrijavaCrudController extends CrudController
         |--------------------------------------------------------------------------
         */
         CRUD::setModel('App\Models\SiPrijava');
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/siprijava');
-        CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
-//        CRUD::setTitle('some string', 'create'); // set the Title for the create action
-//        CRUD::setHeading('some string', 'create'); // set the Heading for the create action
-//        CRUD::setSubheading('some string', 'create');
+
+        $segment = \Request::segment(2);
+
+        switch ($segment) {
+            case 'siprijava':
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/siprijava');
+                CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
+//                CRUD::addClause('where', 'request_category_id', 7);
+//                $this->requestCategoryType = 1;
+//                $this->requestCategory = [10];
+                break;
+            case 'registerrequestsi':
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestsi');
+                CRUD::setEntityNameStrings('siprijava', 'Zavodjenje Prijave SI');
+//                CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
+//                $this->requestCategoryType = 1;
+//                $this->requestCategory = [1, 2];
+                $this->allowRegister = TRUE;
+                break;
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -246,18 +265,38 @@ class SiPrijavaCrudController extends CrudController
         */
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete']);
+            $this->crud->denyAccess(['create', 'delete', 'update']);
         }
+// NE RADI KAD JE ADMIN
+        if ((backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
+            $this->crud->allowAccess(['registerrequestbulk']);
+        }
+
         CRUD::enableExportButtons();
 //        CRUD::enableDetailsRow();
+
+//        CRUD::setFromDB();
     }
 
     protected function setupListOperation()
     {
-        $this->crud->setColumns($this->column_deffinition_array);
+//        $this->crud->setColumns($this->column_deffinition_array);
+        CRUD::column('id');
+        CRUD::column('osoba')->attribute('ime_prezime_jmbg');
+        CRUD::column('status')->attribute('naziv')->label('Status');
 
         $this->crud->removeColumns(['strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
 
+        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -358,6 +397,18 @@ class SiPrijavaCrudController extends CrudController
                 $this->crud->addClause('where', 'datum_prijema', '<=', date('Y-m-d', strtotime($dates->to)));
             });
 
+        if ($this->allowRegister) {
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'active',
+                'label' => 'Za zavođenje'
+            ],
+                FALSE,
+                function () { // if the filter is active
+                    $this->crud->addClause('where', 'status_prijave', REQUEST_SUBMITED); // apply the "active" eloquent scope
+                });
+        }
+
 
     }
 
@@ -366,6 +417,17 @@ class SiPrijavaCrudController extends CrudController
         $this->crud->set('show.setFromDb', FALSE);
 
         $this->crud->setColumns($this->column_deffinition_array);
+
+        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
 
         $this->crud->setColumnDetails('osoba', [
             'wrapper' => [
@@ -393,13 +455,13 @@ class SiPrijavaCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-/*    protected function showDetailsRow($id)
-    {
-        $this->crud->hasAccessOrFail('details_row');
+    /*    protected function showDetailsRow($id)
+        {
+            $this->crud->hasAccessOrFail('details_row');
 
-        $this->data['entry'] = $this->crud->getEntry($id);
-        $this->data['crud'] = $this->crud;
-        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-        return view('crud::osoba_details_row', $this->data);
-    }*/
+            $this->data['entry'] = $this->crud->getEntry($id);
+            $this->data['crud'] = $this->crud;
+            // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
+            return view('crud::osoba_details_row', $this->data);
+        }*/
 }

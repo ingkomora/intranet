@@ -26,7 +26,7 @@ class ZavodjenjeController extends Controller
     protected $result;
     protected $brprijava;
     protected $zavodjenje = [
-        'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblast', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
+        'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblastsi', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
         'licence' => ['document_category_id' => [5, 25], 'registry_type' => 'oblast', 'url' => 'licence', 'statusRel' => 'statusId', 'statusCol' => 'status', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
         'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
         'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
@@ -167,6 +167,7 @@ class ZavodjenjeController extends Controller
         }
         foreach ($requests as $request) {
             try {
+                $existingDocuments = $request->documents;
                 if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
                     $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
                     return $result;
@@ -204,7 +205,6 @@ class ZavodjenjeController extends Controller
                 $documents = [];
 
                 foreach ($document_category_ids as $document_category_id) {
-                    $existingDocuments = $request->documents;
                     if ($existingDocuments->isNotEmpty()) {
                         if (isset($prilog['text'])) {
                             $existingDocuments = $existingDocuments->filter(function ($value, $key) use ($document_category_id) {
@@ -222,7 +222,7 @@ class ZavodjenjeController extends Controller
                             if (!in_array($document_category_id, $dopunaCategory)) {
                                 //GRESKA IMA VISE OD JEDNOG ZAHTEVA ALI MOZE VISE PRILOGA
 //                    echo "ima vise od jednog zahteva";
-                                $result['ERROR'][$request->id] = "Greška 5! Ima više od jednog dokumenta za kategoriju $document_category_id";
+                                $result['ERROR'][$request->id] = "Greška 5! Ima više od jednog dokumenta za kategoriju $document_category_id. Kontaktirajte službu za informacione tehnologije";
                                 return $result;
                             } else {
                                 foreach ($existingDocuments as $document) {
@@ -240,10 +240,15 @@ class ZavodjenjeController extends Controller
                             $documents[] = $document;
                         }
                     } else {
-                        $document = new Document();
-                        $document->document_category_id = $document_category_id;
-                        $document->status_id = DOCUMENT_CREATED;
-                        $documents[] = $document;
+                        if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) {
+                            $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
+                            return $result;
+                        } else {
+                            $document = new Document();
+                            $document->document_category_id = $document_category_id;
+                            $document->status_id = DOCUMENT_CREATED;
+                            $documents[] = $document;
+                        }
                     }
                 }
 
@@ -325,7 +330,12 @@ class ZavodjenjeController extends Controller
                 } else {
                     $label = '02-' . $request->reg_oblast_id;
                 }
-                $label = '02-' . $request->reg_oblast_id;
+            } else if ($this->zavodjenje[$type]['registry_type'] == 'oblastsi') {
+                if ($request->vrsta_posla_id == 5) {
+                    $label = '09-E';
+                } else {
+                    $label = '09-' . $request->reg_oblast_id;
+                }
             } else {
                 $label = $this->zavodjenje[$type]['registry_type'];
             }

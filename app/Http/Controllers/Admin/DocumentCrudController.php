@@ -6,6 +6,7 @@ use App\Http\Requests\DocumentRequest;
 use App\Models\DocumentCategory;
 use App\Models\DocumentCategoryType;
 use App\Models\Status;
+use App\Models\ZahtevLicenca;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -37,8 +38,9 @@ class DocumentCrudController extends CrudController
         $this->crud->set('show.setFromDb', FALSE);
 
 
-        if (backpack_user()->hasRole('admin')) {
-            $this->crud->allowAccess(['create', 'delete', 'update']);
+        if (!backpack_user()->hasRole('admin')) {
+//            $this->crud->allowAccess(['create', 'delete', 'update']);
+            $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
         if (backpack_user()->hasRole('sluzba_maticne_sekcije')) {
@@ -58,22 +60,23 @@ class DocumentCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->addColumns([
-            'id',
-            'document_category_id' => [
-                'name' => 'documentCategory',
-                'type' => 'relationship',
-                'label' => 'Kategorija',
-            ],
+//            'id',
             'documentable_id' => [
                 'name' => 'documentable_id',
                 'type' => 'text',
                 'label' => 'Broj zahteva'
             ],
-            'status_id' => [
-                'name' => 'status',
-                'label' => 'Status',
+            'osoba' => [
+                'name' => 'osoba',
+                'type' => 'model_function',
+                'label' => 'Ime prezime (jmbg)',
+                'function_name' => 'getOsobaImePrezimeJmbg', // the method in your Model
+
+            ],
+            'document_category_id' => [
+                'name' => 'documentCategory',
                 'type' => 'relationship',
-                'attribute' => 'naziv',
+                'label' => 'Opis',
             ],
             /*            'user_id' => [
                             'name' => 'user',
@@ -81,19 +84,22 @@ class DocumentCrudController extends CrudController
                             'type' => 'relationship',
                             'attribute' => 'name',
                         ],*/
-            'registry_number',
+            'registry_number' => [
+                'name' => 'registry_number',
+                'label' => 'Zavodni broj'
+            ],
             'registry_date' => [
                 'name' => 'registry_date',
                 'label' => 'Zavedeno',
                 'type' => 'date',
                 'format' => 'DD.MM.Y.'
             ],
-//            'documentable_type',
-            /*            'document_type_id' => [
-                            'name' => 'documentType',
-                            'label' => 'Tip dokumenta',
-                            'type' => 'relationship',
-                        ],*/
+            'status_id' => [
+                'name' => 'status',
+                'label' => 'Status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
         ]);
 
         $this->crud->modifyColumn('status', [
@@ -106,15 +112,22 @@ class DocumentCrudController extends CrudController
             ]
         ]);
 
-        $this->crud->setColumnDetails('documentable_id', [
+        $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
+//dd($this->crud->getEntries());
+                $query->whereHasMorph(
+                    'documentable',
+                    [ZahtevLicenca::class/*, SiPrijava::class, Request::class*/],
+                    function ($query, $type) use ($searchTerm) {
+                        $query->orWhere('documentable_type', "App\Models\ZahtevLicenca") // Constraint on "commentable"
+                        ->whereHas('osobaId', function ($q) use ($searchTerm) {
+//                            $q->where('id', '0902991779519');
+                            $q->where('id', 'ilike', $searchTerm . '%');
+                        });
 
-                $query->orWhereHas('documentable.osoba', function ($q) use ($column, $searchTerm) {
-                    $q->where('id', 'ilike', $searchTerm . '%');
-                })
-                    ->orWhereHas('documentable', function ($q) use ($column, $searchTerm) {
-                        $q->where('id', 'ilike', $searchTerm . '%');
-                    });
+//                        dd($query->toSql());
+                    }
+                );
             }
         ]);
 
@@ -136,7 +149,7 @@ class DocumentCrudController extends CrudController
         CRUD::addFilter([
             'type' => 'select2',
             'name' => 'documentCategory',
-            'label' => 'Kategorija'
+            'label' => 'Izaberi skraćeni delovodnik'
         ],
             function () {
                 return DocumentCategory::orderBy('id')->pluck('name', 'id')->toArray();
@@ -181,6 +194,7 @@ class DocumentCrudController extends CrudController
                 'name' => 'documentCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija',
+                'limit' => 500,
                 'wrapper' => [
                     'href' => function ($crud, $column, $entry, $related_key) {
                         return backpack_url('document-category/' . $related_key . '/show');
@@ -194,7 +208,7 @@ class DocumentCrudController extends CrudController
                 'type' => 'relationship',
                 'label' => 'Delovodnik',
                 'attribute' => 'base_number_subject',
-                'limit'=>500,
+                'limit' => 500,
                 'wrapper' => [
                     'href' => function ($crud, $column, $entry, $related_key) {
                         return backpack_url('registry/' . $related_key . '/show');
@@ -222,7 +236,10 @@ class DocumentCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'name',
             ],
-            'registry_number',
+            'registry_number' => [
+                'name' => 'registry_number',
+                'label' => 'Zavodni broj',
+            ],
             'registry_date' => [
                 'name' => 'registry_date',
                 'label' => 'Zaveden',
@@ -241,8 +258,6 @@ class DocumentCrudController extends CrudController
                     'class' => 'btn btn-sm btn-outline-info mr-1',
                 ],
             ],
-            'path',
-            'location',
             'documentable_type' => [
                 'name' => 'documentable_type',
                 'label' => 'Model',
@@ -251,7 +266,7 @@ class DocumentCrudController extends CrudController
             ],
             'documentable_id' => [
                 'name' => 'documentable_id',
-//                'label' => 'Documentable id',
+                'label' => 'Broj zahteva|prijave',
                 'type' => 'text',
 //                'function_name'=> 'relatedModel',
             ],
@@ -262,6 +277,8 @@ class DocumentCrudController extends CrudController
                 'function_name' => 'metadataFormating'
             ],
             'note',
+            'path',
+            'location',
         ]);
 
         /**
@@ -322,14 +339,14 @@ class DocumentCrudController extends CrudController
 //            'barcode',
 //            'metadata',
 //            'note',
-            /*'documentable' => [
+            'documentable' => [
                 'name' => 'documentable',
                 'type' => 'relationship',
 //                'model' => '\App\Models\Request', //todo ne moze ovako
-                'model' => '\App\Models\ZahtevLicenca',
+//                'model' => '\App\Models\ZahtevLicenca',
                 'attribute' => 'id',
                 'ajax' => TRUE
-            ],*/
+            ],
 //            'created_at',
 //            'updated_at',
         ]);

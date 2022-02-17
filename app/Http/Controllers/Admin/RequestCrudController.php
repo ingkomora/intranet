@@ -182,7 +182,7 @@ class RequestCrudController extends CrudController
                 }); // apply the "active" eloquent scope
             });
         // simple filter
-        $this->crud->addFilter([
+                $this->crud->addFilter([
             'type' => 'simple',
             'name' => 'nisuplatili',
             'label' => 'Nisu platili članarinu'

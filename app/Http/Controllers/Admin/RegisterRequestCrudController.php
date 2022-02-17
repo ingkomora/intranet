@@ -31,6 +31,7 @@ class RegisterRequestCrudController extends CrudController
 
     protected $requestCategoryType;
     protected $requestCategory;
+    protected $requestableModel;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -51,6 +52,7 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::addClause('where', 'request_category_id', 10);
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [10];
+                $this->requestableModel = '\App\Models\Request';
                 break;
             case 'registerrequestclanstvo':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem i prekid članstva');
@@ -58,6 +60,7 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [1, 2];
+                $this->requestableModel = '\App\Models\Membership';
                 break;
             case 'registerrequestmirovanjeclanstva':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za mirovanje');
@@ -66,14 +69,15 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [4, 5];
                 $allowCreate = TRUE;
+                $this->requestableModel = '\App\Models\Request';
                 break;
-            /*            case 'registerrequestlicence':
-                            CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
-                            CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
-                            CRUD::addClause('where', 'request_category_id', 7); //ubaciti kategorije za licence
-                            $this->requestCategoryType = 2;
-                            $this->requestCategory = [7];
-                            break;*/
+/*            case 'registerrequestlicence':
+                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
+                CRUD::addClause('where', 'request_category_id', 7); //ubaciti kategorije za licence
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [7];
+                break;*/
             case 'registerrequestregistar':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje uverenja o upisu u registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistar');
@@ -81,6 +85,7 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategoryType = 2;
                 $this->requestCategory = [8, 9];
                 $allowCreate = TRUE;
+                $this->requestableModel = '\App\Models\Request';
                 break;
             case 'registerrequestsfl':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje svečane forme licence');
@@ -89,6 +94,9 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategoryType = 2;
                 $this->requestCategory = [3];
                 $allowCreate = TRUE;
+//                $this->requestableModel = '\App\Models\Licenca';
+                $this->requestableModel = '\App\Models\ZahtevLicenca';
+
                 break;
             case 'registerrequestresenjeclanstvo':
                 CRUD::setEntityNameStrings('zahtev', 'Rešenja o prestanku i brisanju iz članstva');
@@ -97,6 +105,7 @@ class RegisterRequestCrudController extends CrudController
 //                CRUD::addClause('whereHas', 'documents');
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [1, 2];
+                $this->requestableModel = '\App\Models\Request';
                 break;
         }
 
@@ -301,6 +310,12 @@ class RegisterRequestCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'category_type_name_status_registry_number',
             ],
+            'requestable' => [
+                'name' => 'requestable',
+                'type' => 'relationship',
+                'attribute' => 'id',
+                'label' => 'Veza ka',
+            ],
             'note' => [
                 'name' => 'note',
                 'label' => 'Napomena',
@@ -326,6 +341,15 @@ class RegisterRequestCrudController extends CrudController
                     return backpack_url('document/' . $related_key . '/show');
                 },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('requestable', [
+            'wrapper' => [
+                /*'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },*/
+                'class' => 'btn btn-sm btn-outline-warning',
             ]
         ]);
 
@@ -359,12 +383,12 @@ class RegisterRequestCrudController extends CrudController
                 'attribute' => 'ime_prezime_licence',
                 'ajax' => TRUE
             ],
-            'documents' => [
+            /*'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
                 'attribute' => 'category_type_name_status_registry_number',
                 'ajax' => TRUE,
-            ],
+            ],*/
             'request_category_id' => [
                 'name' => 'requestCategory',
                 'type' => 'relationship',
@@ -379,7 +403,16 @@ class RegisterRequestCrudController extends CrudController
                 'name' => 'note',
                 'label' => 'Napomena',
             ],
+            /*'requestable' => [
+                'name' => 'requestable',
+                'entity' => 'requestable',
+                'type' => 'select',
+                'model' => '\App\Models\Membership',
+//                'model' => $this->requestableModel,
 
+                'attribute' => 'id',
+                'ajax' => TRUE
+            ],*/
         ]);
 
         $this->crud->setColumnDetails('documents', [
