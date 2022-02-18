@@ -41,7 +41,7 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ime prezime (jmbg)',
             'attribute' => 'ime_prezime_jmbg',
         ],
-/*        'vrsta_posla_id' => [
+        'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
             'label' => 'Vrsta posla',
             'type' => 'relationship',
@@ -119,7 +119,7 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ažurirana',
             'type' => 'datetime',
             'format' => 'DD.MM.Y. HH:mm:ss',
-        ],*/
+        ],
     ],
         $field_deffinition_array = [
         'id' => [
@@ -268,26 +268,21 @@ class SiPrijavaCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 // NE RADI KAD JE ADMIN
-        if ((backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
+        if ((backpack_user()->hasRole('admin') or backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
             $this->crud->allowAccess(['registerrequestbulk']);
         }
 
         CRUD::enableExportButtons();
 //        CRUD::enableDetailsRow();
 
-//        CRUD::setFromDB();
+        CRUD::set('show.setFromDb', FALSE);
     }
 
     protected function setupListOperation()
     {
-//        $this->crud->setColumns($this->column_deffinition_array);
-        CRUD::column('id');
-        CRUD::column('osoba')->attribute('ime_prezime_jmbg');
-        CRUD::column('status')->attribute('naziv')->label('Status');
+        $this->crud->setColumns($this->column_deffinition_array);
 
-        $this->crud->removeColumns(['strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
-
-        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+        $this->crud->removeColumns(['tema', 'documents', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
@@ -297,6 +292,7 @@ class SiPrijavaCrudController extends CrudController
                 'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
+
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -374,7 +370,7 @@ class SiPrijavaCrudController extends CrudController
         $this->crud->addFilter([
             'name' => 'sekcija',
             'type' => 'dropdown',
-            'label' => 'Grupa zvanja'
+            'label' => 'Struka'
         ], function () {
             return Sekcija::orderBy('id')->pluck('naziv', 'id')->toArray();
         },
@@ -408,8 +404,6 @@ class SiPrijavaCrudController extends CrudController
                     $this->crud->addClause('where', 'status_prijave', REQUEST_SUBMITED); // apply the "active" eloquent scope
                 });
         }
-
-
     }
 
     protected function setupShowOperation()
@@ -420,6 +414,43 @@ class SiPrijavaCrudController extends CrudController
 
         CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
 
+        $this->crud->setColumnDetails('osoba', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('osoba/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ],
+        ]);
+
+
+/*        $this->crud->setColumnDetails('vrstaPosla', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('vrsta-posla/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ],
+        ]);
+
+        $this->crud->setColumnDetails('regOblast', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('regoblast/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ],
+        ]);
+
+        $this->crud->setColumnDetails('regPodOblast', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('regPodOblast/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ],
+        ]);*/
+
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
@@ -427,28 +458,6 @@ class SiPrijavaCrudController extends CrudController
                 },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
-        ]);
-
-        $this->crud->modifyColumn('id', [
-            'name' => 'id',
-            'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, ",")) {
-                    $searchTerm = trim($searchTerm, " ,.;");
-                    $searchTerm = explode(",", $searchTerm);
-                    $searchTermArray = array_map('trim', $searchTerm);
-                    $query->whereIn('id', $searchTermArray);
-                } else {
-                    $query->orWhere('id', 'ilike', $searchTerm . '%');
-                }
-            }
-        ]);
-
-        $this->crud->setColumnDetails('osoba', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('osoba/' . $related_key . '/show');
-                },
-            ],
         ]);
     }
 
@@ -459,7 +468,7 @@ class SiPrijavaCrudController extends CrudController
 
         $this->crud->modifyField('status_prijave', [
             'options' => (function ($query) {
-                return $query->where('log_status_grupa_id', STRUCNI_ISPIT)->get();
+                return $query->where('log_status_grupa_id', REQUESTS)->get();
             }), // force the related options to be a custom query, instead of all(); you can use this to filter the results show in the select
         ]);
     }
