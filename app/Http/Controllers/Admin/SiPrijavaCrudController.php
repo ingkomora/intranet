@@ -267,8 +267,7 @@ class SiPrijavaCrudController extends CrudController
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
-// NE RADI KAD JE ADMIN
-        if ((backpack_user()->hasRole('admin') or backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
+        if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
             $this->crud->allowAccess(['registerrequestbulk']);
         }
 
@@ -280,7 +279,7 @@ class SiPrijavaCrudController extends CrudController
 
     protected function setupListOperation()
     {
-        $this->crud->setColumns($this->column_deffinition_array);
+        $this->crud->addColumns($this->column_deffinition_array);
 
         $this->crud->removeColumns(['tema', 'documents', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
 
@@ -424,32 +423,32 @@ class SiPrijavaCrudController extends CrudController
         ]);
 
 
-/*        $this->crud->setColumnDetails('vrstaPosla', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('vrsta-posla/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ],
-        ]);
+        /*        $this->crud->setColumnDetails('vrstaPosla', [
+                    'wrapper' => [
+                        'href' => function ($crud, $column, $entry, $related_key) {
+                            return backpack_url('vrsta-posla/' . $related_key . '/show');
+                        },
+                        'class' => 'btn btn-sm btn-outline-info mr-1',
+                    ],
+                ]);
 
-        $this->crud->setColumnDetails('regOblast', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('regoblast/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ],
-        ]);
+                $this->crud->setColumnDetails('regOblast', [
+                    'wrapper' => [
+                        'href' => function ($crud, $column, $entry, $related_key) {
+                            return backpack_url('regoblast/' . $related_key . '/show');
+                        },
+                        'class' => 'btn btn-sm btn-outline-info mr-1',
+                    ],
+                ]);
 
-        $this->crud->setColumnDetails('regPodOblast', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('regPodOblast/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ],
-        ]);*/
+                $this->crud->setColumnDetails('regPodOblast', [
+                    'wrapper' => [
+                        'href' => function ($crud, $column, $entry, $related_key) {
+                            return backpack_url('regPodOblast/' . $related_key . '/show');
+                        },
+                        'class' => 'btn btn-sm btn-outline-info mr-1',
+                    ],
+                ]);*/
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [

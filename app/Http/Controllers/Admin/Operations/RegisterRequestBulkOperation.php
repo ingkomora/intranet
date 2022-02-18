@@ -32,7 +32,7 @@ trait RegisterRequestBulkOperation
      */
     protected function setupRegisterRequestBulkDefaults()
     {
-        $this->crud->allowAccess('registerrequestbulk');
+        $this->crud->allowAccess(['registerrequestbulk']);
 
         $this->crud->operation('list', function () {
             if (backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) {
@@ -58,8 +58,8 @@ trait RegisterRequestBulkOperation
         $result = [];
         $mail_data = new \stdClass();
         $log = new Log();
-        $contoller = new ZavodjenjeController();
-        $result = $contoller->zavedi($type, $data);
+        $controller = new ZavodjenjeController();
+        $result = $controller->zavedi($type, $data);
 
         return $result;
     }
