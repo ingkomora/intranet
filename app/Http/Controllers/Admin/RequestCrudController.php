@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RequestRequest;
 use App\Models\Request;
+use App\Models\RequestCategory;
 use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -52,11 +53,12 @@ class RequestCrudController extends CrudController
     {
         $this->crud->addColumns([
             'id',
-            'osoba_id' => [
+            'osoba_id',
+            'osoba' => [
                 'name' => 'osoba',
                 'type' => 'relationship',
-                'label' => 'Ime prezime (jmbg)',
-                'attribute' => 'ime_prezime_jmbg',
+                'label' => 'Ime prezime',
+                'attribute' => 'full_name',
             ],
             'request_category_id' => [
                 'name' => 'requestCategory',
@@ -67,6 +69,11 @@ class RequestCrudController extends CrudController
                 'name' => 'status',
                 'type' => 'relationship',
                 'attribute' => 'naziv',
+            ],
+            'requestable' => [
+                'name' => 'requestable',
+                'type' => 'relationship',
+                'attribute' => 'id',
             ],
             'documents' => [
                 'name' => 'documents',
@@ -133,7 +140,16 @@ class RequestCrudController extends CrudController
 
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+//                    dd($column);
+                    $query->orWhereHas('osoba', function ($q) use ($searchTermArray) {
+                        $q->whereIn('id', $searchTermArray)
+                            ->orderBy('id');
+                    });
+                } else if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
                     $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
                         $q->where('ime', 'ilike', $searchTerm[0] . '%')
@@ -182,7 +198,7 @@ class RequestCrudController extends CrudController
                 }); // apply the "active" eloquent scope
             });
         // simple filter
-                $this->crud->addFilter([
+        $this->crud->addFilter([
             'type' => 'simple',
             'name' => 'nisuplatili',
             'label' => 'Nisu platili članarinu'
@@ -211,7 +227,21 @@ class RequestCrudController extends CrudController
         },
             function ($value) { // if the filter is active
                 $this->crud->addClause('where', 'status_id', $value);
-            });
+            }
+        );
+
+        // dropdown filter
+        $this->crud->addFilter([
+            'name' => 'requestCategory',
+            'type' => 'dropdown',
+            'label' => 'Kategorija zahteva'
+        ], function () {
+            return RequestCategory::all()->pluck('name', 'id')->toArray();
+        },
+            function ($value) { // if the filter is active
+                $this->crud->addClause('where', 'request_category_id', $value);
+            }
+        );
 
         // dropdown filter
         if (backpack_user()->hasRole('admin')) {
