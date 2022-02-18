@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RegisterRequestRequest;
 use App\Http\Requests\RequestRequest;
+use App\Http\Requests\TagRequest;
 use App\Models\Document;
 use App\Models\DocumentCategoryType;
 use App\Models\DocumentCategory;
@@ -71,7 +72,7 @@ class RegisterRequestCrudController extends CrudController
                 $allowCreate = TRUE;
                 $this->requestableModel = '\App\Models\Request';
                 break;
-/*            case 'registerrequestlicence':
+            /*case 'registerrequestlicence':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
                 CRUD::addClause('where', 'request_category_id', 7); //ubaciti kategorije za licence
@@ -155,8 +156,16 @@ class RegisterRequestCrudController extends CrudController
                 'type' => 'relationship',
                 'attribute' => 'category_type_name_status_registry_number',
             ],
-
         ]);
+
+//        TODO: privremeno, da bi se videlo koji zahtev se odnosi na koju licencu
+        if (\Request::segment(2) == 'registerrequestsfl') {
+            CRUD::addColumn('note')->beforeColumn('status');
+
+            $this->crud->setColumnDetails('note',[
+                'label'=> 'Licenca',
+            ]);
+        }
 
         $this->crud->modifyColumn('id', [
             'name' => 'id',
