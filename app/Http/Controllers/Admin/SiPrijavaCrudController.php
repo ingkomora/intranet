@@ -429,6 +429,20 @@ class SiPrijavaCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->modifyColumn('id', [
+            'name' => 'id',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+                    $query->whereIn('id', $searchTermArray);
+                } else {
+                    $query->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            }
+        ]);
+
         $this->crud->setColumnDetails('osoba', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
