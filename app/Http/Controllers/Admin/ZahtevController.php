@@ -23,6 +23,7 @@ use App\Models\ZahtevLicenca;
 use Barryvdh\DomPDF\Facade as PDF;
 use DateTime;
 use Doctrine\DBAL\Schema\AbstractAsset;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -1012,7 +1013,8 @@ class ZahtevController extends Controller
 //        $this->osobaClanNapomenaRequest();//5           ...
 //        $this->osobaClanRequestResenje();//6           samo clan =0 i napomena Usled neplacanja clanarine
 //        $this->osobaObrisanaAktivnaRequest();//7
-        $this->prekiniClanstvo();//pojedinacno dok se ne sredi sve
+//        $this->prekiniClanstvo();//pojedinacno dok se ne sredi sve
+        $this->osobaUpisiNapomenuBrisanje();//pojedinacno dok se ne sredi sve
 //        $this->nereseniAktivni();//pojedinacno dok se ne sredi sve
 //        $this->copyZahteviLicenceRequest();//pojedinacno dok se ne sredi sve
 
@@ -1581,15 +1583,89 @@ class ZahtevController extends Controller
         dd($query);
     }
 
+    private function osobaUpisiNapomenuBrisanje()
+    {
+        $file = new UploadedFile(base_path('public/clanstvo_brisanje.xlsx'), 'clanstvo_brisanje.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', NULL, TRUE);
+        if (!is_null($file)) {
+//            UNOS LICENCI IZ EXCEL DATOTEKE
+            $import = new ExcelImport();
+            try {
+                $collection = ($import->toCollection($file));
+//                dd($collection);
+                $osobeImport = $collection[0]
+                    //                    ->take(10)
+                ;
+
+            } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+                $failures = $e->failures();
+                dd($failures);
+            }
+        }
+
+        foreach ($osobeImport->toArray() as $key => $value) {
+            $osobeBrisanje[$value['jmbg']] = $value;
+        }
+//        dd($osobeBrisanje);
+
+//                dd($osobeBrisanje->pluck('jmbg')->toArray());
+
+        $osobeDuplicate = DB::table('requests')
+            ->where('request_category_id', 2)
+            ->groupBy('osoba_id')
+            ->having(DB::raw('count(osoba_id)'), 2)
+            ->pluck('osoba_id');
+        dd($osobeDuplicate);
+
+        /*$query = \App\Models\Request::where('request_category_id', 2)
+            ->whereNotIn('osoba_id', $osobeDuplicate)
+            ->distinct('osoba_id')
+//            ->where('status_id', REQUEST_FINISHED)
+//            ->where('status_id','!=', 43)
+            ->whereHas('osoba', function ($q) {
+                $q->where('napomena', 'ILIKE', 'Usled neplaćanja članarine');
+            })*/
+        $this->counter = 0;
+        $query = \App\Models\osoba::where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
+            ->whereNotIn('id', $osobeDuplicate)
+            /*->whereHas('requests', function ($q) {
+                $q->where('request_category_id', 2);
+            })*/
+            ->orderBy('id')
+            ->chunkById(1000, function ($osobe) use ($osobeBrisanje) {
+                foreach ($osobe as $osoba) {
+
+                    $osobaExcel = $osobeBrisanje[$osoba->id];
+                    $napomena = "Broj rešenja o prestanku članstva 02-1976/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} i broj rešenja o brisanju iz evidencije 02-1977/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']}";
+                    if (!empty($osoba->napomena)) {
+                        $osoba->napomena = $napomena . "##" . $osoba->napomena;
+                    }
+                    $this->counter++;
+                    echo "<br>{$this->counter}. " . $osoba->napomena;
+                }
+            })
+//        limit(2)
+//            ->get()
+//            ->pluck('osoba_id')
+//            ->toArray()
+            //            ->toSql()
+        ;
+
+        dd($this->counter);
+//        dd($query->count());
+//        dd($query);
+
+    }
+
+
     private function prekiniClanstvo()
     {
+
         $query = \App\Models\Request::where('request_category_id', 2)
 //POJEDINACNO
             ->whereHas('osoba', function ($q) {
                 $q->whereIn('id', [
 
                     /*'0203970793419', '2106966913053', '0912985793912', '1711987780026', '0304970710115', '2211958870017', '2106992715030', '0211993715000', '1704990773654', '2308989800010', '1207975710413', '2503981795058', '1705979797610', '0702952762014', '1810959772016', '0405952710532', '1408970765029', '2402971710231', '1311970767613', '1611992742014', '1001973382721', '0608948780044',*/
-
 
 
                     '0110974715090',
@@ -1620,7 +1696,7 @@ class ZahtevController extends Controller
             })*/
             ->orderBy('id')
             ->chunkById(1000, function ($requests) {
-                    $errorStr = '';
+                $errorStr = '';
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
                     $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
@@ -1668,9 +1744,9 @@ class ZahtevController extends Controller
                             "status_id" => REQUEST_FINISHED,
                             "napomena" => str_contains($osoba->napomena, 'Broj rešenja o prestanku članstva') ? $osoba->napomena : "",
                         ];
-                    $result = $this->updateMRCreateD($data);
+                        $result = $this->updateMRCreateD($data);
 
-                    } else{
+                    } else {
                         $errorStr .= "<br>$osoba->id";
                     }
                 }

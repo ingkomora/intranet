@@ -29,18 +29,8 @@ class Licenca extends Model
 {
     use CrudTrait;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'tlicenca';
-
-    /**
-     * The "type" of the auto-incrementing ID.
-     *
-     * @var string
-     */
+//    protected $primaryKey = 'idn';
     protected $keyType = 'string';
 
     /**
@@ -53,7 +43,7 @@ class Licenca extends Model
     /**
      * @var array
      */
-    protected $fillable = ['id', 'osoba', 'zahtev', 'datum', 'datumuo', 'datumobjave', 'status', 'datumukidanja', 'razlogukidanja', 'preuzeta', 'mirovanje', 'prva', 'prijava_clan_id', 'broj_resenja', 'created_at', 'updated_at', 'licencatip', 'napomena', 'reg_oblast_id', 'reg_pod_oblast_id', 'vrsta_posla_id'];
+    protected $guarded = ['idn'];
 
     /**
      * Indicates if the model should be timestamped.

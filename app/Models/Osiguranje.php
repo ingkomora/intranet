@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Osiguranje extends Model {
 
@@ -111,6 +112,8 @@ class Osiguranje extends Model {
      */
 
     public function validnaPolisa() {
+        /*$this->polisa_datum_pocetka = Carbon::parse($this->polisa_datum_pocetka)->addDay()->format('Y-m-d');
+        $this->polisa_datum_zavrsetka = Carbon::parse($this->polisa_datum_zavrsetka)->addDay()->format('Y-m-d');*/
         if ($this->polisa_datum_pocetka <= now() AND $this->polisa_datum_zavrsetka >= now() AND $this->status_dokumenta_id == DOKUMENT_ORIGINAL) {
             return true;
         } else {
