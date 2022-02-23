@@ -341,6 +341,8 @@ class PromenaPodatakaCrudController extends CrudController
             $this->crud->denyAccess(['update']);
         }
 
+        CRUD::set('show.setFromDb', FALSE);
+
         $this->crud->enableExportButtons();
 
     }
@@ -612,6 +614,15 @@ class PromenaPodatakaCrudController extends CrudController
          * virtual columns
          * for separating purpose
          */
+
+        $this->crud->setColumnDetails('osoba', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('osoba/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info',
+            ]
+        ]);
 
         $this->crud->modifyColumn('brlic', [
             'name' => 'brlic',
