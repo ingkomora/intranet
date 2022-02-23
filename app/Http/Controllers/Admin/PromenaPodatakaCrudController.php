@@ -33,14 +33,10 @@ class PromenaPodatakaCrudController extends CrudController
         ],
         'osoba' => [
             'name' => 'osoba',
-//            'name' => 'licenca',
-//            'name' => 'licenca.osobaId',
             'type' => 'select',
-//            'type' => 'relationship',
-            'label' => 'Ime prezime (jmbg)',
+            'label' => 'Osoba',
             'entity' => 'licenca',
             'attribute' => 'ime_prezime_jmbg',
-//            'attribute' => 'ime_prezime_licence',
             'model' => 'App\Models\Licenca',
         ], // virtual column
         /*'ime'=>[
@@ -160,41 +156,6 @@ class PromenaPodatakaCrudController extends CrudController
             'type' => 'datetime',
             'format' => 'DD.MM.YYYY. HH:mm:ss'
         ],
-    ],
-        // todo: privremeno, dok regionalci pozivaju telefonom ljude koji nemaju email
-        $remove_columns_list_definition_array = [
-//        'id',
-        'licni_podaci',
-//        'osoba',
-        'ime',
-        'prezime',
-//        'brlic',
-        'adresa',
-        'mesto',
-        'pbroj',
-        'topstina_id',
-        'opstina',
-//        'tel',
-//        'mob',
-//        'email',
-        'firma_podaci',
-        'nazivfirm',
-        'mestofirm',
-        'opstinafirm',
-        'emailfirm',
-        'telfirm',
-        'wwwfirm',
-        'zahtev_podaci',
-        'ipaddress',
-        'datumprijema',
-        'datumobrade',
-//        'obradjen',
-        'mbfirm',
-        'pibfirm',
-        'adresafirm',
-//        'napomena',
-//        'created_at',
-//        'updated_at'
     ],
 
         $fields_definition_array = [
@@ -377,32 +338,10 @@ class PromenaPodatakaCrudController extends CrudController
         CRUD::setEntityNameStrings('promena podataka', 'Promena podataka');
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess('update');
+            $this->crud->denyAccess(['update']);
         }
+
         $this->crud->enableExportButtons();
-
-//        TODO: da bi se prikazala checkbox kolona za bulk action mora u setup-u da se definisu kolone, u suprotnom nece da prikaze kolonu sa chechbox-ovima
-        $this->crud->setColumns($this->columns_definition_array);
-
-        $this->crud->setColumnDetails('osoba', [
-            'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
-                    $searchTerm = explode(" ", $searchTerm);
-                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
-                    });
-                } else {
-                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
-                        $q
-                            ->where('ime', 'ilike', $searchTerm . '%')
-                            ->orWhere('prezime', 'ilike', $searchTerm . '%')
-                            ->orWhere('id', 'ilike', $searchTerm . '%');
-//                        });
-                    });
-                }
-            }
-        ]);
 
     }
 
@@ -414,19 +353,77 @@ class PromenaPodatakaCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->removeColumns($this->remove_columns_list_definition_array);
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
-         */
+        $this->crud->addColumns($this->columns_definition_array);
 
-//        todo: testirati da li radi pretraga sa licencom sa kojom nije podneo zahtev
+        $this->crud->removeColumns([
+//        'id',
+            'licni_podaci',
+//        'osoba',
+            'ime',
+            'prezime',
+//            'brlic',
+            'adresa',
+            'mesto',
+            'pbroj',
+            'topstina_id',
+            'opstina',
+//        'tel',
+//        'mob',
+//        'email',
+            'firma_podaci',
+            'nazivfirm',
+            'mestofirm',
+            'opstinafirm',
+            'emailfirm',
+            'telfirm',
+            'wwwfirm',
+            'zahtev_podaci',
+            'ipaddress',
+            'datumprijema',
+            'datumobrade',
+//        'obradjen',
+            'mbfirm',
+            'pibfirm',
+            'adresafirm',
+//        'napomena',
+//        'created_at',
+//        'updated_at'
+        ]);
+
+        $this->crud->modifyColumn('id', [
+            'name' => 'id',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+                    $query->whereIn('id', $searchTermArray);
+                } else {
+                    $query->orWhere('id', 'ilike', $searchTerm . '%');
+                }
+            }
+        ]);
+
+
         $this->crud->setColumnDetails('brlic', [
             'searchLogic' => function ($query, $column, $searchTerm) {
-                $query->orWhereHas('licenca', function ($q) use ($column, $searchTerm) {
-                    $q->where('id', 'ilike', $searchTerm . '%');
-                });
+                if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('licenca', function ($q) use ($column, $searchTerm) {
+                        $q->where('id', 'ilike', $searchTerm . '%')
+                            ->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
+                                $q
+                                    ->where('id', 'ilike', $searchTerm . '%')
+                                    ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                    ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                            });
+                    });
+                }
             }
         ]);
 
@@ -448,65 +445,14 @@ class PromenaPodatakaCrudController extends CrudController
                         return 'Noviji';
                     case 6:
                         return 'Potpis';
-                    case 7:
-                    case 16:
-                    case 32:
-                    case 33:
-                    case 34:
-                    case 35:
-                    case 36:
-                    case 37:
-                    case 38:
-                    case 39:
-                    case 40:
-                    case 41:
-                    case 42:
-                        return 'Email-neobrađen';
-                    case 102:
-                    case 116:
-                    case 132:
-                    case 133:
-                    case 134:
-                    case 135:
-                    case 136:
-                    case 137:
-                    case 138:
-                    case 139:
-                    case 140:
-                    case 141:
-                    case 142:
-                        return 'Email-obrađen';
-                    case 202:
-                    case 216:
-                    case 232:
-                    case 233:
-                    case 234:
-                    case 235:
-                    case 236:
-                    case 237:
-                    case 238:
-                    case 239:
-                    case 240:
-                    case 241:
-                    case 242:
-                        return 'Email-Problem';
-                    case 300:
-                        return 'Bulk-neobradjen';
+                    default:
+                        return 'Nepoznat status';
                 }
             },
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->obradjen) {
-                        case 0:
-                        case backpack_user()->id:
-                            return 'bg-warning px-2 rounded';
-                        case 1:
-                            return 'bg-success text-white px-2 rounded';
-                        case backpack_user()->id + 100:
-                            return 'bg-info text-white px-2 rounded';
-                        case backpack_user()->id + 200:
-                            return 'bg-danger text-white px-2 rounded';
-                    }
+                    if ($entry->obradjen === 1)
+                        return 'btn btn-sm btn-outline-info';
                 }
             ]
         ]);
@@ -515,17 +461,6 @@ class PromenaPodatakaCrudController extends CrudController
          * Define filters
          * start
          */
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->addFilter([
-                'type' => 'simple',
-                'name' => 'active',
-                'label' => backpack_user()->name
-            ],
-                FALSE,
-                function () { // if the filter is active
-                    $this->crud->query->whereIn('obradjen', [backpack_user()->id, backpack_user()->id + 100, backpack_user()->id + 200]); // apply the "active" eloquent scope
-                });
-        }
 
         $this->crud->addFilter([
             'type' => 'simple',
@@ -534,7 +469,6 @@ class PromenaPodatakaCrudController extends CrudController
         ],
             FALSE,
             function () { // if the filter is active
-//                $this->crud->query->where('obradjen', backpack_user()->id); // apply the "active" eloquent scope
                 $this->crud->query->where('obradjen', NEAKTIVAN); // apply the "active" eloquent scope
             });
 
@@ -545,19 +479,9 @@ class PromenaPodatakaCrudController extends CrudController
         ],
             FALSE,
             function () { // if the filter is active
-//                $this->crud->query->where('obradjen', backpack_user()->id + 100); // apply the "active" eloquent scope
                 $this->crud->query->where('obradjen', AKTIVAN); // apply the "active" eloquent scope
             });
 
-        /*        $this->crud->addFilter([
-                    'type' => 'simple',
-                    'name' => 'problematicni',
-                    'label' => 'Problematični'
-                ],
-                    FALSE,
-                    function () { // if the filter is active
-                        $this->crud->query->where('obradjen', backpack_user()->id + 200); // apply the "active" eloquent scope
-                    });*/
 
         if (backpack_user()->hasRole('admin')) {
             $this->crud->addFilter([
@@ -574,51 +498,13 @@ class PromenaPodatakaCrudController extends CrudController
                     4 => '4 - Otkazan',
                     5 => '5 - Noviji',
                     6 => '6 - Potpis',
-                    7 => '7 - Email-neobrađen',
-                    16 => '16 - Email-neobrađen',
-                    32 => '32 - Email-neobrađen',
-                    33 => '33 - Email-neobrađen',
-                    34 => '34 - Email-neobrađen',
-                    35 => '35 - Email-neobrađen',
-                    36 => '36 - Email-neobrađen',
-                    37 => '37 - Email-neobrađen',
-                    38 => '38 - Email-neobrađen',
-                    39 => '39 - Email-neobrađen',
-                    40 => '40 - Email-neobrađen',
-                    41 => '41 - Email-neobrađen',
-                    42 => '42 - Email-neobrađen',
-                    116 => '116 - Email-obrađen',
-                    132 => '132 - Email-obrađen',
-                    133 => '133 - Email-obrađen',
-                    134 => '134 - Email-obrađen',
-                    135 => '135 - Email-obrađen',
-                    136 => '136 - Email-obrađen',
-                    137 => '137 - Email-obrađen',
-                    138 => '138 - Email-obrađen',
-                    139 => '139 - Email-obrađen',
-                    140 => '140 - Email-obrađen',
-                    141 => '141 - Email-obrađen',
-                    142 => '142 - Email-obrađen',
-                    216 => '216 - Email-Problem',
-                    232 => '232 - Email-Problem',
-                    233 => '233 - Email-Problem',
-                    234 => '234 - Email-Problem',
-                    235 => '235 - Email-Problem',
-                    236 => '236 - Email-Problem',
-                    237 => '237 - Email-Problem',
-                    238 => '238 - Email-Problem',
-                    239 => '239 - Email-Problem',
-                    240 => '240 - Email-Problem',
-                    241 => '241 - Email-Problem',
-                    242 => '242 - Email-Problem',
-                    300 => '300 - Bulk-neobradjen',
                 ];
             }, function ($values) { // if the filter is active
                 $this->crud->addClause('whereIn', 'obradjen', json_decode($values));
             });
         }
 
-        // daterange filter
+        // date range filter
         $this->crud->addFilter([
             'type' => 'date_range',
             'name' => 'created_at',
@@ -673,44 +559,6 @@ class PromenaPodatakaCrudController extends CrudController
                 4 => '(4) Otkazan',
                 5 => '(5) Noviji',
                 6 => '(6) Potpis',
-                7 => '(7) Email-neobrađen',
-                16 => '(16) Email-neobrađen Tijana',
-                32 => '(32) Email-neobrađen Nada',
-                33 => '(33) Email-neobrađen Ljilja',
-                34 => '(34) Email-neobrađen Miljan',
-                35 => '(35) Email-neobrađen Jasmina',
-                36 => '(36) Email-neobrađen Milorad',
-                37 => '(37) Email-neobrađen Milena',
-                38 => '(38) Email-neobrađen Mirjana',
-                39 => '(39) Email-neobrađen Aca',
-                40 => '(40) Email-neobrađen Biserka',
-                41 => '(41) Email-neobrađen Edisa',
-                42 => '(42) Email-neobrađen Aleksandra',
-                116 => '(116) Email-obrađen Tijana',
-                132 => '(132) Email-obrađen Nada',
-                133 => '(133) Email-obrađen Ljilja',
-                134 => '(134) Email-obrađen Miljan',
-                135 => '(135) Email-obrađen Jasmina',
-                136 => '(136) Email-obrađen Milorad',
-                137 => '(137) Email-obrađen Milena',
-                138 => '(138) Email-obrađen Mirjana',
-                139 => '(139) Email-obrađen Aca',
-                140 => '(140) Email-obrađen Biserka',
-                141 => '(141) Email-obrađen Edisa',
-                142 => '(142) Email-obrađen Aleksandra',
-                216 => '(216) Email-Problem Tijana',
-                232 => '(232) Email-Problem Nada',
-                233 => '(233) Email-Problem Ljilja',
-                234 => '(234) Email-Problem Miljan',
-                235 => '(235) Email-Problem Jasmina',
-                236 => '(236) Email-Problem Milorad',
-                237 => '(237) Email-Problem Milena',
-                238 => '(238) Email-Problem Mirjana',
-                239 => '(239) Email-Problem Aca',
-                240 => '(240) Email-Problem Biserka',
-                241 => '(241) Email-Problem Edisa',
-                242 => '(242) Email-Problem Aleksandra',
-                300 => '(300) Bulk-neobradjen',
             ]
         ]);
     }
@@ -792,64 +640,12 @@ class PromenaPodatakaCrudController extends CrudController
                         return 'Noviji';
                     case 6:
                         return 'Potpis';
-                    case 7:
-                    case 16:
-                    case 32:
-                    case 33:
-                    case 34:
-                    case 35:
-                    case 36:
-                    case 37:
-                    case 38:
-                    case 39:
-                    case 40:
-                    case 41:
-                    case 42:
-                        return 'Email-neobrađen';
-                    case 102:
-                    case 116:
-                    case 132:
-                    case 133:
-                    case 134:
-                    case 135:
-                    case 136:
-                    case 137:
-                    case 138:
-                    case 139:
-                    case 140:
-                    case 141:
-                    case 142:
-                        return 'Email-obrađen';
-                    case 202:
-                    case 216:
-                    case 232:
-                    case 233:
-                    case 234:
-                    case 235:
-                    case 236:
-                    case 237:
-                    case 238:
-                    case 239:
-                    case 240:
-                    case 241:
-                    case 242:
-                        return 'Email-Problem';
+                    default:
+                        return 'Nepoznat status';
                 }
             },
             'wrapper' => [
-                'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->obradjen) {
-                        case 0:
-                        case backpack_user()->id:
-                            return 'bg-warning px-2 rounded';
-                        case 1:
-                            return 'bg-success text-white px-2 rounded';
-                        case backpack_user()->id + 100:
-                            return 'bg-info text-white px-2 rounded';
-                        case backpack_user()->id + 200:
-                            return 'bg-danger text-white px-2 rounded';
-                    }
-                }
+                'class' => 'btn btn-sm btn-outline-info',
             ]
         ]);
 

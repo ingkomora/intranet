@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Admin\Operations;
 
 use App\Http\Requests\PromenaPodatakaEmailRequest;
-use App\Models\Mirovanje;
 use App\Models\PromenaPodataka;
 use Carbon\Carbon;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use App\Http\Requests\MirovanjeObradaRequest;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use function PHPUnit\Framework\isEmpty;
 
 trait PromenaPodatakaEmailOperation
 {
@@ -39,7 +37,7 @@ trait PromenaPodatakaEmailOperation
      */
     protected function setupPromenaPodatakaEmailDefaults()
     {
-        $this->crud->allowAccess('promenapodatakaemail');
+        $this->crud->allowAccess(['promenapodatakaemail']);
 
         $this->crud->operation('promenapodatakaemail', function () {
             $this->crud->loadDefaultOperationSettingsFromConfig();
@@ -64,7 +62,7 @@ trait PromenaPodatakaEmailOperation
     /**
      * Define what happens when the PromenaPodatakaEmail operation is loaded.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|void
+     * @return Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|void
      */
     protected function getPromenaPodatakaEmailForm($id)
     {
@@ -84,7 +82,7 @@ trait PromenaPodatakaEmailOperation
 
         $this->crud->removeSaveAction('save_and_edit');
 
-        // get entry ID from Request (makes sure its the last ID for nested resources)
+        // get entry ID from Request (makes sure it is the last ID for nested resources)
         $id = $this->crud->getCurrentEntryId() ?? $id;
         $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
         // get the info for that entry

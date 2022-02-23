@@ -48,7 +48,7 @@ trait MembershipApprovingOperation
      */
     protected function setupMembershipApprovingDefaults()
     {
-        $this->crud->allowAccess('membershipapproving');
+        $this->crud->allowAccess(['membershipapproving']);
 
         $this->crud->operation('membershipapproving', function () {
             $this->crud->loadDefaultOperationSettingsFromConfig();

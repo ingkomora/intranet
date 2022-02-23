@@ -94,4 +94,9 @@ class Licenca extends Model
     {
         return $this->osobaId->ime . " " . $this->osobaId->prezime . " (" . $this->osobaId->id . ")";
     }
+
+    public function getImeRoditeljPrezimeAttribute()
+    {
+        return "{$this->osobaId->ime} ({$this->osobaId->roditelj}) {$this->osobaId->prezime}";
+    }
 }
