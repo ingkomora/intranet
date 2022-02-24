@@ -946,30 +946,36 @@ class OsobaCrudController extends CrudController
         $this->crud->field('firma')->tab('Podaci o firmi');
 
 //        osiguranje
-        $this->crud->addField([
-            'name' => 'osiguravajucaKuca',
-            'type' => 'relationship',
-            'label' => 'Osiguravajuća kuca',
-            'entity' => 'osiguranja',
-            'attribute' => 'firmaOsiguravajucaKuca.naziv',
-            'tab' => 'Podaci o osiguranju',
-            'attributes' => ['readonly' => 'readonly'],
-        ]);
-        $this->crud->addField([
-            'name' => 'firmaUgovarac',
+        //todo: ne radi, same name "osiguranja"
+/*        $this->crud->addField([
+            'name' => 'osiguranja',
             'label' => 'Ugovarač osiguranja',
-            'entity' => 'osiguranja',
+            'type' => 'relationship',
             'attribute' => 'firmaUgovarac.naziv',
             'tab' => 'Podaci o osiguranju',
-            'attributes' => ['readonly' => 'readonly'],
         ]);
         $this->crud->addField([
-            'name' => 'osobaUgovarac',
+            'name' => 'osiguranja1',
             'label' => 'Ugovarač osiguranja (individualno)',
+            'type' => 'select2',
             'entity' => 'osiguranja',
-            'attribute' => 'osobaUgovarac.naziv',
+            'attribute' => 'osobaUgovarac.id',
             'tab' => 'Podaci o osiguranju',
-            'attributes' => ['readonly' => 'readonly'],
+        ]);
+        $this->crud->addField([
+            'name' => 'osiguranja2',
+            'label' => 'Osiguravajuća kuca',
+            'type' => 'select2',
+            'model' => 'App\Models\Osiguranje',
+            'entity' => 'osiguranja',
+//            'entity' => 'osiguranja.firmaOsiguravajucaKuca',
+//            'attribute' => 'firmaOsiguravajucaKuca.naziv',
+            'attribute' => 'naziv',
+//            'attribute' => 'id',
+            'tab' => 'Podaci o osiguranju',
+            'options' => function ($q) {
+                return $q->whereHas('firmaOsiguravajucaKuca')->get();
+            }
         ]);
         $this->crud->addField([
             'name' => 'polisaPokrice',
@@ -977,14 +983,15 @@ class OsobaCrudController extends CrudController
             'entity' => 'osiguranja',
             'attribute' => 'polisaPokrice.naziv',
             'tab' => 'Podaci o osiguranju',
-            'attributes' => ['readonly' => 'readonly'],
-        ]);
+        ]);*/
 
 //        obrazovanje
-        $this->crud->addField([ //todo nece da prikaze polje "bolonja"
+        $this->crud->addField([
             'name' => 'bolonja',
             'label' => 'Da li su studije završene po bolonji?',
             'tab' => 'Obrazovanje',
+            'type' => 'select_from_array',
+            'options' => [0 => 'Ne', 1 => 'Da'],
         ]);
         $this->crud->addField([
             'name' => 'separatorOS',
@@ -1013,7 +1020,7 @@ class OsobaCrudController extends CrudController
         $this->crud->field('mrgodina')->label('Godina završetka')->tab('Obrazovanje');
         $this->crud->field('mrbroj')->label('Broj diplome')->tab('Obrazovanje');
 
-        //        funkcije
+//        funkcije
         $this->crud->addFields([
             'funkcija_id' => [
                 'name' => 'funkcija_id',
