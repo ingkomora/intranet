@@ -36,15 +36,20 @@ class OsobaCrudController extends CrudController
             'name' => 'licni_podaci',
             'type' => 'custom_html',
         ],
+        'id' => [
+            'name' => 'id',
+            'label' => 'jmbg',
+        ],
         'osoba' => [
             'name' => 'osoba',
             'type' => 'model_function',
             'label' => 'Ime (roditelj) prezime',
             'function_name' => 'getImeRoditeljPrezimeAttribute',
         ],
-        'id' => [
-            'name' => 'id',
-            'label' => 'jmbg',
+        'zvanje' => [
+            'name' => 'zvanjeId',
+            'type' => 'relationship',
+            'label' => 'Zvanje',
         ],
         'lib',
 //        'ime',
@@ -57,11 +62,6 @@ class OsobaCrudController extends CrudController
         'prezime_staro' => [
             'label' => 'Staro prezime',
             'name' => 'prezime_staro',
-        ],
-        'zvanje' => [
-            'name' => 'zvanjeId',
-            'type' => 'relationship',
-            'label' => 'Zvanje',
         ],
         'titula' => [
             'name' => 'titula',
@@ -486,7 +486,7 @@ class OsobaCrudController extends CrudController
     {
         $this->crud->addColumns($this->columns_definition_array);
         $this->crud->removeColumns([
-            'licni_podaci', 'rodjenje', 'prebivaliste', 'firma', 'obrazovanje', 'dipl', 'mr', 'funkcije', 'portal', 'razlog',
+            'licni_podaci', 'rodjenje', 'prebivaliste', 'firma', 'obrazovanje', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
 
             'devojackoprezime',
             'prezime_staro',
