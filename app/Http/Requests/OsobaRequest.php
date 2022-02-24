@@ -41,6 +41,7 @@ class OsobaRequest extends FormRequest {
             'ime' => 'required',
             'prezime' => 'required',
             'roditelj' => 'required',
+//            'kontaktemail' => 'required',
             'rodjenjemesto' => 'required',
             'rodjenjeopstina' => 'required',
             'rodjenjedrzava' => 'required',
