@@ -4,15 +4,20 @@
             <p>
                 <strong>{{$entry->ime ?? ''}} {{$entry->prezime ?? ''}}</strong>, {{$entry->zvanjeId->naziv ?? ''}}
                 <br>
-                <strong>Članstvo:</strong> {{$entry->clan == 1 ? $entry->clan = "Član IKS" : "Nije član IKS"}}
+                <strong>Članstvo:</strong> {{$entry->clan == AKTIVAN ? $entry->clan = "Član IKS" : "Nije član IKS"}}
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
                 <br>
-                <b>LIB:</b>
+                <b>Registar:</b>
                 @if($entry->lib)
-                    <a
-                        href="http://www.ingkomora.rs/clanovi/registar_pretraga.php?lib={{$entry->lib ?? 'nema lib'}}"
-                        target="_blank">{{$entry->lib}}</a>
+                    @if($entry->licence->isEmpty())
+                        Nema podataka upisanih u Registar.
+                    @else
+                        <a
+                            href="http://www.ingkomora.rs/clanovi/registar_pretraga.php?lib={{$entry->lib ?? 'nema lib'}}"
+                            target="_blank">
+                            <i class="nav-icon fas fa-book"></i> Pogledaj podatke upisane u Registar</a>
+                    @endif
                 @else
                     Nije dodeljen lib
                 @endif
