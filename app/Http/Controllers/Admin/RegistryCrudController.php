@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RegistryRequest;
+use App\Models\RequestCategory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -44,14 +45,26 @@ class RegistryCrudController extends CrudController
         CRUD::column('id');
         CRUD::column('registryDepartmentUnit')->attribute('label')->label('rdu');
         CRUD::column('base_number');
-        CRUD::column('requestCategories');
+        CRUD::column('requestCategories')->limit(500);
         CRUD::column('counter');
-        CRUD::column('subject');
+        CRUD::column('subject')->limit(500);
 //        CRUD::column('copy');
 //        CRUD::column('sub_base_number');
         CRUD::column('status_id');
 //        CRUD::column('created_at');
 //        CRUD::column('updated_at');
+
+        $this->crud->addFilter([
+            'type' => 'select2',
+            'name' => 'requestCategory',
+            'label' => 'RequestCategory'
+        ], function () {
+            return RequestCategory::all()->pluck('name', 'id')->toArray();
+        }, function ($value) {
+            $this->crud->addClause('whereHas', 'requestCategories', function ($q) use ($value){
+                $q->where('request_category_id', $value);
+            });
+        });
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -106,6 +119,7 @@ class RegistryCrudController extends CrudController
 
             ],
         ]);
+
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
