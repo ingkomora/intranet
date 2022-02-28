@@ -58,6 +58,10 @@
                         <th scope="col">iznos uplate</th>
                         <th scope="col">pretplata</th>
                         <th scope="col">datum uplate</th>
+                        @role('admin')
+                        <th scope="col">datumazuriranja_admin</th>
+                        <th scope="col">azurirao_admin</th>
+                        @endrole>
                         <th scope="col">napomena</th>
                     </tr>
                     </thead>
@@ -68,6 +72,10 @@
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
                             <td>{{$unos->datumuplate}}</td>
+                            @role('admin')
+                            <td>{{$unos->datumazuriranja_admin}}</td>
+                            <td>{{$unos->azurirao_admin}}</td>
+                            @endrole
                             <td>{{$unos->napomena}}</td>
                         </tr>
                     @endforeach
