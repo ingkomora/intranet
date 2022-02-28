@@ -61,7 +61,7 @@
                         @role('admin')
                         <th scope="col">datumazuriranja_admin</th>
                         <th scope="col">azurirao_admin</th>
-                        @endrole>
+                        @endrole
                         <th scope="col">napomena</th>
                     </tr>
                     </thead>
