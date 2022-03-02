@@ -184,7 +184,7 @@ trait MembershipApprovingOperation
         $message = '';
 
         // ukoliko je tosoba.clan = 1 ne bi smelo da uopste ima ovaj zahtev
-        if ($osoba->clan == 1) {
+        if ($osoba->clan == AKTIVAN) {
             \Alert::error("<b>GREŠKA 4!</b><br><br>Članstvo po zahtevu broj {$request->id} ne može biti kreirano jer je clan = 1.<br><br>Prenesite ovu poruku administratoru.")->flash();
             return \Redirect::to($this->crud->route);
         }
@@ -375,7 +375,13 @@ trait MembershipApprovingOperation
             }
 
 //        OSOBA: update clan = 1
-            $osoba->clan = AKTIVAN;
+            /*
+             * TODO: Clanstvo na cekanju:
+             * Odobrava se clanstvo posle UO, ali ipak nije clan dok racunovodstvo ne proknjizi uplatu prve clanarine.
+             * U aplikaciji za clanarinu je potrebno postaviti clan = 1 ukoliko je clan = 100
+             */
+//            $osoba->clan = AKTIVAN;
+            $osoba->clan = 100;
             if ($osoba->save()) {
 
                 $lib = new LibLibrary();
