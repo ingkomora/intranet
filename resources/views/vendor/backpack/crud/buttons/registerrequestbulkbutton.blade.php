@@ -36,9 +36,9 @@
                 let el = document.createElement('div');
                 el.innerHTML = '<div class="form-group row"><label for="registrydate" class="col-sm-3 col-form-label col-form-label-sm">Datum</label><input type="date" name="registrydate" id="registrydate" class="form-control form-control-sm mb-3 col-md-8"></div>';
 
-                if (url.indexOf("licence") >= 0 || url.indexOf("si") >= 0) {
+                // if (url.indexOf("licence") >= 0 || url.indexOf("si") >= 0) {
                     el.innerHTML += '<div class="form-group row"><label for="prilog" class="col-sm-2 col-form-label col-form-label-sm">Dopuna? </label><input type="checkbox" name="prilog" id="prilog" value="1" class="form-control form-control-sm mb-3 col-md-1"><label for="prilogtext" class="col-sm-2 col-form-label col-form-label-sm">Naziv:</label><input type="text" name="prilogtext" id="prilogtext" class="input-group mb-3 col-md-6"></div>';
-                }
+                // }
 
 
                 // show confirm message

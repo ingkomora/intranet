@@ -63,6 +63,8 @@
                         <th scope="col">iznos uplate</th>
                         <th scope="col">pretplata</th>
                         <th scope="col">datum uplate</th>
+                        <th scope="col">datumazuriranja</th>
+                        <th scope="col">azurirao_korisnik</th>
                         @role('admin')
                         <th scope="col">datumazuriranja_admin</th>
                         <th scope="col">azurirao_admin</th>
@@ -71,15 +73,18 @@
                     </tr>
                     </thead>
                     @foreach($entry->clanarine as $unos)
+{{--                        @dd($unos->appKorisnik)--}}
                         <tr>
                             <td>{{$unos->rokzanaplatu}}</td>
                             <td>{{$unos->iznoszanaplatu}}</td>
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
                             <td>{{$unos->datumuplate}}</td>
+                            <td>{{$unos->datumazuriranja}}</td>
+                            <td>{{$unos->appKorisnik->nalog??""}}</td>
                             @role('admin')
                             <td>{{$unos->datumazuriranja_admin}}</td>
-                            <td>{{$unos->azurirao_admin}}</td>
+                            <td>{{$unos->appAdmin->nalog??""}}</td>
                             @endrole
                             <td>{{$unos->napomena}}</td>
                         </tr>
