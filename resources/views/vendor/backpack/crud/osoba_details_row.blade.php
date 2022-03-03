@@ -4,7 +4,12 @@
             <p>
                 <strong>{{$entry->ime ?? ''}} {{$entry->prezime ?? ''}}</strong>, {{$entry->zvanjeId->naziv ?? ''}}
                 <br>
-                <strong>Članstvo:</strong> {{$entry->clan == AKTIVAN ? $entry->clan = "Član IKS" : "Nije član IKS"}}
+                <strong>Članstvo:</strong>
+                @switch($entry->clan)
+                @case($entry->clan == AKTIVAN) {{"Član IKS"}}
+                @case($entry->clan == NEAKTIVAN) {{"Nije član IKS"}}
+                @case($entry->clan == 100) {{"Na čekanju"}}
+                @endswitch
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
                 <br>

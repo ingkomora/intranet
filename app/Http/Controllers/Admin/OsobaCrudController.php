@@ -139,10 +139,18 @@ class OsobaCrudController extends CrudController
         'datumrodjenja' => [
             'name' => 'datumrodjenja',
             'label' => 'Datum',
+            'type' => 'date',
+            'format' => 'DD.MM.Y.'
+        ],
+
+//        adrese
+        'adrese' => [
+            'label' => 'PODACI O ADRESAMA',
+            'name' => 'adrese',
         ],
 //        prebivaliste
         'prebivaliste' => [
-            'label' => 'PODACI O PREBIVALIŠTU',
+            'label' => 'ADRESA PREBIVALIŠTA',
             'name' => 'prebivaliste',
         ],
         'prebivalistedrzava' => [
@@ -170,6 +178,10 @@ class OsobaCrudController extends CrudController
         'prebivalisteadresa' => [
             'name' => 'prebivalisteadresa',
             'label' => 'Adresa',
+        ],
+        'posta' => [
+            'label' => 'ADRESA ZA DOSTAVLJANJE POŠTE',
+            'name' => 'posta',
         ],
         'ulica',
         'broj',
@@ -348,9 +360,28 @@ class OsobaCrudController extends CrudController
         'docsmerid',
         'docunetsmer',
 
+//        osiguranja
+/*        'osiguranjasection' => [
+            'label' => 'PODACI O OSIGURANJU',
+            'name' => 'osiguranjasection',
+        ],
+        'osiguranjetip' => [
+            'name' => 'osiguranjetip',
+            'label' => 'Tip osiguranja',
+            'type' => 'select2',
+            'model' => 'App\Models\Osiguranje',
+            'attribute', 'osiguranjeTip.naziv'
+        ],
+        'osiguranja' => [
+            'name' => 'osiguranja.firmaOsiguravajucaKuca',
+            'label' => 'Osiguravajuća kuća',
+            'attribute', 'naziv'
+        ],*/
+
+
 //        funkcije
         'funkcije' => [
-            'label' => 'PODACI O FUNKCIJAMA',
+            'label' => 'SVOJSTVO U KOMORI',
             'name' => 'funkcije',
         ],
         'funkcija_id' => [
@@ -367,7 +398,7 @@ class OsobaCrudController extends CrudController
             'name' => 'clan',
             'label' => 'Članstvo',
             'type' => 'select_from_array',
-            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član'],
+            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju'],
         ],
 
 //        portal
@@ -430,7 +461,7 @@ class OsobaCrudController extends CrudController
             'name' => 'zaposlen',
             'label' => 'Status radnog odnosa',
             'type' => 'select_from_array',
-            'options' => [0 => 'Nezaposlen', 1 => 'Zaposlen'],
+            'options' => [0 => 'Nezaposlen', 1 => 'Zaposlen', 3 => 'Penzioner'],
         ],
         'godine_radnog_iskustva',
 
@@ -486,7 +517,10 @@ class OsobaCrudController extends CrudController
     {
         $this->crud->addColumns($this->columns_definition_array);
         $this->crud->removeColumns([
-            'licni_podaci', 'rodjenje', 'prebivaliste', 'firma', 'obrazovanje', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
+//            separatori
+//            start
+            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma', 'obrazovanje', 'osiguranjasection', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
+//            end
 
             'devojackoprezime',
             'prezime_staro',
@@ -520,6 +554,7 @@ class OsobaCrudController extends CrudController
             'rodjenjeinomesto',
             'datumrodjenja',
 
+//        adrese
 //        prebivaliste
             'prebivalisteopstinaid' => [
                 'name' => 'opstinaId',
@@ -531,6 +566,7 @@ class OsobaCrudController extends CrudController
             'prebivalisteopstina',
             'prebivalisteadresa',
             'prebivalistedrzava',
+//        posta
             'ulica',
             'broj',
             'podbroj',
@@ -556,6 +592,7 @@ class OsobaCrudController extends CrudController
                 'attribute' => 'naziv_mb',
             ],
 
+//        obrazovanje
 //        dipl
             'diplfakultet',
             'diplmesto',
@@ -605,6 +642,9 @@ class OsobaCrudController extends CrudController
             'docunetfakultet',
             'docsmerid',
             'docunetsmer',
+
+//        osiguranje
+            'osiguranjetip',
 
 //        funkcija
             'funkcija_id',
@@ -761,23 +801,29 @@ class OsobaCrudController extends CrudController
             'type' => 'custom_html',
             'value' => '<div id="lpseparator"></div>
                         <script>
-                            var row = document.getElementById("lpseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("lpseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("lpseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
-//        separator za vrstu studija
+//        studije
 //        start
         $this->crud->modifyColumn('dipl', [
             'type' => 'custom_html',
             'value' => '<div id="diplstudijeseparator"></div>
                         <script>
+//                            var row = document.getElementById("diplstudijeseparator").parentNode.parentNode.parentNode;
+//                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
                             var row = document.getElementById("diplstudijeseparator").parentNode.parentNode.parentNode.children[0];
                             var col = document.getElementById("diplstudijeseparator").parentNode.parentNode;
                             col.remove();
                             row.setAttribute("colspan", 2);
                             row.setAttribute("class", "text-center");
-//                            row.style.cssText = "padding-left: 15px";
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
                         </script>
                         '
         ]);
@@ -790,39 +836,93 @@ class OsobaCrudController extends CrudController
                             col.remove();
                             row.setAttribute("colspan", 2);
                             row.setAttribute("class", "text-center");
-//                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
                         </script>
                         '
         ]);
 //        end
 
+        $this->crud->modifyColumn('osiguranjasection', [
+            'type' => 'custom_html',
+            'value' => '<div id="osiguranjaseparator"></div>
+                        <script>
+                            var row = document.getElementById("osiguranjaseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("osiguranjaseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
+                        </script>
+                        '
+        ]);
 
         $this->crud->modifyColumn('rodjenje', [
             'type' => 'custom_html',
             'value' => '<div id="rseparator"></div>
                         <script>
-                            var row = document.getElementById("rseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("rseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("rseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
 
-        $this->crud->modifyColumn('prebivaliste', [
+//        adrese
+//        start
+        $this->crud->modifyColumn('adrese', [
             'type' => 'custom_html',
-            'value' => '<div id="pseparator"></div>
+            'value' => '<div id="adreseseparator"></div>
                         <script>
-                            var row = document.getElementById("pseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("adreseseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("adreseseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
+        $this->crud->modifyColumn('prebivaliste', [
+            'type' => 'custom_html',
+            'value' => '<div id="prebivalisteseparator"></div>
+                        <script>
+                            var row = document.getElementById("prebivalisteseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("prebivalisteseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
+                        </script>
+                        '
+        ]);
+        $this->crud->modifyColumn('posta', [
+            'type' => 'custom_html',
+            'value' => '<div id="postaseparator"></div>
+                        <script>
+                            var row = document.getElementById("postaseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("postaseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
+                        </script>
+                        '
+        ]);
+//        end
 
         $this->crud->modifyColumn('firma', [
             'type' => 'custom_html',
             'value' => '<div id="fseparator"></div>
                         <script>
-                            var row = document.getElementById("fseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("fseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("fseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
@@ -831,8 +931,12 @@ class OsobaCrudController extends CrudController
             'type' => 'custom_html',
             'value' => '<div id="oseparator"></div>
                         <script>
-                            var row = document.getElementById("oseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("oseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("oseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
@@ -841,8 +945,12 @@ class OsobaCrudController extends CrudController
             'type' => 'custom_html',
             'value' => '<div id="funkseparator"></div>
                         <script>
-                            var row = document.getElementById("funkseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("funkseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("funkseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
@@ -851,8 +959,12 @@ class OsobaCrudController extends CrudController
             'type' => 'custom_html',
             'value' => '<div id="portalseparator"></div>
                         <script>
-                            var row = document.getElementById("portalseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("portalseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("portalseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
@@ -861,8 +973,12 @@ class OsobaCrudController extends CrudController
             'type' => 'custom_html',
             'value' => '<div id="rzseparator"></div>
                         <script>
-                            var row = document.getElementById("rzseparator").parentNode.parentNode.parentNode;
-                            row.style.cssText = "background-color: rgba(124,105,239,0.2)";
+                            var row = document.getElementById("rzseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("rzseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
                         </script>
                         '
         ]);
@@ -947,43 +1063,43 @@ class OsobaCrudController extends CrudController
 
 //        osiguranje
         //todo: ne radi, same name "osiguranja"
-/*        $this->crud->addField([
-            'name' => 'osiguranja',
-            'label' => 'Ugovarač osiguranja',
-            'type' => 'relationship',
-            'attribute' => 'firmaUgovarac.naziv',
-            'tab' => 'Podaci o osiguranju',
-        ]);
-        $this->crud->addField([
-            'name' => 'osiguranja1',
-            'label' => 'Ugovarač osiguranja (individualno)',
-            'type' => 'select2',
-            'entity' => 'osiguranja',
-            'attribute' => 'osobaUgovarac.id',
-            'tab' => 'Podaci o osiguranju',
-        ]);
-        $this->crud->addField([
-            'name' => 'osiguranja2',
-            'label' => 'Osiguravajuća kuca',
-            'type' => 'select2',
-            'model' => 'App\Models\Osiguranje',
-            'entity' => 'osiguranja',
-//            'entity' => 'osiguranja.firmaOsiguravajucaKuca',
-//            'attribute' => 'firmaOsiguravajucaKuca.naziv',
-            'attribute' => 'naziv',
-//            'attribute' => 'id',
-            'tab' => 'Podaci o osiguranju',
-            'options' => function ($q) {
-                return $q->whereHas('firmaOsiguravajucaKuca')->get();
-            }
-        ]);
-        $this->crud->addField([
-            'name' => 'polisaPokrice',
-            'label' => 'Pokriće polise',
-            'entity' => 'osiguranja',
-            'attribute' => 'polisaPokrice.naziv',
-            'tab' => 'Podaci o osiguranju',
-        ]);*/
+        /*        $this->crud->addField([
+                    'name' => 'osiguranja',
+                    'label' => 'Ugovarač osiguranja',
+                    'type' => 'relationship',
+                    'attribute' => 'firmaUgovarac.naziv',
+                    'tab' => 'Podaci o osiguranju',
+                ]);
+                $this->crud->addField([
+                    'name' => 'osiguranja1',
+                    'label' => 'Ugovarač osiguranja (individualno)',
+                    'type' => 'select2',
+                    'entity' => 'osiguranja',
+                    'attribute' => 'osobaUgovarac.id',
+                    'tab' => 'Podaci o osiguranju',
+                ]);
+                $this->crud->addField([
+                    'name' => 'osiguranja2',
+                    'label' => 'Osiguravajuća kuca',
+                    'type' => 'select2',
+                    'model' => 'App\Models\Osiguranje',
+                    'entity' => 'osiguranja',
+        //            'entity' => 'osiguranja.firmaOsiguravajucaKuca',
+        //            'attribute' => 'firmaOsiguravajucaKuca.naziv',
+                    'attribute' => 'naziv',
+        //            'attribute' => 'id',
+                    'tab' => 'Podaci o osiguranju',
+                    'options' => function ($q) {
+                        return $q->whereHas('firmaOsiguravajucaKuca')->get();
+                    }
+                ]);
+                $this->crud->addField([
+                    'name' => 'polisaPokrice',
+                    'label' => 'Pokriće polise',
+                    'entity' => 'osiguranja',
+                    'attribute' => 'polisaPokrice.naziv',
+                    'tab' => 'Podaci o osiguranju',
+                ]);*/
 
 //        obrazovanje
         $this->crud->addField([
@@ -1111,7 +1227,7 @@ class OsobaCrudController extends CrudController
             'label' => 'Status radnog odnosa',
             'tab' => 'Portal',
             'type' => 'select_from_array',
-            'options' => [0 => 'Ne', 1 => 'Da'],
+            'options' => [0 => 'Ne', 1 => 'Da', 3 => 'Penzioner'],
         ]);
 
 //        razno
