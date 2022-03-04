@@ -50,6 +50,7 @@ class OsobaCrudController extends CrudController
             'name' => 'zvanjeId',
             'type' => 'relationship',
             'label' => 'Zvanje',
+            'limit' => 200,
         ],
         'lib',
 //        'ime',

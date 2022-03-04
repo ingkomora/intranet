@@ -32,6 +32,13 @@ class RegistryCrudController extends CrudController
         CRUD::setEntityNameStrings('registry', 'registries');
 
         CRUD::set('show.setFromDb', FALSE);
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create', 'delete', 'update']);
+        }
+
+        $this->crud->enableDetailsRow();
+        $this->crud->enableExportButtons();
     }
 
     /**

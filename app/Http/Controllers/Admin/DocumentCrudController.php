@@ -326,7 +326,7 @@ class DocumentCrudController extends CrudController
             'registry_number',
             'registry_date' => [
                 'name' => 'registry_date',
-                'label' => 'datum zavođenja',
+                'label' => 'Datum zavođenja',
                 'type' => 'date_picker',
                 'date_picker_options' => [
                     'todayBtn' => 'linked',
@@ -353,7 +353,7 @@ class DocumentCrudController extends CrudController
 
         $this->crud->modifyField('status', [
             'options' => (function ($query) {
-                return $query->orderBy('id')->where('log_status_grupa_id', 12)->get(); // samo grupa statusa "DOCUMENTS"
+                return $query->orderBy('id')->where('log_status_grupa_id', DOCUMENTS)->get(); // samo grupa statusa "DOCUMENTS"
             }),
         ]);
 
