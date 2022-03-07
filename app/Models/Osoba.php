@@ -32,7 +32,7 @@ use Tesla\JMBG\JMBG;
  * @property Clanarina $prvaClanarina
  * @property Clanarina $poslednjaPlacenaClanarina
  * @property Clanarina $poslednjaClanarina
- * @property Clanarina $aktivanClan
+ * @property Clanarina $izmirenaClanarina
  */
 class Osoba extends Model
 {
@@ -135,7 +135,7 @@ class Osoba extends Model
      */
     public function opstinaId()
     {
-        return $this->belongsTo('App\Models\Opstina', 'prebivalisteopstinaid')->orderBy('ime','desc');
+        return $this->belongsTo('App\Models\Opstina', 'prebivalisteopstinaid')->orderBy('ime', 'desc');
     }
 
     /**
@@ -153,6 +153,7 @@ class Osoba extends Model
     {
         return $this->belongsTo('App\Models\Funkcija', 'funkcija');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -204,25 +205,55 @@ class Osoba extends Model
     public function poslednjaClanarina()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')
-            ->orderBy('rokzanaplatu','desc')->limit(1);
+            ->orderBy('rokzanaplatu', 'desc')->limit(1);
     }
 
     public function poslednjaPlacenaClanarina()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')
-            ->orderBy('rokzanaplatu','desc')->whereRaw('iznoszanaplatu = iznosuplate + pretplata')->limit(1);
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu = iznosuplate + pretplata')->limit(1);
     }
 
-    public function aktivanClan()
+    public function poslednjaPlacenaClanarinaDatumUplate()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')
-            ->orderBy('rokzanaplatu','desc')->whereRaw('rokzanaplatu >= now()')->limit(1);
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu = iznosuplate + pretplata')->whereNotNull('datumuplate')->where('datumuplate', '<', '2021-11-04')->limit(1);
+    }
+
+    public function clanarinaDatumAzuriranjaAdmin($year)
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu = iznosuplate + pretplata')->whereYear('datumazuriranja_admin', $year)->whereNull('napomena');
+    }
+
+    public function izmirenaClanarina()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('rokzanaplatu >= now()')->limit(1);
+    }
+
+    public function izmirenaClanarinaSa2020()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')->distinct('osoba')
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu > iznosuplate + pretplata')->whereDate('rokzanaplatu', '<', '2021-01-01');
+    }
+
+    public function izmirenaClanarinaSa2021()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')->distinct('osoba')
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu > iznosuplate + pretplata')->whereDate('rokzanaplatu', '<', '2022-01-01');
+    }
+
+    public function dugujeClanarinuZa2021()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba')->distinct('osoba')
+            ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu > iznosuplate + pretplata')->whereDate('rokzanaplatu', '>', '2021-01-01')->whereDate('rokzanaplatu', '<', '2022-01-01');
     }
 
     public function poslednjeDveClanarine()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')
-            ->orderBy('rokzanaplatu','desc')->limit(2);
+            ->orderBy('rokzanaplatu', 'desc')->limit(2);
     }
 
     /**

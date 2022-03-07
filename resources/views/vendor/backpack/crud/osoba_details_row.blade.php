@@ -6,10 +6,10 @@
                 <br>
                 <strong>Članstvo:</strong>
                 @switch($entry->clan)
-                    @case($entry->clan == -1) {{"Funkcioner"}} @break
-                    @case($entry->clan == AKTIVAN) {{"Član IKS"}} @break
-                    @case($entry->clan == NEAKTIVAN) {{"Nije član IKS"}} @break
-                    @case($entry->clan == 100) {{"Na čekanju"}} @break
+                    @case(-1) {{"Funkcioner"}} @break
+                    @case(AKTIVAN) {{"Član IKS"}} @break
+                    @case(NEAKTIVAN) {{"Nije član IKS"}} @break
+                    @case(100) {{"Na čekanju"}} @break
                 @endswitch
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
