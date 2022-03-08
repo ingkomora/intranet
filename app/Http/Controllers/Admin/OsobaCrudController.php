@@ -399,7 +399,7 @@ class OsobaCrudController extends CrudController
             'name' => 'clan',
             'label' => 'Članstvo',
             'type' => 'select_from_array',
-            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju'],
+            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju', 10 => 'Priprema se brisanje iz članstva'],
         ],
 
 //        portal
@@ -723,6 +723,8 @@ class OsobaCrudController extends CrudController
             return [
                 1 => 'Član je',
                 0 => 'Nije član',
+                100 => 'Članstvo na čekanju',
+                10 => 'Priprema se brisanje iz članstva',
             ];
         }, function ($value) {
             $this->crud->addClause('where', 'clan', $value);
@@ -1157,7 +1159,7 @@ class OsobaCrudController extends CrudController
                 'name' => 'clan',
                 'label' => 'Članstvo',
                 'type' => 'select_from_array',
-                'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član'],
+                'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju', 10 => 'Priprema se brisanje iz članstva'],
                 'tab' => 'Podaci o statusu u IKS',
 //                'attributes' => ['readonly' => 'readonly'],
             ],

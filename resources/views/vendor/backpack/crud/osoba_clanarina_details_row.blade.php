@@ -10,6 +10,7 @@
                     @case(AKTIVAN) {{"Član IKS"}} @break
                     @case(NEAKTIVAN) {{"Nije član IKS"}} @break
                     @case(100) {{"Na čekanju"}} @break
+                    @case(10) {{"Priprema se za brisanje iz članstva"}} @break
                 @endswitch
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}

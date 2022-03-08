@@ -5,8 +5,10 @@
 <li class="nav-item nav-dropdown">
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
-        {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje osoba</a></li>--}}
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba') }}'> Osobe</a></li>
+        @role('admin|sluzba_rk')
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje adresa</a></li>
+        @endrole
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zvanje') }}'> Zvanja</a></li>
 
     </ul>
@@ -76,10 +78,10 @@
         <li class="nav-title">PROMENA PODATAKA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka') }}'> Promena podataka</a></li>
         @endrole
-{{--        @role('sluzba_rk')
-        <li class="nav-title">PROMENA PODATAKA</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka?active=true') }}'> Promena podataka</a></li>
-        @endrole--}}
+        {{--        @role('sluzba_rk')
+                <li class="nav-title">PROMENA PODATAKA</li>
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka?active=true') }}'> Promena podataka</a></li>
+                @endrole--}}
     </ul>
 </li>
 <!-- Users, Roles, Permissions -->

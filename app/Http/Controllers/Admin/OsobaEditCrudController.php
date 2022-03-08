@@ -16,10 +16,11 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class OsobaEditCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation {
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+/*    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation {
         update as traitUpdate;
-    }
+    }*/
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 
@@ -83,14 +84,14 @@ class OsobaEditCrudController extends CrudController
             'name' => 'prebivalistedrzava',
             'label' => 'Država',
         ],
-        'status_id' => [
-            'name' => 'status_id',
-            'type' => 'select',
-            'entity' => 'requests.status',
-            'label' => 'Status',
-            'model' => 'App\Models\Request',
-            'attribute' => 'naziv'
-        ]
+//        'status_id' => [
+//            'name' => 'status_id',
+//            'type' => 'select',
+//            'entity' => 'requests.status',
+//            'label' => 'Status',
+//            'model' => 'App\Models\Request',
+//            'attribute' => 'naziv'
+//        ]
     ],
         $fields_definition_array = [
         'id' => [
@@ -148,14 +149,14 @@ class OsobaEditCrudController extends CrudController
             'name' => 'prebivalistedrzava',
             'label' => 'Država',
         ],
-        'status_id' => [
+/*        'status_id' => [
             'name' => 'status_id',
             'type' => 'select',
             'label' => 'Status',
             'entity' => 'requests.status',
             'attribute' => 'naziv',
             'default' => OBRADJEN, // TODO: da postavi vrednost iz baze, a ne prvi status za opstu kategoriju
-        ],
+        ],*/
     ];
 
     /**
@@ -167,16 +168,19 @@ class OsobaEditCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Osoba::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/osoba-edit');
-        CRUD::setEntityNameStrings('člana', 'Članovi');
+        CRUD::setEntityNameStrings('člana', 'Ažuriranje adresa');
 
         $this->crud->setColumns($this->columns_definition_array);
 
-        $this->crud->addClause('whereHas', 'requests', function ($query) {
+        /*$this->crud->addClause('whereHas', 'requests', function ($query) {
             $query->where('request_category_id', 2);
-        });
+        });*/
 
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess('create');
+        $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
+        $this->crud->addClause('orderBy', 'ime');
+
+        if (!backpack_user()->hasRole(['admin', 'rk'])) {
+            $this->crud->denyAccess(['create']);
         }
 
         $this->crud->enableDetailsRow();
@@ -215,7 +219,7 @@ class OsobaEditCrudController extends CrudController
             }
         ]);
 
-        $this->crud->modifyColumn('status_id', [
+        /*$this->crud->modifyColumn('status_id', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
                     switch ($related_key) {
@@ -226,7 +230,7 @@ class OsobaEditCrudController extends CrudController
                     }
                 }
             ]
-        ]);
+        ]);*/
 
 
         // simple filter
@@ -279,7 +283,7 @@ class OsobaEditCrudController extends CrudController
             });
 
         // dropdown filter
-        $this->crud->addFilter([
+/*        $this->crud->addFilter([
             'name' => 'status',
             'type' => 'dropdown',
             'label' => 'Status'
@@ -290,10 +294,10 @@ class OsobaEditCrudController extends CrudController
                 $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
                     $q->where('status_id', $value);
                 });
-            });
+            });*/
 
         // dropdown filter
-        $this->crud->addFilter([
+/*        $this->crud->addFilter([
             'name' => 'clanarina',
             'type' => 'select2_multiple',
             'label' => 'Plaćena članarina za godinu:'
@@ -310,7 +314,7 @@ class OsobaEditCrudController extends CrudController
                 $this->crud->addClause('whereHas', 'requests', function ($q) use ($values) {
                     $q->whereIn('note', json_decode($values));
                 });
-            });
+            });*/
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -330,13 +334,13 @@ class OsobaEditCrudController extends CrudController
         $this->crud->setValidation(OsobaEditRequest::class);
 
         $this->crud->addFields($this->fields_definition_array);
-        $this->crud->modifyField('status_id', [
+        /*$this->crud->modifyField('status_id', [
             'options' => (function ($query) {
                 return $query
                     ->where('log_status_grupa_id', OPSTA)
                     ->get();
             }), //  you can use this to filter the results show in the select
-        ]);
+        ]);*/
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -356,7 +360,7 @@ class OsobaEditCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    public function update()
+/*    public function update()
     {
 //        todo: sta ako ima vise rekorda???
 //        dd($this->crud->getRequest()->status_id);
@@ -373,7 +377,7 @@ class OsobaEditCrudController extends CrudController
         $response = $this->traitUpdate();
         // do something after save
         return $response;
-    }
+    }*/
 
     protected function showDetailsRow($id)
     {
