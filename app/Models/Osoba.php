@@ -232,13 +232,13 @@ class Osoba extends Model
             ->orderBy('rokzanaplatu', 'desc')->whereRaw('rokzanaplatu >= now()')->limit(1);
     }
 
-    public function izmirenaClanarinaSa2020()
+    public function neIzmirenaClanarinaDo2021()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')->distinct('osoba')
             ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu > iznosuplate + pretplata')->whereDate('rokzanaplatu', '<', '2021-01-01');
     }
 
-    public function izmirenaClanarinaSa2021()
+    public function neIzmirenaClanarinaDo2022()
     {
         return $this->hasMany('App\Models\Clanarina', 'osoba')->distinct('osoba')
             ->orderBy('rokzanaplatu', 'desc')->whereRaw('iznoszanaplatu > iznosuplate + pretplata')->whereDate('rokzanaplatu', '<', '2022-01-01');

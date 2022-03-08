@@ -992,7 +992,7 @@ class ZahtevController extends Controller
 //        dd($children);
     }
 
-    public function clanstvo($function = '', $one = '', $two = '')
+    public function clanstvo($action, $save = '')
     {
         DB::disableQueryLog();
 //        za one koji nisu clanovi
@@ -1005,6 +1005,7 @@ class ZahtevController extends Controller
 //        $this->clanarina();
 //        $this->prijavaSi();
 //        $this->prijaveClanstvo();//1                  OK ! ponoviti zbog zavodnih brojeva
+//        $this->preziveli();                             //ONI KOJI SU TREBALI DA BUDU OBRISANI A NISU
 //        $this->osobeClanarinaNotMembership();//2      OK
 //        $this->osobeClanarinaNotMembershipFix();//2.25  OK
 //        $this->osobeClanarinaMembership();//2.5       OK
@@ -1013,11 +1014,13 @@ class ZahtevController extends Controller
 //        $this->osobaClanNapomenaRequest();//5           ...
 //        $this->osobaClanRequestResenje();//6           samo clan =0 i napomena Usled neplacanja clanarine
 //        $this->osobaObrisanaAktivnaRequest();//7
-//        $this->prekiniClanstvo();//pojedinacno dok se ne sredi sve
+
+//        $this->prekiniClanstvo;//pojedinacno dok se ne sredi sve
 //        $this->osobaUpisiNapomenuBrisanje();//pojedinacno dok se ne sredi sve
-        $this->nereseniAktivni();//pojedinacno dok se ne sredi sve
+//        $this->nereseniAktivni();//pojedinacno dok se ne sredi sve
 //        $this->copyZahteviLicenceRequest();//pojedinacno dok se ne sredi sve
 
+//        $this->count();
 //        potrebno je svima iz stavke 6 kreirati odgovarajuca dokumenta i podesiti statuse zahteva i membershipa
 
 
@@ -1046,16 +1049,116 @@ class ZahtevController extends Controller
          *
          */
 
+        echo '<style>
+                        html, body {
+                            background-color: #fff;
+                            color: #636b6f;
+                            font-family: "Nunito", sans-serif;
+                            font-weight: 200;
+                            font-size: 16px;
+                            height: 100vh;
+                        }
+                        a{
+                            display: block;
+                            margin: 5px;
+                        }
+                    </style>
+                <ol>';
+
+        echo '<li><a href="/admin/clanstvo/clanarina">clanarina</a></li>';
+        echo '<li><a href="/admin/clanstvo/prijavaSi">prijavaSi</a></li>';
+        echo '<li><a href="/admin/clanstvo/prijaveClanstvo">prijaveClanstvo</a></li>';
+        echo '<li><a href="/admin/clanstvo/preziveli">preziveli</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobeClanarinaNotMembership">osobeClanarinaNotMembership</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobeClanarinaNotMembershipFix">osobeClanarinaNotMembershipFix</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobeClanarinaMembership">osobeClanarinaMembership</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaNotClanNotRequest">osobaNotClanNotRequest</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaNotClanNapomenaRequest">osobaNotClanNapomenaRequest</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaClanNapomenaRequest">osobaClanNapomenaRequest</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaClanRequestResenje">osobaClanRequestResenje</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaObrisanaAktivnaRequest">osobaObrisanaAktivnaRequest</a>';
+        echo '<li><a href="/admin/clanstvo/prekiniClanstvo">prekiniClanstvo</a></li>';
+        echo '<li><a href="/admin/clanstvo/osobaUpisiNapomenuBrisanje">osobaUpisiNapomenuBrisanje</a></li>';
+        echo '<li><a href="/admin/clanstvo/nereseniAktivni">nereseniAktivni</a></li>';
+        echo '<li><a href="/admin/clanstvo/copyZahteviLicenceRequest">copyZahteviLicenceRequest</a></li>';
+
+        echo '</ol>';
+
+        switch ($action) {
+            case 'clanarina':
+                $this->clanarina($save);
+                break;
+            case 'prijavaSi':
+                $this->prijavaSi($save);
+                break;
+            case 'prijaveClanstvo':
+                $this->prijaveClanstvo($save);
+                break;
+            case 'preziveli':
+                $this->preziveli($save);
+                break;
+            case 'osobeClanarinaNotMembership':
+                $this->osobeClanarinaNotMembership($save);
+                break;
+            case 'osobeClanarinaNotMembershipFix':
+                $this->osobeClanarinaNotMembershipFix($save);
+                break;
+            case 'osobeClanarinaMembership':
+                $this->osobeClanarinaMembership($save);
+                break;
+            case 'osobaNotClanNotRequest':
+                $this->osobaNotClanNotRequest($save);
+                break;
+            case 'osobaNotClanNapomenaRequest':
+                $this->osobaNotClanNapomenaRequest($save);
+                break;
+            case 'osobaClanNapomenaRequest':
+                $this->osobaClanNapomenaRequest($save);
+                break;
+            case 'osobaClanRequestResenje':
+                $this->osobaClanRequestResenje($save);
+                break;
+            case 'osobaObrisanaAktivnaRequest':
+                $this->osobaObrisanaAktivnaRequest($save);
+                break;
+            case 'prekiniClanstvo':
+                $this->prekiniClanstvo($save);
+                break;
+            case 'osobaUpisiNapomenuBrisanje':
+                $this->osobaUpisiNapomenuBrisanje($save);
+                break;
+            case 'nereseniAktivni':
+                $this->nereseniAktivni($save);
+                break;
+            case 'copyZahteviLicenceRequest':
+                $this->copyZahteviLicenceRequest($save);
+                break;
+            default:
+                $this->count();
+                break;
+        }
+
     }
 
     private function outputHtmlTable($array)
     {
         $result = '';
-        $result .= "<table>";
+        $result .= "<table style='box-sizing: border-box' cellspacing=0>";
+        $header = TRUE;
         foreach ($array as $row) {
-            foreach ($row as $col) {
-                $result .= "<td>$col</td>";
+            if ($header) {
+                $result .= "<tr>";
+                foreach ($row as $head => $col) {
+                    $result .= "<th style='border:  solid 1px gray; margin: 0; padding: 3px;'>$head</th>";
+                }
+                $result .= "</tr>";
             }
+            $result .= "<tr>";
+            foreach ($row as $head => $col) {
+                $result .= "<td style='border:  solid 1px gray; margin: 0; padding: 3px;'>$col</td>";
+            }
+            $result .= "</tr>";
+            $header = FALSE;
         }
         $result .= "</table>";
         return $result;
@@ -1083,6 +1186,156 @@ class ZahtevController extends Controller
 //        limit(2)
 //            ->pluck('osoba')->toArray()
             ->get();
+    }
+
+    private function count()
+    {
+        $query = \App\Models\osoba::
+//            whereHas('izmirenaClanarina')
+//        whereHas('izmirenaClanarinaSa2020') //preziveli
+//        whereHas('izmirenaClanarinaSa2021') //
+        whereHas('dugujeClanarinuZa2021') // koji duguju samo za 2021 godinu
+        ->distinct('id')
+            ->where('clan', 1)
+//            ->whereNotNull('napomena')
+
+            /*->whereDoesntHave('requests', function ($q) {
+                $q->whereHas('requestCategory', function ($q) {
+                    $q->where('request_category_type_id', 2)
+                    ;
+                });
+            })*/
+            ->whereDoesntHave('requests', function ($q) {
+                $q
+                    ->where('request_category_id', 4)
+//                    ->where('status_id', REQUEST_FINISHED)
+//                    ->where('note', 'Staro mirovanje')
+                ;
+            })//            ->toSql()
+        ;
+
+        dd($query->count());
+//        dd($query);
+    }
+
+    private function preziveli($save = '')
+    {
+        $osobaOK = FALSE;
+        $print = [];
+
+        echo "<h1>PREŽIVELI ($save)</h1>";
+
+        $odustaliOdZalbe = [234, 482, 1547, 1615, 2032, 2256, 2282, 2301, 2344, 2846, 2901, 2953, 3118, 3580, 4358, 4632, 4677, 4939, 5430, 5480, 5550, 5607, 5818, 5842, 5863, 5975, 6101, 6241, 6442, 6817, 7549, 7569, 7642, 8125, 8351, 8680, 8701, 8714, 9025, 9073, 9520, 9971];
+
+        /*$osobeImport = $this->getExcel();
+        foreach ($osobeImport->toArray() as $key => $value) {
+            $osobeBrisanje[$value['jmbg']] = $value;
+        }*/
+//        dd($osobeBrisanje);
+
+//                dd($osobeBrisanje->pluck('jmbg')->toArray());
+
+        $this->counter = 0;
+//        echo "ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 1<BR>";
+        echo "ONI KOJI SU TREBALI DA BUDU OBRISANI A NISU<BR>";
+
+
+        $query = \App\Models\osoba::
+            where('clan', 1)
+//            whereHas('izmirenaClanarina')
+//        ->whereHas('neIzmirenaClanarinaDo2021')
+        ->whereDoesntHave('neIzmirenaClanarinaDo2021')
+//        ->whereHas('izmirenaClanarinaSa2021')
+            ->distinct('id')
+//            ->whereNotNull('napomena')
+
+
+            ->whereDoesntHave('requests', function ($q) {
+                $q->whereHas('requestCategory', function ($q) {
+                    $q->where('request_category_type_id', 2)
+                    ;
+                });
+            })
+            ->whereDoesntHave('requests', function ($q) {
+                $q
+                    ->where('request_category_id', 4)
+//                    ->where('status_id', REQUEST_FINISHED)
+//                    ->where('note', 'Staro mirovanje')
+                ;
+            })
+
+            ->orderBy('id')
+            ->chunkById(100, function ($osobe) use (/*$osobeBrisanje,*/ &$print, $save) {
+                $jmbgs = '';
+                foreach ($osobe as $osoba) {
+                    $requests = $osoba->requests->where('request_category_id', 1);
+                    $requestsStr = implode(',', $requests->pluck('status_id')->toArray());
+//                    if (isset($osobeBrisanje[$osoba->id])) {
+//                        $osobaExcel = $osobeBrisanje[$osoba->id];
+//                    } else {
+                    $osobaExcel = FALSE;
+//                    }
+//                    $clanarine = $osoba->poslednjeDveClanarine->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
+                    $clanarine = $osoba->poslednjeDveClanarine->toArray();
+                    if (isset($clanarine[1])) {
+                        $clanarine0 = array_splice($clanarine[0], 1, 5);
+                        $clanarine1 = array_splice($clanarine[1], 1, 5);
+                        $clanarineStr = http_build_query($clanarine0, '', '; ') . "<br>" . http_build_query($clanarine1, '', '; ');
+//                        $clanarineStr = NULL;
+                    } else {
+                        $clanarine0 = array_splice($clanarine[0], 1, 5);
+                        $clanarineStr = http_build_query($clanarine0, '', '; ');
+//                        $clanarineStr = NULL;
+                    }
+//                    dd($clanarine0);
+//                    $clanarineStr = http_build_query($clanarine, '', '; ');
+
+//                    if (!empty($clanarineStr) //samo provera jedna ili dve clanarine
+//                        AND substr($clanarine0['rokzanaplatu'],0,4) == '2021'
+//                    ) {
+                    $jmbgs .= "'$osoba->id', ";
+//                        $jmbgs .= "$osoba->id<br>";
+                    $allRequests = implode(',', $osoba->requests->pluck('id')->toArray());
+                    $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
+                    $printRow = [];
+                    $printRow['count'] = ++$this->counter;
+                    $printRow['JMBG'] = $osoba->id;
+                    $printRow['član'] = $osoba->clan;
+//                    $printRow['REQUEST'] = "<strong>$request->id</strong>($request->request_category_id)";
+//                    $printRow['DOC'] = implode(',', $request->documents->pluck('document_category_id')->toArray());
+                    $printRow['ALLREQ'] = $allRequests;
+                    $printRow['Članarine'] = $clanarineStr;
+                    $printRow['napomena'] = $osoba->napomena;
+                    $printRow['MEMB'] = $memberships;
+                    $printRow['excel'] = $osobaExcel;
+//                    $printRow['Status'] = "{$request->status->naziv}, $request->updated_at";
+
+                    if ($save == 'save') {
+                        if ($osoba->save()) {
+                            $osobaOK = TRUE;
+                        }
+                        $printRow['Osoba SAVED'] = $osobaOK;
+                    }
+
+
+                    $print[] = $printRow;
+//                    }
+//                    echo " $this->counter";
+                }
+//                echo "$jmbgs";
+                echo "<br>$jmbgs<br>";
+            })
+//        ->limit(100)
+//            ->get()
+//            ->pluck('osoba_id')
+//            ->toArray()
+//                        ->toSql()
+        ;
+
+        echo $this->outputHtmlTable($print);
+//        dd($this->counter);
+//        dd($query->count());
+        dd($query);
     }
 
     private function osobeClanarinaNotMembership()
@@ -1536,6 +1789,7 @@ class ZahtevController extends Controller
          * 4. da li ima zalbi koje su odbijene
          */
         $naslov = TRUE;
+        $print = [];
         $query = \App\Models\Request::where('request_category_id', 2)
 //POJEDINACNO
 //            ->where('status_id', 41)
@@ -1545,7 +1799,7 @@ class ZahtevController extends Controller
 //                    ->whereHas('poslednjaPlacenaClanarina')
                     ->whereHas('poslednjaPlacenaClanarinaDatumUplate')
 //                    ->whereHas('clanarinaDatumAzuriranjaAdmin')
-                    ->whereHas('aktivanClan');
+                    ->whereHas('izmirenaClanarina');
             })
 //SVI
             /*->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
@@ -1554,7 +1808,7 @@ class ZahtevController extends Controller
                 $q->where('clan', 1);
             })*/
             ->orderBy('id')
-            ->chunkById(1000, function ($requests) use ($naslov) {
+            ->chunkById(1000, function ($requests) use ($naslov, &$print) {
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
                     if ($naslov) {
@@ -1563,35 +1817,30 @@ class ZahtevController extends Controller
                     }
                     $clanarine = $osoba->poslednjeDveClanarine->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
                     $clanarinPlacena = $osoba->poslednjaPlacenaClanarina->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
-//                    $aktivan = $osoba->aktivanClan;
+                    $aktivan = $osoba->izmirenaClanarina;
                     $clanarineStr = http_build_query($clanarine, '', '; ');
                     $clanarinPlacenaStr = http_build_query($clanarinPlacena, '', '; ');
 //                    dd($clanarineStr);
                     $allRequests = implode(',', $osoba->requests->pluck('id')->toArray());
                     $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
 //                    $requests = $osoba->requests;
-                    $document = [];
-                    $reqStr = '';
 
-                    $reqStr .= " <strong>REQ:$request->id</strong>($request->request_category_id), ";
-                    $reqStr .= "(DOC:" . implode(',', $request->documents->pluck('document_category_id')->toArray()) . ");";
-                    $documents = implode(' # ', $document);
-                    $requestsStr = implode(',', $requests->pluck('status_id', 'id')->toArray());
-//                    $req = $osoba->requests->where('request_category_id',2)->first();
-//                        dd($licence->toArray());
-
-//                    dd($osoba->poslednjaPlacenaClanarina->toArray());
-//                    $reqStr .= " Članarine 2: $clanarineStr";
-                    $reqStr .= " Članarina poslednja placena: $clanarinPlacenaStr";
-                    $reqStr .= " svi REQ: $allRequests";
-                    $reqStr .= " napomena: $osoba->napomena";
-                    $reqStr .= " datum uplate: {$osoba->poslednjaPlacenaClanarinaDatumUplate->toArray()[0]['datumuplate']}";
+                    $printRow = [];
+                    $printRow['count'] = ++$this->counter;
+                    $printRow['JMBG'] = $osoba->id;
+                    $printRow['član'] = $osoba->clan;
+                    $printRow['REQUEST'] = "<strong>$request->id</strong>($request->request_category_id)";
+                    $printRow['DOC'] = implode(',', $request->documents->pluck('document_category_id')->toArray());
+                    $printRow['Članarine 2'] = $clanarineStr;
+                    $printRow['Članarina poslednja placena'] = $clanarinPlacenaStr;
+                    $printRow['ALL REQ'] = $allRequests;
+                    $printRow['postojeca napomena'] = $osoba->napomena;
+                    $printRow['MEMB'] = $memberships;
 
 
-                    $this->counter++;
-//                    echo "<BR>$osoba->napomena";
-                    echo "$this->counter | član: $osoba->clan |  MEMB: $memberships | $osoba->id | $reqStr<br>";
+//                    $reqStr .= " datum uplate: {$osoba->poslednjaPlacenaClanarinaDatumUplate->toArray()[0]['datumuplate']}";
 
+                    $print[] = $printRow;
                 }
                 echo "<br>Kreirano: $this->ok od $this->counter";
                 echo "<br>Nije kreirano: $this->error od $this->counter";
@@ -1601,8 +1850,9 @@ class ZahtevController extends Controller
 //            ->pluck('osoba')->toArray()
 //            ->get()
         ;
+        echo $this->outputHtmlTable($print);
 //        dd($query->count());
-        dd($query);
+        dd($print);
     }
 
     private function getExcel($path = 'public/clanstvo_brisanje.xlsx')
@@ -1627,7 +1877,8 @@ class ZahtevController extends Controller
 
     private function osobaUpisiNapomenuBrisanje()
     {
-
+        $osobaOK = FALSE;
+        $print = [];
         $osobeImport = $this->getExcel();
 
         $odustaliOdZalbe = [234, 482, 1547, 1615, 2032, 2256, 2282, 2301, 2344, 2846, 2901, 2953, 3118, 3580, 4358, 4632, 4677, 4939, 5430, 5480, 5550, 5607, 5818, 5842, 5863, 5975, 6101, 6241, 6442, 6817, 7549, 7569, 7642, 8125, 8351, 8680, 8701, 8714, 9025, 9073, 9520, 9971];
@@ -1659,8 +1910,11 @@ class ZahtevController extends Controller
 //                    ->where('clan', 0)      // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 0
 //                    ->where('clan', 1)    //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 1
 //                    ->where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
-                    ->where('napomena', 'ILIKE', '%Usled neplaćanja članarine.')//                    ->whereNotIn('osoba_id', $osobeDuplicate)
-                ;
+//                    ->where('napomena', 'ILIKE', '%Usled neplaćanja članarine.')//                    ->whereNotIn('osoba_id', $osobeDuplicate)
+
+                    ->whereIn('id', [
+                        "1701992810639"
+                    ]);
             })
             /*$query = \App\Models\osoba::where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
                 ->whereNotIn('id', $osobeDuplicate)
@@ -1670,21 +1924,42 @@ class ZahtevController extends Controller
                     ;
                 })*/
             ->orderBy('id')
-            ->chunkById(1000, function ($osobe) use ($osobeBrisanje) {
+            ->chunkById(1000, function ($osobe) use ($osobeBrisanje, &$print) {
 //                foreach ($osobe as $osoba) {
                 foreach ($osobe as $request) {
                     $osoba = $request->osoba;
                     $requests = $osoba->requests->where('request_category_id', 1);
                     $requestsStr = implode(',', $requests->pluck('status_id')->toArray());
                     $osobaExcel = $osobeBrisanje[$osoba->id];
-                    $napomena = "Broj rešenja o prestanku članstva 02-1976/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} i broj rešenja o brisanju iz evidencije 02-1977/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']}";
+                    $allRequests = implode(',', $osoba->requests->pluck('id')->toArray());
+                    $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
+                    $napomena = "Broj rešenja o prestanku članstva 02-1976/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} i broj rešenja o brisanju iz evidencije 02-1977/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} Usled neplaćanja članarine.";
                     if (!empty($osoba->napomena)) {
-//                        $osoba->napomena = $napomena . "##" . $osoba->napomena;
+                        if (strstr($osoba->napomena, "Usled neplaćanja članarine.")) {
+                            $osoba->napomena = $napomena . " " . $osoba->napomena;
+                        } else if ($napomena != $osoba->napomena) {
+                            $osoba->napomena = $napomena . "##" . $osoba->napomena;
+                        }
                     } else {
-//                        $osoba->napomena = $napomena;
+                        $osoba->napomena = $napomena;
                     }
-                    $this->counter++;
-                    echo "<br>{$this->counter}. $osoba->id, CLAN: $osoba->clan, REQ: $request->id, $osoba->napomena, $osoba->updated_at, Status: {$request->status->naziv}, $request->updated_at, ALLREQ: $requestsStr";
+
+                    $printRow = [];
+                    $printRow['count'] = ++$this->counter;
+                    $printRow['JMBG'] = $osoba->id;
+                    $printRow['član'] = $osoba->clan;
+                    $printRow['REQUEST'] = "<strong>$request->id</strong>($request->request_category_id)";
+                    $printRow['DOC'] = implode(',', $request->documents->pluck('document_category_id')->toArray());
+                    $printRow['ALLREQ'] = $allRequests;
+                    $printRow['napomena'] = $osoba->napomena;
+                    $printRow['MEMB'] = $memberships;
+                    $printRow['Status'] = "{$request->status->naziv}, $request->updated_at";
+
+                    /*if ($osoba->save()) {
+                        $osobaOK = TRUE;
+                    }
+                    $printRow['Osoba SAVED'] = $osobaOK;*/
+                    $print[] = $printRow;
                 }
             })
 //        limit(2)
@@ -1693,6 +1968,7 @@ class ZahtevController extends Controller
 //            ->toArray()
             //            ->toSql()
         ;
+        echo $this->outputHtmlTable($print);
 
         dd($this->counter);
 //        dd($query->count());
@@ -1701,15 +1977,16 @@ class ZahtevController extends Controller
     }
 
 
-    private function prekiniClanstvo()
+    private function prekiniClanstvo($save = '')
     {
+        echo "<h2>prekiniClanstvo ($save)</h2>";
 
         $query = \App\Models\Request::where('request_category_id', 2)
 //POJEDINACNO
             ->whereHas('osoba', function ($q) {
                 $q->whereIn('id', [
+                    "0204947730015"
 
-                    '2207960710011', '3008967715117', '2206963810037', '2603971783714', '1803972735018', '2007952113242', '2503976725076', '2303962780040', '2802976730042'
                 ]);
             })
 //SVI
@@ -1719,7 +1996,7 @@ class ZahtevController extends Controller
                 $q->where('clan', 1);
             })*/
             ->orderBy('id')
-            ->chunkById(1000, function ($requests) {
+            ->chunkById(1000, function ($requests) use ($save) {
                 $errorStr = '';
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
@@ -1768,7 +2045,9 @@ class ZahtevController extends Controller
                             "status_id" => REQUEST_FINISHED,
                             "napomena" => str_contains($osoba->napomena, 'Broj rešenja o prestanku članstva') ? $osoba->napomena : "",
                         ];
-//                        $result = $this->updateMRCreateD($data);
+                        if ($save == 'save') {
+                            $result = $this->updateMRCreateD($data);
+                        }
 
                     } else {
                         $errorStr .= "<br>$osoba->id";
