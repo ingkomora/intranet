@@ -43,6 +43,7 @@ Route::group([
     Route::get('/splitaddress', 'ZahtevController@splitAddress');
     Route::get('/joinaddress', 'ZahtevController@joinAddress');
     Route::get('/registries', 'ZahtevController@registries');
+    Route::get('/clanstvo/{action}/{save?}', 'ZahtevController@clanstvo');
     Route::get('/clanstvo', 'ZahtevController@clanstvo');
 /*    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
     Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
