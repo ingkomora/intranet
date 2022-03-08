@@ -76,7 +76,7 @@
         {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>--}}
         {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/obradamirovanja') }}'> Obrada zahteva</a></li>--}}
         <li class="nav-title">PROMENA PODATAKA</li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/promenapodataka') }}'> Promena podataka</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('membership/promenapodataka') }}'> Promena podataka</a></li>
         @endrole
         {{--        @role('sluzba_rk')
                 <li class="nav-title">PROMENA PODATAKA</li>
