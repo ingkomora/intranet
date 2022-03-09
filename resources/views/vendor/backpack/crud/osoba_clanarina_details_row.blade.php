@@ -58,13 +58,13 @@
                     </thead>
                     @foreach($entry->clanarine as $unos)
                         <tr>
-                            <td>{{$unos->rokzanaplatu}}</td>
+                            <td>{{\Carbon\Carbon::parse($unos->rokzanaplatu)->format('d.m.Y.')}}</td>
                             <td>{{$unos->iznoszanaplatu}}</td>
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
-                            <td>{{$unos->datumuplate}}</td>
+                            <td>{{\Carbon\Carbon::parse($unos->datumuplate)->format('d.m.Y.')}}</td>
                             @role('admin')
-                            <td>{{$unos->datumazuriranja_admin}}</td>
+                            <td>{{\Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s')}}</td>
                             <td>{{$unos->azurirao_admin}}</td>
                             @endrole
                             <td>{{$unos->napomena}}</td>
