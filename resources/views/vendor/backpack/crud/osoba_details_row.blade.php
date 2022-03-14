@@ -10,6 +10,7 @@
                     @case(AKTIVAN) {{"Član IKS"}} @break
                     @case(NEAKTIVAN) {{"Nije član IKS"}} @break
                     @case(100) {{"Na čekanju"}} @break
+                    @case(10) {{"Priprema se za brisanje iz članstva"}} @break
                 @endswitch
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
@@ -31,7 +32,9 @@
             <p><b>Licence:</b><br>
                 @if($entry->licence->isNotEmpty())
                     @foreach($entry->licence as $item)
-                        <strong>{{$item->id}} ({{$item->status}})</strong>, <strong>tip:</strong> {{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}}), <b>zahtev:</b> {{$item->zahtev ?? 'nema zahtev'}}, {{$item->broj_resenja ?? 'nema rešenje'}}, {{$item->datumuo}}<br>
+                        <strong>{{$item->id}} ({{$item->status}})</strong>,
+                        <strong>tip:</strong> {{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}}),
+                        <b>zahtev:</b> {{$item->zahtev ?? 'nema zahtev'}}, {{$item->broj_resenja ?? 'nema rešenje'}}, {{\Carbon\Carbon::parse($item->datumuo)->format('d.m.Y.') ?? ''}}<br>
                     @endforeach
                 @else Nema podataka o licencama
                 @endif
@@ -41,7 +44,8 @@
                     @foreach($entry->zahteviLicence as $item)
                         <strong>{{$item->id}}</strong> ({{$item->statusId->naziv ?? 'nema status'}}),
                         <strong>tip:</strong> {{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}}),
-                        <b>status:</b> {{$item->statusId->naziv ?? 'nema status'}}, <b>datum prijema:</b> {{$item->prijem ?? '-'}}<br>
+                        <b>status:</b> {{$item->statusId->naziv ?? 'nema status'}},
+                        <b>datum prijema:</b> {{!empty($item->prijem) ? \Carbon\Carbon::parse($item->prijem)->format('d.m.Y.') : '-'}}<br>
                     @endforeach
                 @else Nema podataka o zahtevima za izdavanje licence
                 @endif
@@ -49,7 +53,9 @@
             <p><b>Stručni ispit:</b><br>
                 @if($entry->siPrijave->isNotEmpty())
                     @foreach($entry->siPrijave as $item)
-                        <strong>{{$item->id}}</strong> ({{$item->status->naziv ?? 'nema status'}}), vrsta posla:<strong> {{$item->vrstaPosla->naziv}}</strong>, zahtev: {{$item->regOblast->naziv}}, {{$item->regPodOblast->naziv}}, {{$item->datum_prijema ?? ''}}, {{$item->zavodni_broj ?? ''}}<br>
+                        <strong>{{$item->id}}</strong> ({{$item->status->naziv ?? 'nema status'}}),
+                        vrsta posla:<strong> {{$item->vrstaPosla->naziv}}</strong>,
+                        zahtev: {{$item->regOblast->naziv}}, {{$item->regPodOblast->naziv}}, {{!empty($item->datum_prijema) ? \Carbon\Carbon::parse($item->datum_prijema)->format('d.m.Y.') : ''}}, {{$item->zavodni_broj ?? ''}}<br>
                     @endforeach
                 @else Nema podataka o stručnom ispitu
                 @endif
@@ -74,18 +80,18 @@
                     </tr>
                     </thead>
                     @foreach($entry->clanarine as $unos)
-{{--                        @dd($unos->appKorisnik)--}}
+                        {{--                        @dd($unos->appKorisnik)--}}
                         <tr>
-                            <td>{{$unos->rokzanaplatu}}</td>
+                            <td>{{\Carbon\Carbon::parse($unos->rokzanaplatu)->format('d.m.Y.')}}</td>
                             <td>{{$unos->iznoszanaplatu}}</td>
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
-                            <td>{{$unos->datumuplate}}</td>
-                            <td>{{$unos->datumazuriranja}}</td>
-                            <td>{{$unos->appKorisnik->nalog??""}}</td>
+                            <td>{{!empty($unos->datumuplate) ? \Carbon\Carbon::parse($unos->datumuplate)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{!empty($unos->datumazuriranja) ? \Carbon\Carbon::parse($unos->datumazuriranja)->format('d.m.Y. H:m:s') : '-'}}</td>
+                            <td>{{$unos->appKorisnik->nalog ?? "-"}}</td>
                             @role('admin')
-                            <td>{{$unos->datumazuriranja_admin}}</td>
-                            <td>{{$unos->appAdmin->nalog??""}}</td>
+                            <td>{{!empty($unos->datumazuriranja_admin) ? \Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s') : '-'}}</td>
+                            <td>{{$unos->appAdmin->nalog ?? "-"}}</td>
                             @endrole
                             <td>{{$unos->napomena}}</td>
                         </tr>

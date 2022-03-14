@@ -17,16 +17,19 @@ Kako je članom 11. stav 2. tačka 13. Statuta Inženjerske komore Srbije propis
 | Poziv na broj:              | 05- *upisati broj Licence*    |
 @endcomponent
 
-Komora je svojim članovima obezbedila besplatnu polisu osiguranja od profesionalne odgovornosti.
+Komora je svojim članovima obezbedila polisu osiguranja od profesionalne odgovornosti.
 Naime, Zakonom o izmenama i dopunama Zakona o planiranju i izgradnji („Službeni glasnik RS“, broj 9/2020) propisano je da pravo na upotrebu profesionalnog naziva, odnosno pravo na obavljanje stručnih poslova stiče se upisom aktivnog statusa u Registru licenciranih inženjera, arhitekata i prostornih planera na osnovu važeće polise osiguranja od profesionalne odgovornosti.
 
 @component('mail::panel')
 ***Napomena***
 *Odluka o prijemu u članstvo Inženjerske komore Srbije biće Vam poslata poštom na Vašu adresu.*
 @endcomponent
-&nbsp;
+
+&nbsp;\
+Kako bi u Registru obezbedili aktivan status, molimo Vas da u što kraćem roku izvršite uplatu članarine.
 &nbsp;
 
+&nbsp;\
 S poštovanjem
 
 STRUČNA SLUŽBA ZA POSLOVE MATIČNIH SEKCIJA, STRUČNIH ISPITA I USAVRŠAVANJA

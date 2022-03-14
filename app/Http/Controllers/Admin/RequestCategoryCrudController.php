@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RequestCategoryRequest;
+use App\Models\RequestCategory;
+use App\Models\RequestCategoryType;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -29,6 +31,12 @@ class RequestCategoryCrudController extends CrudController
         CRUD::setModel(\App\Models\RequestCategory::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/request-category');
         CRUD::setEntityNameStrings('request category', 'request categories');
+
+        CRUD::set('show.setFromDb', FALSE);
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create', 'update', 'delete']);
+        }
     }
 
     /**
@@ -40,16 +48,54 @@ class RequestCategoryCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
-        CRUD::column('name');
+        CRUD::column('name')->limit(100);
         CRUD::column('note');
         CRUD::column('requestCategoryType')->type('relationship');
         CRUD::column('status_id')->type('relationship')->attribute('naziv');
 
-                /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
-         */
+        $this->crud->addFilter([
+            'type' => 'select2',
+            'name' => 'requestcategorytype',
+            'label' => 'Tip kategorije'
+        ], function () {
+            return RequestCategoryType::orderBy('id')->pluck('name', 'id')->toArray();
+        }, function ($value) {
+            $this->crud->addClause('where', 'request_category_type_id', $value);
+        });
+
+    }
+
+    /**
+     * Define what happens when the Show operation is loaded.
+     *
+     * @return void
+     */
+    protected function setupShowOperation()
+    {
+        CRUD::column('id');
+        CRUD::column('name')->limit(100);
+        CRUD::column('note');
+        CRUD::column('requestCategoryType')->type('relationship');
+        CRUD::column('status_id')->type('relationship')->attribute('naziv');
+
+        $this->crud->setColumnDetails('requestCategoryType', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('request-category-type/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
+            ]
+        ]);
+        $this->crud->setColumnDetails('status_id', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('status/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
+            ]
+        ]);
     }
 
     /**
@@ -83,17 +129,12 @@ class RequestCategoryCrudController extends CrudController
 
         ]);
 
-
         $this->crud->modifyField('status', [
             'options' => (function ($query) {
                 return $query->orderBy('id')->where('log_status_grupa_id', 1)->get(); // samo grupa statusa "Zahtevi"
             }),
         ]);
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number']));
-         */
+
     }
 
     /**

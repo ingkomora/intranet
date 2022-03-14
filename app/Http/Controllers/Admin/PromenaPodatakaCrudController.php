@@ -334,7 +334,7 @@ class PromenaPodatakaCrudController extends CrudController
     public function setup()
     {
         CRUD::setModel(\App\Models\PromenaPodataka::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/clanstvo/promenapodataka');
+        CRUD::setRoute(config('backpack.base.route_prefix') . '/membership/promenapodataka');
         CRUD::setEntityNameStrings('promena podataka', 'Promena podataka');
 
         if (!backpack_user()->hasRole('admin')) {

@@ -362,22 +362,22 @@ class OsobaCrudController extends CrudController
         'docunetsmer',
 
 //        osiguranja
-/*        'osiguranjasection' => [
-            'label' => 'PODACI O OSIGURANJU',
-            'name' => 'osiguranjasection',
-        ],
-        'osiguranjetip' => [
-            'name' => 'osiguranjetip',
-            'label' => 'Tip osiguranja',
-            'type' => 'select2',
-            'model' => 'App\Models\Osiguranje',
-            'attribute', 'osiguranjeTip.naziv'
-        ],
-        'osiguranja' => [
-            'name' => 'osiguranja.firmaOsiguravajucaKuca',
-            'label' => 'Osiguravajuća kuća',
-            'attribute', 'naziv'
-        ],*/
+        /*        'osiguranjasection' => [
+                    'label' => 'PODACI O OSIGURANJU',
+                    'name' => 'osiguranjasection',
+                ],
+                'osiguranjetip' => [
+                    'name' => 'osiguranjetip',
+                    'label' => 'Tip osiguranja',
+                    'type' => 'select2',
+                    'model' => 'App\Models\Osiguranje',
+                    'attribute', 'osiguranjeTip.naziv'
+                ],
+                'osiguranja' => [
+                    'name' => 'osiguranja.firmaOsiguravajucaKuca',
+                    'label' => 'Osiguravajuća kuća',
+                    'attribute', 'naziv'
+                ],*/
 
 
 //        funkcije
@@ -399,7 +399,7 @@ class OsobaCrudController extends CrudController
             'name' => 'clan',
             'label' => 'Članstvo',
             'type' => 'select_from_array',
-            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju'],
+            'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju', 10 => 'Priprema se brisanje iz članstva'],
         ],
 
 //        portal
@@ -684,7 +684,12 @@ class OsobaCrudController extends CrudController
 
         $this->crud->setColumnDetails('idn', [
             'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+                    $query->whereIn('id', $searchTermArray)->orderBy('id');
+                } else if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
                     $query->where('ime', 'ilike', $searchTerm[0] . '%')
                         ->where('prezime', 'ilike', $searchTerm[1] . '%');
@@ -723,6 +728,8 @@ class OsobaCrudController extends CrudController
             return [
                 1 => 'Član je',
                 0 => 'Nije član',
+                100 => 'Članstvo na čekanju',
+                10 => 'Priprema se brisanje iz članstva',
             ];
         }, function ($value) {
             $this->crud->addClause('where', 'clan', $value);
@@ -1157,7 +1164,7 @@ class OsobaCrudController extends CrudController
                 'name' => 'clan',
                 'label' => 'Članstvo',
                 'type' => 'select_from_array',
-                'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član'],
+                'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju', 10 => 'Priprema se brisanje iz članstva'],
                 'tab' => 'Podaci o statusu u IKS',
 //                'attributes' => ['readonly' => 'readonly'],
             ],

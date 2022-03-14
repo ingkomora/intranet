@@ -10,6 +10,7 @@
                     @case(AKTIVAN) {{"Član IKS"}} @break
                     @case(NEAKTIVAN) {{"Nije član IKS"}} @break
                     @case(100) {{"Na čekanju"}} @break
+                    @case(10) {{"Priprema se za brisanje iz članstva"}} @break
                 @endswitch
                 <br>
                 <strong>Napomena:</strong> {{!empty($entry->napomena) ? $entry->napomena : "Nema napomene"}}
@@ -57,14 +58,16 @@
                     </thead>
                     @foreach($entry->clanarine as $unos)
                         <tr>
-                            <td>{{$unos->rokzanaplatu}}</td>
+                            <td>{{\Carbon\Carbon::parse($unos->rokzanaplatu)->format('d.m.Y.')}}</td>
                             <td>{{$unos->iznoszanaplatu}}</td>
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
-                            <td>{{$unos->datumuplate}}</td>
+                            <td>{{!empty($unos->datumuplate) ? \Carbon\Carbon::parse($unos->datumuplate)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{!empty($unos->datumazuriranja) ? \Carbon\Carbon::parse($unos->datumazuriranja)->format('d.m.Y. H:m:s') : '-'}}</td>
+                            <td>{{$unos->appKorisnik->nalog ?? "-"}}</td>
                             @role('admin')
-                            <td>{{$unos->datumazuriranja_admin}}</td>
-                            <td>{{$unos->azurirao_admin}}</td>
+                            <td>{{!empty($unos->datumazuriranja_admin) ? \Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s') : '-'}}</td>
+                            <td>{{$unos->appAdmin->nalog ?? "-"}}</td>
                             @endrole
                             <td>{{$unos->napomena}}</td>
                         </tr>

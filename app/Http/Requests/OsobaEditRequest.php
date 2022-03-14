@@ -34,7 +34,7 @@ class OsobaEditRequest extends FormRequest {
             'prebivalisteopstinaid' => 'required',
             'ulica' => 'required',
             'broj' => 'required',
-            'status_id' => 'required',
+//            'status_id' => 'required',
         ];
     }
 
