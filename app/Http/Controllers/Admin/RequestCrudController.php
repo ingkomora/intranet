@@ -38,6 +38,7 @@ class RequestCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
+        CRUD::set('show.setFromDb', FALSE);
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
@@ -262,6 +263,70 @@ class RequestCrudController extends CrudController
                     $this->crud->addClause('whereIn', 'note', json_decode($values));
                 });
         }
+    }
+
+    /**
+     * Define what happens when the Show operation is loaded.
+     *
+     * @return void
+     */
+    protected function setupShowOperation()
+    {
+        $this->crud->addColumns([
+            'id',
+            'osoba_id',
+            'osoba' => [
+                'name' => 'osoba',
+                'type' => 'relationship',
+                'label' => 'Ime prezime',
+                'attribute' => 'full_name',
+            ],
+            'request_category_id' => [
+                'name' => 'requestCategory',
+                'type' => 'relationship',
+                'label' => 'Kategorija zahteva',
+            ],
+            'status_id' => [
+                'name' => 'status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
+            'requestable' => [
+                'name' => 'requestable',
+                'type' => 'relationship',
+                'attribute' => 'id',
+            ],
+            'documents' => [
+                'name' => 'documents',
+                'type' => 'relationship',
+                'attribute' => 'category_type_name_status_registry_number',
+            ],
+            'note' => [
+                'name' => 'note',
+                'label' => 'Napomena',
+                'limit' => 500
+            ],
+        ]);
+
+        $this->crud->setColumnDetails('osoba', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('osoba/' . $related_key . '/show');
+                },
+                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info',
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('status', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('status/' . $related_key . '/show');
+                },
+                'target' => '_blank',
+                'class' => 'btn btn-sm btn-outline-info',
+            ]
+        ]);
     }
 
     /**
