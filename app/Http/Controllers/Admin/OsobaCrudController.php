@@ -362,22 +362,22 @@ class OsobaCrudController extends CrudController
         'docunetsmer',
 
 //        osiguranja
-/*        'osiguranjasection' => [
-            'label' => 'PODACI O OSIGURANJU',
-            'name' => 'osiguranjasection',
-        ],
-        'osiguranjetip' => [
-            'name' => 'osiguranjetip',
-            'label' => 'Tip osiguranja',
-            'type' => 'select2',
-            'model' => 'App\Models\Osiguranje',
-            'attribute', 'osiguranjeTip.naziv'
-        ],
-        'osiguranja' => [
-            'name' => 'osiguranja.firmaOsiguravajucaKuca',
-            'label' => 'Osiguravajuća kuća',
-            'attribute', 'naziv'
-        ],*/
+        /*        'osiguranjasection' => [
+                    'label' => 'PODACI O OSIGURANJU',
+                    'name' => 'osiguranjasection',
+                ],
+                'osiguranjetip' => [
+                    'name' => 'osiguranjetip',
+                    'label' => 'Tip osiguranja',
+                    'type' => 'select2',
+                    'model' => 'App\Models\Osiguranje',
+                    'attribute', 'osiguranjeTip.naziv'
+                ],
+                'osiguranja' => [
+                    'name' => 'osiguranja.firmaOsiguravajucaKuca',
+                    'label' => 'Osiguravajuća kuća',
+                    'attribute', 'naziv'
+                ],*/
 
 
 //        funkcije
@@ -684,7 +684,12 @@ class OsobaCrudController extends CrudController
 
         $this->crud->setColumnDetails('idn', [
             'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+                    $query->whereIn('id', $searchTermArray)->orderBy('id');
+                } else if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
                     $query->where('ime', 'ilike', $searchTerm[0] . '%')
                         ->where('prezime', 'ilike', $searchTerm[1] . '%');
