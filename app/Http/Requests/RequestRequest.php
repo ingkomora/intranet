@@ -26,7 +26,10 @@ class RequestRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+             'osoba' => 'required',
+             'requestCategory' => 'required',
+//             'status' => 'required',
+             'status_id' => 'required', // TODO: privremeno da bi marko mogao da oznaci zahteve (resenja) na koje je ulozena zalba
         ];
     }
 

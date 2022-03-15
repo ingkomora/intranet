@@ -37,6 +37,9 @@ class RequestCrudController extends CrudController
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
+        if (backpack_user()->hasRole('sluzba_pravna')) {
+            $this->crud->allowAccess(['update']);
+        }
 
         CRUD::set('show.setFromDb', FALSE);
 
@@ -107,24 +110,9 @@ class RequestCrudController extends CrudController
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
                     switch ($entry->status_id) {
-//                        case OBRADJEN:
-//                            return 'bg-success text-white px-2 rounded';
-//                        case PROBLEM:
-//                            return 'bg-danger text-white px-2 rounded';
-//                        case OTKAZAN:
-//                            return 'border border-danger text-white px-2 rounded';
-//                        case REQUEST_CREATED:
-//                            return 'border border-info text-white px-2 rounded';
-                        case REQUEST_SUBMITED:
-                            return 'text-success';
-//                        case REQUEST_IN_PROGRESS:
-//                            return 'border border-warning text-white px-2 rounded';
-//                        case REQUEST_FINISHED:
-//                            return 'border border-success text-white px-2 rounded';
-//                        case REQUEST_PROBLEM:
-//                            return 'border border-danger text-white px-2 rounded';
-//                        case REQUEST_CANCELED:
-//                            return 'border border-info text-white px-2 rounded';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info mr-1';
+                        default:
                     }
                 }
             ]
@@ -174,11 +162,14 @@ class RequestCrudController extends CrudController
         $this->crud->addFilter([
             'type' => 'dropdown',
             'name' => 'clan',
-            'label' => 'Član'
+            'label' => 'Članstvo'
         ], function () {
             return [
-                1 => 'Član je',
+                -1 => 'Funkcioner',
                 0 => 'Nije član',
+                1 => 'Član',
+                100 => 'Članstvo na čekanju',
+                10 => 'Priprema se brisanje iz članstva'
             ];
         }, function ($value) {
             $this->crud->addClause('whereHas', 'osoba', function ($q) use ($value) {
@@ -244,6 +235,19 @@ class RequestCrudController extends CrudController
             }
         );
 
+        $this->crud->addFilter([
+            'name' => 'documents',
+            'type' => 'simple',
+            'label' => 'Dokumenta'
+        ],
+            FALSE,
+            function ($value) { // if the filter is active
+                $this->crud->addClause('whereHas', 'documents', function ($q) {
+//                        $q->whereNotNull('registry_number');
+//                        $q->whereNull('registry_number');
+                });
+            });
+
         // dropdown filter
         if (backpack_user()->hasRole('admin')) {
             $this->crud->addFilter([
@@ -262,6 +266,7 @@ class RequestCrudController extends CrudController
                 function ($values) { // if the filter is active
                     $this->crud->addClause('whereIn', 'note', json_decode($values));
                 });
+
         }
     }
 
@@ -327,6 +332,15 @@ class RequestCrudController extends CrudController
                 'class' => 'btn btn-sm btn-outline-info',
             ]
         ]);
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
     }
 
     /**
@@ -368,10 +382,27 @@ class RequestCrudController extends CrudController
 
         ]);
 
-        $this->crud->modifyField('status', [
+        /*$this->crud->modifyField('status', [
             'options' => (function ($query) {
                 return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
             }),
+        ]);*/
+        // TODO: privremeno da bi marko mogao da oznaci zahteve (resenja) na koje je ulozena zalba
+        CRUD::removeField('status');
+        $this->crud->addField([
+            'name' => 'status_id',
+            'type' => 'select_from_array',
+            'options' => [
+                41 => 'Žabla (41)',
+                43 => 'Poništen (43)',
+                50 => 'Kreiran (50)',
+                51 => 'Podnet (51)',
+                52 => 'U obradi (52)',
+                53 => 'Završen (53)',
+                54 => 'Otkazan (54)',
+                58 => 'Storniran (58)',
+                100 => 'Odustao od žalbe (100)',
+            ],
         ]);
 
         /**
@@ -394,8 +425,8 @@ class RequestCrudController extends CrudController
         $this->crud->addField([
             'name' => 'created_at',
             'label' => 'Kreiran',
-//            'attributes' => ['disabled' => 'disabled'],
-//            'type' => 'datetime_picker',
+            'attributes' => ['disabled' => 'disabled'],
+            'type' => 'datetime_picker',
             'datetime_picker_options' => [
                 'format' => 'DD.MM.YYYY. HH:mm:ss',
                 'language' => 'sr_latin'
@@ -405,7 +436,7 @@ class RequestCrudController extends CrudController
         $this->crud->addField([
             'name' => 'updated_at',
             'label' => 'Ažuriran',
-//                'attributes' => ['disabled' => 'disabled'],
+            'attributes' => ['disabled' => 'disabled'],
             'type' => 'datetime_picker',
             'datetime_picker_options' => [
                 'format' => 'DD.MM.YYYY. HH:mm:ss',
