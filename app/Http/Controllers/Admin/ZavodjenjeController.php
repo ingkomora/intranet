@@ -154,7 +154,6 @@ class ZavodjenjeController extends Controller
         $registry_date = (!empty($data['registry_date'])) ? Carbon::parse($data['registry_date'])->format('Y-m-d') : now()->toDateString();
         $this->brprijava = $ids;
         $requests = $model::whereIn('id', $ids)->orderBy('id', 'asc')->get();
-
         if (isset($data['prilog_text'])) {
             if (count($ids) > 1) {
                 $result['ERROR'][1] = "Greška 1! Zavođenje dopune je moguće samo za jedan izabrani zahtev";
@@ -180,83 +179,87 @@ class ZavodjenjeController extends Controller
                 } else {
                     $document_category_ids = (array)$this->zavodjenje[$type]['document_category_id'];
                 }
-
-                if (isset($data['prilog'])) {
-                    if (!($request->{$requestStatusColumnName} == REQUEST_IN_PROGRESS or $request->{$requestStatusColumnName} == REQUEST_FINISHED)) {
+                if (isset($data['prilog_text'])) {
+//                        ZAVEDI SAMO DOPUNU
+                    if (strlen($data['prilog_text']) > 90) {
+                        $result['ERROR'][1] = "Greška 4! Naziv dopune ne sme imati više od 90 karaktera!";
+                        return $result;
+                    }
+                    $categoryDopuna = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
+                    $temp = array_filter($document_category_ids, function ($id) use ($categoryDopuna) {
+                        return in_array($id, $categoryDopuna);
+                    });
+                    $document_category_id = reset($temp);
+                } else if (isset($data['prilog'])) {
+                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS)) {
                         $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
-                    if (isset($data['prilog_text'])) {
-//                        ZAVEDI SAMO DOPUNU
-                        if (strlen($data['prilog_text']) > 90) {
-                            $result['ERROR'][1] = "Greška 4! Naziv dopune ne sme imati više od 90 karaktera!";
-                            return $result;
-                        }
-                        $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
-                    } else {
-//                        ODSTAMPAJ SVE
-//                        dd($document_category_ids);
-                    }
+                    $categoryDopuna = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
+                    $temp = array_filter($document_category_ids, function ($id) use ($categoryDopuna) {
+                        return in_array($id, $categoryDopuna);
+                    });
+                    $document_category_id = reset($temp);
                 } else {
 //                    ZAVEDI ILI ODSTAMPAJ SAMO ZAHTEV
-                    $document_category_ids = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', '<>', 11)->pluck('id')->toArray();
+                    $category = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', '<>', 11)->pluck('id')->toArray();
+                    $temp = array_filter($document_category_ids, function ($id) use ($category) {
+                        return in_array($id, $category);
+                    });
+                    $document_category_id = reset($temp);
                 }
-
-//                dd($document_category_ids);
                 $documents = [];
-
-                foreach ($document_category_ids as $document_category_id) {
-                    if ($existingDocuments->isNotEmpty()) {
-                        if (isset($prilog['text'])) {
-                            $existingDocuments = $existingDocuments->filter(function ($value, $key) use ($document_category_id) {
-                                return $value->document_category_id == $document_category_id and ($value->status_id == DOCUMENT_CREATED or $value->status_id == DOCUMENT_REGISTERED) and $value->documentCategory->document_category_type_id <> 11;
-                            });
-                        } else {
-                            $existingDocuments = $existingDocuments->filter(function ($value, $key) use ($document_category_id) {
-                                return $value->document_category_id == $document_category_id and ($value->status_id == DOCUMENT_CREATED or $value->status_id == DOCUMENT_REGISTERED);
-                            });
-                            //HTEO SI DOPUNU A NEMA TEXTA???!!
-//                            $prilog['text'] = '/';
-                        }
-                        if ($existingDocuments->count() > 1) {
-                            $dopunaCategory = DocumentCategory::where('document_category_type_id', 11)->pluck('id')->toArray();
-                            if (!in_array($document_category_id, $dopunaCategory)) {
-                                //GRESKA IMA VISE OD JEDNOG ZAHTEVA ALI MOZE VISE PRILOGA
-//                    echo "ima vise od jednog zahteva";
-                                $result['ERROR'][$request->id] = "Greška 5! Ima više od jednog dokumenta za kategoriju $document_category_id. Kontaktirajte službu za informacione tehnologije";
-                                return $result;
-                            } else {
-                                foreach ($existingDocuments as $document) {
-                                    $documents[] = $document;
-                                }
-                            }
-                        } else if ($existingDocuments->count() > 0) {
-//                dd($existingDocuments);
-                            $document = $existingDocuments->first();
-                            $documents[] = $document;
-                        } else {
-                            $document = new Document();
-                            $document->document_category_id = $document_category_id;
-                            $document->status_id = DOCUMENT_CREATED;
-                            $documents[] = $document;
-                        }
+                if ($existingDocuments->isNotEmpty()) {
+                    if (isset($prilog['text'])) {
+                        $filteredExistingDocuments = $existingDocuments->filter(function ($document, $key) use ($document_category_id) {
+                            return $document->document_category_id == $document_category_id and ($document->status_id == DOCUMENT_CREATED or $document->status_id == DOCUMENT_REGISTERED) and $document->documentCategory->document_category_type_id <> 11; // ako je setovan prilog text onda se zavodi nova dopuna
+                        });
+                    } else if (isset($data['prilog'])) {
+                        $filteredExistingDocuments = $existingDocuments->filter(function ($document, $key) use ($document_category_id) {
+                            return $document->document_category_id == $document_category_id and ($document->status_id == DOCUMENT_CREATED or $document->status_id == DOCUMENT_REGISTERED or $document->status_id == DOCUMENT_CANCELED) and $document->documentCategory->document_category_type_id == 11; // ako je setovan prilog text onda se zavodi nova dopuna
+                        });
                     } else {
-                        if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) {
-                            $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
+                        $filteredExistingDocuments = $existingDocuments->filter(function ($document, $key) use ($document_category_id) {
+                            return $document->document_category_id == $document_category_id and ($document->status_id == DOCUMENT_CREATED or $document->status_id == DOCUMENT_REGISTERED or $document->status_id == DOCUMENT_CANCELED);
+                        });
+                    }
+                    if (($filteredExistingDocuments)->count() > 1) {
+
+                        $dopunaCategory = DocumentCategory::where('document_category_type_id', 11)->pluck('id')->toArray();
+                        if (!in_array($document_category_id, $dopunaCategory)) {
+                            //GRESKA IMA VISE OD JEDNOG ZAHTEVA ALI MOZE VISE PRILOGA
+//                    echo "ima vise od jednog zahteva";
+                            $result['ERROR'][$request->id] = "Greška 5! Ima više od jednog dokumenta za kategoriju $document_category_id. Kontaktirajte službu za informacione tehnologije";
                             return $result;
                         } else {
-                            $document = new Document();
-                            $document->document_category_id = $document_category_id;
-                            $document->status_id = DOCUMENT_CREATED;
-                            $documents[] = $document;
+                            foreach ($filteredExistingDocuments as $document) {
+                                $documents[] = $document;
+                            }
                         }
+                    } else if ($filteredExistingDocuments->count() > 0) {
+                        $document = $filteredExistingDocuments->first();
+                        $documents[] = $document;
+                    } else {
+                        $document = new Document();
+                        $document->document_category_id = $document_category_id;
+                        $document->status_id = DOCUMENT_CREATED;
+                        $documents[] = $document;
+                    }
+                } else {
+                    if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) {
+                        $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
+                        return $result;
+                    } else {
+                        $document = new Document();
+                        $document->document_category_id = $document_category_id;
+                        $document->status_id = DOCUMENT_CREATED;
+                        $documents[] = $document;
                     }
                 }
-
                 DB::beginTransaction();
-
 //                dd($documents);
                 foreach ($documents as $document) {
+//                dd($document);
                     $resultDocument = $this->registerDocuments($request, $document, $registry_date, $type, $prilog);
                     if (isset($result['ERROR'])) {
                         if ($resultDocument['ERROR'][$request->id]['status']) {
@@ -293,7 +296,6 @@ class ZavodjenjeController extends Controller
         }
         $result['pdf'] = $this->zavodneNalepnicePDF($data);
         return $result;
-
     }
 
     /**
@@ -396,10 +398,6 @@ class ZavodjenjeController extends Controller
         }
         $metadata = json_decode($document->metadata);
         $dopuna = $metadata->dopuna ?? '';
-        if ($document->document_category_id == 25) { //????? ne radi
-//            dd($document->document_category_id);
-//        echo "<br>". $document->document_category_id;
-        }
         $result['data'] = array(
             'category' => $document->documentCategory->name,
             'osoba' => $osoba->getImeRoditeljPrezimeAttribute(),
@@ -412,7 +410,7 @@ class ZavodjenjeController extends Controller
         );
         $result['osoba'] = $osoba;
         $result['requestCategory'] = $request->requestCategory->name;
-//        dd($result);
+
         return $result;
     }
 
@@ -421,8 +419,7 @@ class ZavodjenjeController extends Controller
      *
      * @return string|\Illuminate\Http\Response
      */
-    public
-    function zavodneNalepnicePDF($data)
+    public function zavodneNalepnicePDF($data)
     {
         $data['oblast'] = '';
         $filename = date("Ymd") . "_test";
@@ -445,8 +442,7 @@ class ZavodjenjeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public
-    function nalepnicePDF()
+    public function nalepnicePDF()
     {
         $prijave = SiPrijava::whereIn('id', $this->brprijava)->orderBy('id', 'asc')->get();
         $data['result'] = $prijave->map(function ($prijava) {
@@ -473,8 +469,7 @@ class ZavodjenjeController extends Controller
     /**
      * @param $prijava_id
      */
-    public
-    function prijavaPDF($prijava_id, $type = 'stream')
+    public function prijavaPDF($prijava_id, $type = 'stream')
     {
         $prijava = SiPrijava::findOrFail($prijava_id);
         $zahtev = $prijava->zahtevLicenca;
