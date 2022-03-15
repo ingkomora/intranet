@@ -44,16 +44,18 @@
                 <table class="table table-sm table-striped">
                     <thead>
                     <tr>
-                        <th scope="col">rok za naplatu</th>
-                        <th scope="col">iznos za naplatu</th>
-                        <th scope="col">iznos uplate</th>
-                        <th scope="col">pretplata</th>
-                        <th scope="col">datum uplate</th>
+                        <th scope="col">Rok za naplatu</th>
+                        <th scope="col">Iznos za naplatu</th>
+                        <th scope="col">Iznos uplate</th>
+                        <th scope="col">Pretplata</th>
+                        <th scope="col">Datum uplate</th>
+                        <th scope="col">Ažurirao</th>
+                        <th scope="col">Datum ažuriranja</th>
                         @role('admin')
-                        <th scope="col">datumazuriranja_admin</th>
-                        <th scope="col">azurirao_admin</th>
+                        <th scope="col">Ažurirao admin</th>
+                        <th scope="col">Datum ažuriranja admin</th>
                         @endrole
-                        <th scope="col">napomena</th>
+                        <th scope="col">Napomena</th>
                     </tr>
                     </thead>
                     @foreach($entry->clanarine as $unos)
@@ -66,8 +68,8 @@
                             <td>{{!empty($unos->datumazuriranja) ? \Carbon\Carbon::parse($unos->datumazuriranja)->format('d.m.Y. H:m:s') : '-'}}</td>
                             <td>{{$unos->appKorisnik->nalog ?? "-"}}</td>
                             @role('admin')
-                            <td>{{!empty($unos->datumazuriranja_admin) ? \Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s') : '-'}}</td>
                             <td>{{$unos->appAdmin->nalog ?? "-"}}</td>
+                            <td>{{!empty($unos->datumazuriranja_admin) ? \Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s') : '-'}}</td>
                             @endrole
                             <td>{{$unos->napomena}}</td>
                         </tr>
