@@ -29,16 +29,42 @@
                     Nije dodeljen lib
                 @endif
             </p>
-            <p><b>Licence:</b><br>
-                @if($entry->licence->isNotEmpty())
-                    @foreach($entry->licence as $item)
-                        <strong>{{$item->id}} ({{$item->status}})</strong>,
-                        <strong>tip:</strong> {{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}}),
-                        <b>zahtev:</b> {{$item->zahtev ?? 'nema zahtev'}}, {{$item->broj_resenja ?? 'nema rešenje'}}, {{\Carbon\Carbon::parse($item->datumuo)->format('d.m.Y.') ?? ''}}<br>
+
+            @if($entry->licence->isNotEmpty())
+                <h5>Licence:</h5>
+                <table class="table table-sm table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Broj</th>
+                        <th scope="col">Tip</th>
+                        <th scope="col">Oznaka</th>
+                        <th scope="col">Datum sticanja</th>
+                        <th scope="col">Preuzeta</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Datum ukidanja</th>
+                        <th scope="col">Razlog ukidanja</th>
+                        <th scope="col">Napomena</th>
+                    </tr>
+                    </thead>
+                    @foreach($entry->licence as $licenca)
+                        <tr>
+                            <td>{{$licenca->id}}</td>
+                            <td>{{$licenca->licencatip}}</td>
+                            <td>{{$licenca->tipLicence->oznaka}}</td>
+                            <td>{{\Carbon\Carbon::parse($licenca->datumuo)->format('d.m.Y.')}}</td>
+                            <td>{{$licenca->preuzeta === 1 ? 'Preuzeta': 'Nije preuzeta'}}</td>
+                            <td>{{$licenca->status}}</td>
+                            <td>{{\Carbon\Carbon::parse($licenca->datumukidanja)->format('d.m.Y.')}}</td>
+                            <td>{{$licenca->razlogukidanja}}</td>
+                            <td>{{$licenca->napomena}}</td>
+                        </tr>
                     @endforeach
-                @else Nema podataka o licencama
-                @endif
-            </p>
+                </table>
+            @else Nema podataka o licencama
+            @endif
+
+            <br><br>
+
             <p><b>Zahtevi za licence:</b><br>
                 @if($entry->zahteviLicence->isNotEmpty())
                     @foreach($entry->zahteviLicence as $item)
