@@ -50,10 +50,10 @@
                             <td>{{$licenca->id}}</td>
                             <td>{{$licenca->licencatip}}</td>
                             <td>{{$licenca->tipLicence->oznaka}}</td>
-                            <td>{{\Carbon\Carbon::parse($licenca->datumuo)->format('d.m.Y.')}}</td>
+                            <td>{{!empty($licenca->datumuo) ? \Carbon\Carbon::parse($licenca->datumuo)->format('d.m.Y.') : '-'}}</td>
                             <td>{{$licenca->preuzeta === 1 ? 'Preuzeta': 'Nije preuzeta'}}</td>
                             <td>{{$licenca->status}}</td>
-                            <td>{{\Carbon\Carbon::parse($licenca->datumukidanja)->format('d.m.Y.')}}</td>
+                            <td>{{!empty($licenca->datumukidanja) ? \Carbon\Carbon::parse($licenca->datumukidanja)->format('d.m.Y.') : '-'}}</td>
                             <td>{{$licenca->razlogukidanja}}</td>
                             <td>{{$licenca->napomena}}</td>
                         </tr>
