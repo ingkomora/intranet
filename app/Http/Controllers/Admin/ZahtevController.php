@@ -1000,6 +1000,8 @@ class ZahtevController extends Controller
         ini_set('max_execution_time', '6000');
 
         $this->counter = 0;
+        $this->error = 0;
+        $this->ok = 0;
 
 //        CLANARINA
 //        $this->clanarina();
@@ -1062,6 +1064,10 @@ class ZahtevController extends Controller
                             display: block;
                             margin: 5px;
                         }
+                        ol{
+                        width: 400px;
+                        }
+
                     </style>
                 <ol>';
 
@@ -1134,7 +1140,7 @@ class ZahtevController extends Controller
                 $this->copyZahteviLicenceRequest($save);
                 break;
             default:
-                $this->count();
+//                $this->count();
                 break;
         }
 
@@ -1241,10 +1247,10 @@ class ZahtevController extends Controller
 
 
         $query = \App\Models\osoba::
-            where('clan', 1)
+        where('clan', 1)
 //            whereHas('izmirenaClanarina')
 //        ->whereHas('neIzmirenaClanarinaDo2021')
-        ->whereDoesntHave('neIzmirenaClanarinaDo2021')
+            ->whereDoesntHave('neIzmirenaClanarinaDo2021')
 //        ->whereHas('izmirenaClanarinaSa2021')
             ->distinct('id')
 //            ->whereNotNull('napomena')
@@ -1252,8 +1258,7 @@ class ZahtevController extends Controller
 
             ->whereDoesntHave('requests', function ($q) {
                 $q->whereHas('requestCategory', function ($q) {
-                    $q->where('request_category_type_id', 2)
-                    ;
+                    $q->where('request_category_type_id', 2);
                 });
             })
             ->whereDoesntHave('requests', function ($q) {
@@ -1263,7 +1268,6 @@ class ZahtevController extends Controller
 //                    ->where('note', 'Staro mirovanje')
                 ;
             })
-
             ->orderBy('id')
             ->chunkById(100, function ($osobe) use (/*$osobeBrisanje,*/ &$print, $save) {
                 $jmbgs = '';
@@ -1777,7 +1781,7 @@ class ZahtevController extends Controller
 
     }
 
-    private function nereseniAktivni()
+    private function nereseniAktivni($save = '')
     {
         /*
          * 1. neresene zalbe uplatio
@@ -1875,7 +1879,7 @@ class ZahtevController extends Controller
         return $osobeImport;
     }
 
-    private function osobaUpisiNapomenuBrisanje()
+    private function osobaUpisiNapomenuBrisanje($save = '')
     {
         $osobaOK = FALSE;
         $print = [];
@@ -1898,23 +1902,25 @@ class ZahtevController extends Controller
 //        dd($osobeDuplicate);
         $this->counter = 0;
 //        echo "ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 1<BR>";
-        echo "ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 0<BR>";
+//        echo "ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 0<BR>";
 
-        $query = \App\Models\Request::where('request_category_id', 2)
+        $query = \App\Models\Request::
+        where('request_category_id', 2)
+
 //            ->distinct('osoba_id')
-//                    ->whereIn('id', $odustaliOdZalbe) //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
-//            ->where('status_id', REQUEST_FINISHED)
+            ->where('status_id', '<>', REQUEST_FINISHED)
+//            ->whereIn('id', $odustaliOdZalbe) //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
 //            ->where('status_id','<>', 41)   // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
             ->whereHas('osoba', function ($q) use ($osobeDuplicate) {
                 $q
 //                    ->where('clan', 0)      // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 0
 //                    ->where('clan', 1)    //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 1
-//                    ->where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
-//                    ->where('napomena', 'ILIKE', '%Usled neplaćanja članarine.')//                    ->whereNotIn('osoba_id', $osobeDuplicate)
-
-                    ->whereIn('id', [
-                        "1701992810639"
-                    ]);
+                    ->where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
+//                    ->where('napomena', 'ILIKE', '%Usled neplaćanja članarine.')
+                    ->whereNotIn('osoba_id', $osobeDuplicate)/*->whereIn('id', [
+                    "1701992810639"
+                ])*/
+                ;
             })
             /*$query = \App\Models\osoba::where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
                 ->whereNotIn('id', $osobeDuplicate)
@@ -1924,49 +1930,64 @@ class ZahtevController extends Controller
                     ;
                 })*/
             ->orderBy('id')
-            ->chunkById(1000, function ($osobe) use ($osobeBrisanje, &$print) {
+            ->chunkById(1000, function ($requests) use ($osobeBrisanje, &$print, $save) {
 //                foreach ($osobe as $osoba) {
-                foreach ($osobe as $request) {
+                $jmbgs = '';
+                foreach ($requests as $request) {
                     $osoba = $request->osoba;
                     $requests = $osoba->requests->where('request_category_id', 1);
                     $requestsStr = implode(',', $requests->pluck('status_id')->toArray());
-                    $osobaExcel = $osobeBrisanje[$osoba->id];
                     $allRequests = implode(',', $osoba->requests->pluck('id')->toArray());
                     $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
-                    $napomena = "Broj rešenja o prestanku članstva 02-1976/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} i broj rešenja o brisanju iz evidencije 02-1977/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} Usled neplaćanja članarine.";
-                    if (!empty($osoba->napomena)) {
-                        if (strstr($osoba->napomena, "Usled neplaćanja članarine.")) {
-                            $osoba->napomena = $napomena . " " . $osoba->napomena;
-                        } else if ($napomena != $osoba->napomena) {
-                            $osoba->napomena = $napomena . "##" . $osoba->napomena;
-                        }
-                    } else {
-                        $osoba->napomena = $napomena;
-                    }
-
                     $printRow = [];
-                    $printRow['count'] = ++$this->counter;
-                    $printRow['JMBG'] = $osoba->id;
-                    $printRow['član'] = $osoba->clan;
-                    $printRow['REQUEST'] = "<strong>$request->id</strong>($request->request_category_id)";
-                    $printRow['DOC'] = implode(',', $request->documents->pluck('document_category_id')->toArray());
-                    $printRow['ALLREQ'] = $allRequests;
-                    $printRow['napomena'] = $osoba->napomena;
-                    $printRow['MEMB'] = $memberships;
-                    $printRow['Status'] = "{$request->status->naziv}, $request->updated_at";
+                    $napomena = '';
+                    if (array_key_exists($osoba->id, $osobeBrisanje)) {
+//                        dd($osobeBrisanje);
+                        $osobaExcel = $osobeBrisanje[$osoba->id];
+                        $napomena = "Broj rešenja o prestanku članstva 02-1976/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']} i broj rešenja o brisanju iz evidencije 02-1977/2021-{$osobaExcel['r_br']} od {$osobaExcel['datum_resenja']}";
+                        if (!empty($osoba->napomena)) {
+                            if ($osoba->napomena == "Usled neplaćanja članarine") {
+                                $osoba->napomena = "$napomena $osoba->napomena.";
+                            } else if (strstr($osoba->napomena, "Usled neplaćanja članarine")) {
+                                if (strstr($osoba->napomena, $napomena)) {
+                                    //nema promene
+                                } else {
+                                    $osoba->napomena = "$napomena $osoba->napomena.";
+                                }
+                            } else {
+                                $osoba->napomena = $napomena . "##" . $osoba->napomena;
+                            }
+                        } else {
+                            $osoba->napomena = $napomena;
+                        }
+                        $jmbgs .= "'$osoba->id', ";
 
-                    /*if ($osoba->save()) {
-                        $osobaOK = TRUE;
+                        $printRow['count'] = ++$this->counter;
+                        $printRow['JMBG'] = $osoba->id;
+                        $printRow['član'] = $osoba->clan;
+                        $printRow['REQUEST'] = "<strong>$request->id</strong>($request->request_category_id)";
+                        $printRow['DOC'] = implode(',', $request->documents->pluck('document_category_id')->toArray());
+                        $printRow['ALLREQ'] = $allRequests;
+                        $printRow['napomena'] = $osoba->napomena;
+                        $printRow['MEMB'] = $memberships;
+                        $printRow['Status'] = "{$request->status->naziv}, $request->updated_at";
+
+                        if ($save == 'save') {
+                            if ($osoba->save()) {
+                                $osobaOK = TRUE;
+                            }
+                            $printRow['Osoba SAVED'] = $osobaOK;
+                        }
                     }
-                    $printRow['Osoba SAVED'] = $osobaOK;*/
                     $print[] = $printRow;
                 }
+                echo "<br>$jmbgs<br>";
             })
 //        limit(2)
 //            ->get()
 //            ->pluck('osoba_id')
 //            ->toArray()
-            //            ->toSql()
+//            ->toSql()
         ;
         echo $this->outputHtmlTable($print);
 
@@ -1979,25 +2000,30 @@ class ZahtevController extends Controller
 
     private function prekiniClanstvo($save = '')
     {
+        $errorStr = '';
         echo "<h2>prekiniClanstvo ($save)</h2>";
+        $start = microtime(TRUE);
 
         $query = \App\Models\Request::where('request_category_id', 2)
+//            ->where('status_id', '<>', REQUEST_FINISHED)
+//            ->where('id', 5226)
 //POJEDINACNO
-            ->whereHas('osoba', function ($q) {
-                $q->whereIn('id', [
-                    "0204947730015"
 
+            ->whereDoesntHave('osoba', function ($q) {
+//            ->whereHas('osoba', function ($q) {
+                $q->whereIn('id', [
+                    '6111250563610'
                 ]);
             })
 //SVI
-            /*->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
+            ->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
             ->where('note', 'ilike', '%platio%')
-            ->whereHas('osoba', function ($q) {
+            ->whereDate('updated_at', '<', '2022-03-16 00:00:00')
+            /*->whereHas('osoba', function ($q) {
                 $q->where('clan', 1);
             })*/
             ->orderBy('id')
-            ->chunkById(1000, function ($requests) use ($save) {
-                $errorStr = '';
+            ->chunkById(1000, function ($requests) use ($save, &$errorStr) {
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
                     $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
@@ -2012,7 +2038,7 @@ class ZahtevController extends Controller
 //                        dd($licence->toArray());
 
                     preg_match("/Broj rešenja o prestanku članstva\s(.*)\sod.*i broj rešenja o brisanju iz evidencije\s(.*)\sod\s(\d\d\.\d\d\.\d\d\d\d\.)/", $osoba->napomena, $match);
-//
+                    $this->counter++;
                     if (!empty($match)) {
 //                        samo za one koji imaju napomenu sa brojem resenje
 //                        dd($request);
@@ -2023,10 +2049,10 @@ class ZahtevController extends Controller
                         $datum_resenja = date('Y-m-d', strtotime($match[3]));
                         $datum_resenjaPlusOneMonth = Carbon::parse($datum_resenja)->addMonth()->format("Y-m-d");
                         $datum_resenja = Carbon::parse($datum_resenja)->format("Y-m-d");
-                        $this->counter++;
+                        $this->ok++;
 //                    echo "<BR>$osoba->napomena";
 
-                        echo "$this->counter | $docreqStr | MEMB: $memberships | $osoba->id | broj_resenja_prestanak: $broj_resenja_prestanak | broj_resenja_brisanje: $broj_resenja_brisanje | datum_resenja: $datum_resenja<br>";
+                        echo "$this->counter | $docreqStr | MEMB: $memberships | $osoba->id | broj_resenja_prestanak: $broj_resenja_prestanak | broj_resenja_brisanje: $broj_resenja_brisanje | datum_resenja: $datum_resenja | $request->note<br>";
                         $data = [
                             "osoba_id" => $osoba->id,
                             "datum_prijema" => $datum_resenja,
@@ -2050,18 +2076,22 @@ class ZahtevController extends Controller
                         }
 
                     } else {
-                        $errorStr .= "<br>$osoba->id";
+                        echo "$this->counter | $docreqStr | MEMB: $memberships | $osoba->id | $request->note<br>";
+                        $this->error++;
+                        $errorStr .= "'$osoba->id',";
                     }
                 }
+                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(FALSE));
                 echo "<br>Kreirano: $this->ok od $this->counter";
-                echo "<br>Nije kreirano: $this->error od $this->counter";
-                echo "<br>Greska, nisu azurirani: $errorStr";
-//                    if ($this->counter == 1000) dd('kraj');
+                echo "<br>Nije kreirano: $this->error od $this->counter<br>";
             })
 //        limit(2)
 //            ->pluck('osoba')->toArray()
 //            ->get()
         ;
+        $stop = microtime(true) - $start;
+        echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
+        echo "<br><br>Greska, nisu azurirani: $errorStr<br>";
 //        dd($query->count());
         dd($query);
     }
@@ -2073,7 +2103,7 @@ class ZahtevController extends Controller
             ->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
             ->where('note', 'ilike', '%platio%')
             ->whereHas('osoba', function ($q) {
-                $q->where('clan', 1);
+                $q->where('clan', 1); //uradjeno
             })
             ->orderBy('id')
             ->chunkById(1000, function ($requests) {
@@ -2540,11 +2570,11 @@ class ZahtevController extends Controller
 
         $oldData = $data;
 
-        echo "<BR>";
+        /*echo "<BR>";
         echo "<BR>OLD DATA";
         echo "<PRE>";
         print_r($oldData);
-        echo "</PRE>";
+        echo "</PRE>";*/
 
         try {
 
@@ -2682,11 +2712,11 @@ class ZahtevController extends Controller
                 }
 //                $document = Document::where();
                 $document = Document::firstOrNew($documentOdlukaData);
-                echo "<BR>";
+                /*echo "<BR>";
                 echo "<BR>DOCUMENT id: $document->id" . strtoupper($key);
                 echo "<PRE>";
                 print_r($document->toArray());
-                echo "</PRE>";
+                echo "</PRE>";*/
                 echo "<BR>DOCUMENT UPDATE " . strtoupper($key);
                 echo "<PRE>";
                 print_r($documentOdlukaData);
@@ -3392,5 +3422,36 @@ class ZahtevController extends Controller
         return $keys;
     }
 
+    /**
+     * @param $size
+     * @return string
+     */
+    protected function convert($size)
+    {
+        $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
+        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+    }
+
+    /**
+     * @param bool $start
+     * @return int
+     */
+    public function measureTime($start = FALSE)
+    {
+        if ($start === FALSE) {
+            //start
+            return (int)microtime(TRUE);
+        } else {
+            //stop
+            return (int)microtime(TRUE) - (int)$start;
+        }
+    }
+
+    public function secondsToTime($seconds)
+    {
+        $dtF = new \DateTime('@0');
+        $dtT = new \DateTime("@$seconds");
+        return $dtF->diff($dtT)->format('%a dana, %h sati, %i minuta i %s sekundi');
+    }
 
 }
