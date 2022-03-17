@@ -1,36 +1,36 @@
 @component('vendor.mail.html.message_iks')
 
-{{$data->osoba->isMale() ? 'Poštovani' : 'Poštovana'}} {{$data->osoba->full_name}},
+{{$data->osoba->isMale() ? 'Поштовани' : 'Поштована'}} {{$data->osoba->full_name}},
 
-Obaveštavamo Vas da je Upravni odbor Inženjerske komore Srbije doneo odluku kojom ste primljeni u članstvo Inženjerske komore Srbije.
+Обавештавамо Вас да је Управни одбор Инжењерске коморе Србије донео одлуку којом сте примљени у чланство Инжењерске коморе Србије.
 
-Kako je članom 11. stav 2. tačka 13. Statuta Inženjerske komore Srbije propisano da su prava i dužnosti članova Komore da uredno plaćaju članarinu, potrebno je da izvršite istu.
+Како је чланом 11. став 2. тачка 13. Статута Инжењерске коморе Србије прописано да су права и дужности чланова Коморе да уредно плаћају чланарину, потребно је да извршите исту.
 
 
 @component('mail::table')
-| Uputstvo za uplatu članarine|                               |
+| Упутство за уплату чланарине|                               |
 | :---------------------------| :---------------------------- |
-| Iznos za uplatu:            | 9.500,00 dinara               |
-| Svrha uplate:               | Članarina                     |
-| Primalac:                   | Inženjerska komora Srbije     |
-| Tekući račun:               | 160-40916-33                  |
-| Poziv na broj:              | 05- *upisati broj Licence*    |
+| Износ за уплату:            | 9.500,00 динара               |
+| Сврха уплате:               | Чланарина                     |
+| Прималац:                   | Инжењерска комора Србије      |
+| Текући рачун:               | 160-40916-33                  |
+| Позив на број:              | 05- *уписати број лиценце*    |
 @endcomponent
 
-Komora je svojim članovima obezbedila polisu osiguranja od profesionalne odgovornosti.
-Naime, Zakonom o izmenama i dopunama Zakona o planiranju i izgradnji („Službeni glasnik RS“, broj 9/2020) propisano je da pravo na upotrebu profesionalnog naziva, odnosno pravo na obavljanje stručnih poslova stiče se upisom aktivnog statusa u Registru licenciranih inženjera, arhitekata i prostornih planera na osnovu važeće polise osiguranja od profesionalne odgovornosti.
+Комора је својим члановима обезбедила полису осигурања од професионалне одговорности.
+Наиме, Законом о изменама и допунама Закона о планирању и изградњи („Службени гласник РС“, број 9/2020) прописано је да право на употребу професионалног назива, односно право на обављање стручних послова стиче се уписом активног статуса у Регистру лиценцираних инжењера, архитеката и просторних планера на основу важеће полисе осигурања од професионалне одговорности.
 
 @component('mail::panel')
-***Napomena***
-*Odluka o prijemu u članstvo Inženjerske komore Srbije biće Vam poslata poštom na Vašu adresu.*
+***Напомена***
+*Одлука о пријему у чланство Инжењерске коморе Србије биће Вам послата поштом на Вашу адресу.*
 @endcomponent
 
 &nbsp;\
-Kako bi u Registru obezbedili aktivan status, molimo Vas da u što kraćem roku izvršite uplatu članarine.
+Како би у Регистру обезбедили активан статус, молимо Вас да у што краћем року извршите уплату чланарине.
 &nbsp;
 
 &nbsp;\
-S poštovanjem
+С поштовањем
 
-STRUČNA SLUŽBA ZA POSLOVE MATIČNIH SEKCIJA, STRUČNIH ISPITA I USAVRŠAVANJA
+СТРУЧНА СЛУЖБА ЗА ПОСЛОВЕ МАТИЧНИХ СЕКЦИЈА, СТРУЧНИХ ИСПИТА И УСАВРШАВАЊА
 @endcomponent
