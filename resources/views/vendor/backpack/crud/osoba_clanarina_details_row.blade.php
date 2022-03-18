@@ -90,8 +90,8 @@
                             <td>{{$unos->iznosuplate}}</td>
                             <td>{{$unos->pretplata}}</td>
                             <td>{{!empty($unos->datumuplate) ? \Carbon\Carbon::parse($unos->datumuplate)->format('d.m.Y.') : '-'}}</td>
-                            <td>{{!empty($unos->datumazuriranja) ? \Carbon\Carbon::parse($unos->datumazuriranja)->format('d.m.Y. H:m:s') : '-'}}</td>
                             <td>{{$unos->appKorisnik->nalog ?? "-"}}</td>
+                            <td>{{!empty($unos->datumazuriranja) ? \Carbon\Carbon::parse($unos->datumazuriranja)->format('d.m.Y. H:m:s') : '-'}}</td>
                             @role('admin')
                             <td>{{$unos->appAdmin->nalog ?? "-"}}</td>
                             <td>{{!empty($unos->datumazuriranja_admin) ? \Carbon\Carbon::parse($unos->datumazuriranja_admin)->format('d.m.Y. H:m:s') : '-'}}</td>
