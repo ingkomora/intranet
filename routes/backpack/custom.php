@@ -91,6 +91,7 @@ Route::group([
     Route::crud('membership', 'MembershipCrudController');
     Route::crud('clanarina', 'ClanarinaCrudController');
     Route::crud('clanarina-old', 'ClanarinaOldCrudController');
+    Route::crud('licenca-tip', 'LicencaTipCrudController');
     //ZAVOĐENJE
     Route::post('/zavodjenje/zavedi/si', 'ZavodjenjeController@store');
     Route::post('/zavodjenje/zavedi/licence', 'ZavodjenjeController@storeLicence');

@@ -48,7 +48,8 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-certificate"></i>LICENCE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('licenca') }}'> Licence</a></li>
-        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevlicenca') }}'> Zahtevi Licence</a></li>
+        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zahtevlicenca') }}'> Zahtevi licence</a></li>
+<li class='nav-item'><a class='nav-link' href='{{ backpack_url('licenca-tip') }}'><i class='nav-icon la la-question'></i> Tipovi Licenci</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesi/obradizahtevsvecanaforma') }}'> Svečane forme</a></li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('unesinovelicence') }}'> Unesi nove licence</a></li>
     </ul>
@@ -75,6 +76,7 @@
         {{--        <li class="nav-title">MIROVANJA</li>--}}
         {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/mirovanja') }}'> Mirovanja</a></li>--}}
         {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanstvo/obradamirovanja') }}'> Obrada zahteva</a></li>--}}
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('membership') }}'> Memberships</a></li>
         <li class="nav-title">PROMENA PODATAKA</li>
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('membership/promenapodataka') }}'> Promena podataka</a></li>
         @endrole
@@ -156,5 +158,6 @@
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> RegReqCat</a></li>
 <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>
 @endrole
+
 
 
