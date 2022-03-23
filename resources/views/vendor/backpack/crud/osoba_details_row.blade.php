@@ -94,7 +94,7 @@
                         <th scope="col">Rok za naplatu</th>
                         <th scope="col">Iznos za naplatu</th>
                         <th scope="col">Iznos uplate</th>
-                        <th scope="col">Pretplata</th>
+                        <th scope="col">Preneto</th>
                         <th scope="col">Datum uplate</th>
                         <th scope="col">Ažurirao</th>
                         <th scope="col">Datum ažuriranja</th>
