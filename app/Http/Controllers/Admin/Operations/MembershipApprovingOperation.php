@@ -395,7 +395,7 @@ trait MembershipApprovingOperation
                     }
                     // sending mail
                     try {
-                        $error['message'] = "Rok za naplatu novog članstva " . Carbon::parse($odluka_datum)->format('d.m.Y.') . " je manji od roka za naplatu poslednje članarine prethodnog članstva " . Carbon::parse($poslednjaClanarina->rokzanaplatu)->format('d.m.Y.');
+                        $error['message'] = "Rok za naplatu novog članstva " . Carbon::parse($odluka_datum)->format('d.m.Y.') . " je manji od roka za naplatu poslednje članarine prethodnog članstva " . Carbon::parse($poslednjaClanarina->rokzanaplatu)->format('d.m.Y.')." Potrebno je izvršiti korekciju članarine.";
                         Mail::to(EMAIL_RACUNOVODSTVO)
                             ->send(new AdminReportEmail($request, $error));
                     } catch (\Exception $e) {
