@@ -508,6 +508,10 @@ class OsobaCrudController extends CrudController
             $this->crud->addClause('whereRaw', 'length(id) = 13');
         }
 
+        if (backpack_user()->hasRole('sluzba_maticne_sekcije')){
+            $this->crud->allowAccess(['update']);
+        }
+
         $this->crud->set('show.setFromDb', FALSE);
 
         $this->crud->enableDetailsRow();
@@ -687,7 +691,10 @@ class OsobaCrudController extends CrudController
                 if (strstr($searchTerm, ",")) {
                     $searchTerm = trim($searchTerm, " ,.;");
                     $searchTerm = explode(",", $searchTerm);
-                    $searchTermArray = array_map('trim', $searchTerm);
+//                    $searchTermArray = array_map('trim', $searchTerm);
+                    $searchTermArray = array_map(function($item) {
+                        return trim($item, ' \'",.;');
+                    }, $searchTerm);
                     $query->whereIn('id', $searchTermArray)->orderBy('id');
                 } else if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);

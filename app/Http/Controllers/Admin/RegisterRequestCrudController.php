@@ -62,6 +62,7 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [1, 2];
                 $this->requestableModel = '\App\Models\Membership';
+                $allowCreate = TRUE;
                 break;
             case 'registerrequestmirovanjeclanstva':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za mirovanje');

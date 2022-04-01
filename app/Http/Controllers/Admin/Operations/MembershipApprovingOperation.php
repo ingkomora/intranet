@@ -129,6 +129,7 @@ trait MembershipApprovingOperation
     public function postMembershipApprovingForm(RequestMembershipApprovingRequest $request): \Illuminate\Http\RedirectResponse
     {
         $this->crud->hasAccessOrFail('membershipapproving');
+
         $validated = $request->validated();
 
         $request = Request::find($validated['id']);
@@ -141,6 +142,15 @@ trait MembershipApprovingOperation
 
         $odluka_datum = Carbon::parse($validated['odluka_datum'])->format('Y-m-d');
         $osoba = $request->osoba;
+
+        if (empty($osoba->lib)) {
+            $lib = new LibLibrary();
+            $osoba->lib = $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
+            if (empty($osoba->lib)) {
+                \Alert::error("<b>GREŠKA 14!</b><br><br><b>Greška prilikom dodele liba.")->flash();
+                return \Redirect::to($this->crud->route);
+            }
+        }
 
         // da li ima licence upisane u registar
         $osobaLicence = $osoba->licence->where('status', '<>', 'D');
@@ -162,6 +172,7 @@ trait MembershipApprovingOperation
                 ->where('registry_request_category.document_category_id', 18); // odluka
             })
             ->get();
+
         if ($registry->count() != 1) {
             \Alert::error("<b>GREŠKA 3!</b><br><br><b>Nije moguće odobriti članstvo.</b><br>Problem sa zavodnim brojem.<br><br>Prenesite ovu poruku administratoru.")->flash();
             return \Redirect::to($this->crud->route);
@@ -170,7 +181,9 @@ trait MembershipApprovingOperation
         }
 //        dd($registry);
         $registry->counter++;
-        $registry_num = $registry->registryDepartmentUnit->label . "-" . $registry->base_number . "/" . date("Y", strtotime($odluka_datum)) . "-" . $registry->counter;
+//        Zavodni broj se upisuje sa odluke
+//        $registry_num = $registry->registryDepartmentUnit->label . "-" . $registry->base_number . "/" . date("Y", strtotime($odluka_datum)) . "-" . $registry->counter;
+        $registry_num = $validated['odluka_br'];
 
         $log = new Log();
         $log_data = [];
@@ -178,7 +191,7 @@ trait MembershipApprovingOperation
         $log_data['app'] = $this->crud->getOperation();
 
         $membershipOK = $requestOK = $documentOK = $registryOK = $osobaOK = $clanarinaOK = FALSE;
-        $clanarinaOldOK = $poslednjaClanarinaOK = TRUE;
+        $clanarinaOldOK = $poslednjaClanarinaOK = $novaClanarinaOK = TRUE;
         $create_membership = TRUE;
 
         $message = '';
@@ -208,7 +221,7 @@ trait MembershipApprovingOperation
                     // show a error message
                     $create_membership = FALSE;
                     $message = "<b>GREŠKA 7!</b><br><br>Članstvo po zahtevu broj {$request->id} je prekinuto ali nema datum prestanka.<br><br>Obratite se administratoru.";
-                    //ako smo dosli dovde sa create_membership=TRUE, onda je membership status MEMBERSHIP_ENDED a ended_at nije empty
+                    //ako smo dosli do ovde sa create_membership=TRUE, onda je membership status MEMBERSHIP_ENDED a ended_at nije empty
                 } elseif ($existingMembership->status_id == MEMBERSHIP_SUSPENDED) {
                     $create_membership = FALSE;
                     $message = "<b>GREŠKA 8!</b><br><br>Članstvo po zahtevu broj {$request->id} je u statusu mirovanja.<br><br>Obratite se administratoru.";
@@ -253,7 +266,7 @@ trait MembershipApprovingOperation
             /*
              * proveri  membership OK
              * * * * * * * * * * * *
-             * proveri  request mora da bude INPROGRESS 52 OK
+             * proveri  request mora da bude IN PROGRESS 52 OK
              * * * * * * * * * * * *
              * proveri  documents:
              *          mora da ima zahtev koji mora da ima status REGISTERED 57
@@ -324,25 +337,74 @@ trait MembershipApprovingOperation
 
 //        CLANARINA
             $poslednjaClanarina = $osoba->poslednjaClanarina;
-            if ($poslednjaClanarina->isNotEmpty()) {
-                $poslednjaClanarina = $poslednjaClanarina->first();
 
-                if ($poslednjaClanarina->iznoszanaplatu != $poslednjaClanarina->iznosuplate + $poslednjaClanarina->pretplata && ($poslednjaClanarina->iznosuplate <= 1 || $poslednjaClanarina->pretplata <= 1)) {
+            $poslednjaClanarina = $poslednjaClanarina->isNotEmpty() ? $poslednjaClanarina->first() : NULL;
 
-                    $clanarinaNapomena = $poslednjaClanarina->napomena = empty($poslednjaClanarina->napomena) ? 'Prekid članstva' : $poslednjaClanarina->napomena . '. Prekid članstva';
+            if ($poslednjaClanarina) {
 
-                    $resultPoslednjaClanarina = DB::table('tclanarinaod2006')
-                        ->where('id', $poslednjaClanarina->id)
+                $clanarinaNapomena = $poslednjaClanarina->napomena = empty($poslednjaClanarina->napomena) ? 'Prekid članstva' : $poslednjaClanarina->napomena . '. Prekid članstva';
+
+                if ($poslednjaClanarina->rokzanaplatu < $odluka_datum) {
+//                Novo clanstvo je mladje od poslednjeg datuma clanarine prethodnog clanstva
+
+                    if ($poslednjaClanarina->iznoszanaplatu != $poslednjaClanarina->iznosuplate + $poslednjaClanarina->pretplata && ($poslednjaClanarina->iznosuplate <= 1 || $poslednjaClanarina->pretplata <= 1)) {
+
+                        $resultPoslednjaClanarina = DB::table('tclanarinaod2006')
+                            ->where('id', $poslednjaClanarina->id)
+                            ->update([
+                                'iznoszanaplatu' => 1,
+                                'iznosuplate' => 1,
+                                'napomena' => $clanarinaNapomena,
+                                'datumazuriranja' => now(),
+                                'azurirao_korisnik' => backpack_user()->id,
+                            ]);
+
+                        if (!$resultPoslednjaClanarina) {
+                            $poslednjaClanarinaOK = FALSE;
+                        }
+                    } else if ($poslednjaClanarina->iznoszanaplatu == $poslednjaClanarina->iznosuplate + $poslednjaClanarina->pretplata) {
+
+                        $resultPoslednjaClanarina = DB::table('tclanarinaod2006')
+                            ->where('id', $poslednjaClanarina->id)
+                            ->update([
+                                'napomena' => $clanarinaNapomena,
+                                'datumazuriranja' => now(),
+                                'azurirao_korisnik' => backpack_user()->id,
+                            ]);
+                        if (!$resultPoslednjaClanarina) {
+                            $poslednjaClanarinaOK = FALSE;
+                        }
+                    }
+
+                } else {
+//                    Datum clanarine novog clanstva je manji od datuma clanarine prethodnog clanstva
+//                    Potrebno je da se izvrsi korekcija clanarine
+//                    Trazimo pretposlednju clanarinu da bismo postavili napomenu
+                    $poslednjaClanarinaRokZaNaplatuMinusGodina = Carbon::parse($poslednjaClanarina->rokzanaplatu)->subYear();
+                    $poslednjaClanarinaMinusGodina = Clanarina::where('osoba', $osoba->id)->where('rokzanaplatu', $poslednjaClanarinaRokZaNaplatuMinusGodina)->first();
+
+                    $resultPoslednjaClanarinaMinusGodina = DB::table('tclanarinaod2006')
+                        ->where('id', $poslednjaClanarinaMinusGodina->id)
                         ->update([
-                            'iznoszanaplatu' => 1,
-                            'iznosuplate' => 1,
                             'napomena' => $clanarinaNapomena,
                             'datumazuriranja' => now(),
+                            'azurirao_korisnik' => backpack_user()->id,
                         ]);
-
-                    if (!$resultPoslednjaClanarina) {
+                    if (!$resultPoslednjaClanarinaMinusGodina) {
                         $poslednjaClanarinaOK = FALSE;
                     }
+                    // sending mail
+                    try {
+                        $error['message'] = "Rok za naplatu novog članstva " . Carbon::parse($odluka_datum)->format('d.m.Y.') . " je manji od roka za naplatu poslednje članarine prethodnog članstva " . Carbon::parse($poslednjaClanarina->rokzanaplatu)->format('d.m.Y.')." Potrebno je izvršiti korekciju članarine.";
+                        Mail::to(EMAIL_RACUNOVODSTVO)
+                            ->send(new AdminReportEmail($request, $error));
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        $error['message'] = $e->getMessage();
+                        Mail::to(backpack_user()->email)
+                            ->send(new AdminReportEmail($request, $error));
+                    }
+//                    throw new \Exception("");
                 }
             }
 
@@ -353,6 +415,8 @@ trait MembershipApprovingOperation
             $clanarina->napomena = "Započeto članstvo po zahtevu broj: $request->id";
             $clanarina->azurirao_korisnik = backpack_user()->id;
             $clanarina->datumazuriranja = now();
+
+            if (!$clanarina->save()) $novaClanarinaOK &= FALSE;
 
             if ($clanarina->save()) {
                 $clanarinaOK = TRUE;
@@ -374,24 +438,14 @@ trait MembershipApprovingOperation
                 }
             }
 
-//        OSOBA: update clan = 1
+//        OSOBA:
             /*
-             * TODO: Clanstvo na cekanju:
              * Odobrava se clanstvo posle UO, ali ipak nije clan dok racunovodstvo ne proknjizi uplatu prve clanarine.
-             * U aplikaciji za clanarinu je potrebno postaviti clan = 1 ukoliko je clan = 100
              */
-//            $osoba->clan = AKTIVAN;
             $osoba->clan = 100;
-            if ($osoba->save()) {
+            if ($osoba->save()) $osobaOK = TRUE;
 
-                $lib = new LibLibrary();
-                $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
-
-                $osobaOK = TRUE;
-            }
-
-
-            if ($membershipOK && $requestOK && $documentOK && $registryOK && $clanarinaOK && $poslednjaClanarinaOK && $clanarinaOldOK && $osobaOK) {
+            if ($membershipOK && $requestOK && $documentOK && $registryOK && $clanarinaOK && $poslednjaClanarinaOK && $clanarinaOldOK && $osobaOK && $novaClanarinaOK) {
 
                 $log->naziv = json_encode($log_data, JSON_UNESCAPED_UNICODE);
                 $log->log_status_grupa_id = CLANSTVO;
@@ -414,7 +468,7 @@ trait MembershipApprovingOperation
                 }
 
                 // show a success message
-                \Alert::success("<b>BRAVO!</b><br><br>Članstvo osobe {$osoba->ime_roditelj_prezime} je aktivirano.")->flash();
+                \Alert::success("<b>BRAVO!</b><br><br>Članstvo osobe {$osoba->ime_roditelj_prezime} je odobreno.<br><br>Kako bi osoba postala član, potrebno je da se proknjiži prva članarina.")->flash();
 
             } else {
                 DB::rollBack();

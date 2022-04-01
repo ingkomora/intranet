@@ -152,7 +152,7 @@ define('DOCUMENT_CANCELED', 58);
 define('ARHITEKTE', array(1, 15, 30, 33, 34, 35));
 define('PEJZ_ARHITEKTE', array(6, 58));
 
-define('PROFESIONALNI_NAZIV', array(
+const PROFESIONALNI_NAZIV = [
     1 => ['Odgovorni planer' => 'Odgovornog planera',
         'Odgovorni urbanista' => 'Odgovornog urbanistu',
         'Odgovorni projektant' => 'Odgovornog projektanta',
@@ -170,4 +170,8 @@ define('PROFESIONALNI_NAZIV', array(
         'Pejzažni arhitekta' => 'Pejzažnog arhitektu',
         'Arhitekta' => 'Arhitektu',
         'Izvođač radova' => 'Izvođača radova']
-));
+];
+
+
+//  MEJLOVI OD ZNAČAJA
+const EMAIL_RACUNOVODSTVO = 'racunovodstvo@ingkomora.rs';

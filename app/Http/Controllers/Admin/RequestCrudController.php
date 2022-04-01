@@ -248,8 +248,23 @@ class RequestCrudController extends CrudController
                 });
             });
 
-        // dropdown filter
         if (backpack_user()->hasRole('admin')) {
+
+            $this->crud->addFilter([
+                'name' => 'hasNotGetLicence',
+                'type' => 'simple',
+                'label' => 'Nije preuzeo licencu'
+            ],
+                FALSE,
+                function ($value) { // if the filter is active
+                    $this->crud->addClause('whereHas', 'osoba', function ($q) {
+                        $q->whereDoesntHave('licence', function ($q) {
+                            $q->where('preuzeta', 1);
+                        });
+                    });
+                });
+
+            // dropdown filter
             $this->crud->addFilter([
                 'name' => 'clanarina',
                 'type' => 'select2_multiple',
@@ -338,6 +353,7 @@ class RequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
+                'target' => '_blank',
                 'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
@@ -393,7 +409,7 @@ class RequestCrudController extends CrudController
             'name' => 'status_id',
             'type' => 'select_from_array',
             'options' => [
-                41 => 'Žabla (41)',
+                41 => 'Žalba (41)',
                 43 => 'Poništen (43)',
                 50 => 'Kreiran (50)',
                 51 => 'Podnet (51)',
