@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $created_at
  * @property string $updated_at
  * @property RegistryDepartmentUnit $registryDepartmentUnit
+ * @property RequestCategory $requestCategory
  * @property Status $status
  */
 class Registry extends Model

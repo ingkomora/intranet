@@ -370,7 +370,6 @@ class ZahtevController extends Controller
                         $error = FALSE;
                         foreach ($values as $value) {
                             $zahtev = ZahtevLicenca::where(['licenca_broj' => $value['broj']])->first();
-//                            dd($zahtev);
                             if (!is_null($zahtev)) {
                                 if ($zahtev->osoba !== $value['jmbg']) {
                                     $error = TRUE;
@@ -504,8 +503,8 @@ class ZahtevController extends Controller
         } //end foreach
         $result['falseJMBG'] = array_keys($falseJMBG);
 //        dd($result);
-        $messageLicencaOK .= ". Uspešno sačuvano u bazi($countOK)";
-        $messageLicencaNOK .= " . Nije sačuvano u bazi($countNOK)";
+        $messageLicencaOK = ($countOK > 0) ? "$messageLicencaOK . Uspešno sačuvano u bazi($countOK)" : "";
+        $messageLicencaNOK = ($countNOK > 0) ? "$messageLicencaNOK . Nije sačuvano u bazi($countNOK)" : "";
 
         info($messageLicencaOK);
 //        $flagNOTOK ? toastr()->error($messageLicencaNOK) : toastr()->warning("Nema grešaka");
@@ -610,6 +609,8 @@ class ZahtevController extends Controller
             $response->status = FALSE;
             return $response;
         }
+        $osoba = Osoba::find($licenca['jmbg']);
+
         $zahtev->osoba = $licenca['jmbg'];
         $zahtev->licenca_broj = $licenca['broj'];
         $zahtev->licenca_broj_resenja = $licenca['broj_resenja'];
@@ -618,13 +619,73 @@ class ZahtevController extends Controller
         $zahtev->vrsta_posla_id = $tipLicence->sekcija;
         $zahtev->reg_oblast_id = $tipLicence->podOblast->oblast_id;
         $zahtev->reg_pod_oblast_id = $tipLicence->pod_oblast_id;
-        //todo treba zahtev status da bude zavrsen ako je kreirana licenca => azurira se prilikom azuriranja licence
-        $zahtev->status = REQUEST_SUBMITED;
+        if (empty($zahtev->zvanje_id)) {
+            $zahtev->zvanje_id = $osoba->zvanje;
+        }
+        $zahtev->status = REQUEST_FINISHED;
         $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
         $zahtev->datum = date("Y-m-d");
+
+        $document = $zahtev->documents->where('document_category_id', 5); // zahtev za izdavanje licence
+        if ($document->count() > 1) {
+            $response->message = "Postoji {$document->count()} dokumenata za zahtev broj $zahtev->id";
+            $response->status = FALSE;
+        } elseif ($document->count() == 1) {
+            $document = $document->first();
+        } else { // ako empty($document)
+            $document = new Document();
+        }
+
+        $document->document_type_id = 1; // zahtev
+        $document->document_category_id = 5; // zahtev za izdavanje licence
+        $document->registry_date = $zahtev->prijem;
+        $document->status_id = DOCUMENT_REGISTERED;
+
+        $label = '02-' . $osoba->zvanjeId->zvanje_grupa_id;
+
+        $registry = Registry::where('status_id', AKTIVAN)
+            ->whereHas('registryDepartmentUnit', function ($q) use ($label) {
+                $q->where('label', "$label");
+            })
+            ->whereHas('requestCategories', function ($q) use ($zahtev, $document) {
+                $q->where('registry_request_category.request_category_id', $zahtev->request_category_id); // zahtev za izdavanje licence
+            })
+            ->get();
+
+        if ($registry->count() != 1) {
+//            todo: greska
+        } else {
+            $registry = $registry->first();
+        }
+        if (empty($document->registry_number)) {
+            $registry->counter++;
+            $document->registry_id = $registry->id;
+            $document->registry_number = $registry->registryDepartmentUnit->label . "-" . $registry->base_number . "/" . date("Y", strtotime($zahtev->prijem)) . "-" . $registry->counter;
+        }
+        $document->user_id = backpack_user()->id;
+        $document->valid_from = $zahtev->prijem;
+
+        if ($document->save()) {
+//            dd($document);
+            $document->barcode = empty($document->barcode) ? "{$zahtev->id}#{$document->id}#{$document->registry_number}#{$document->registry_date}" : $document->barcode;
+            $document->documentable()->associate($zahtev);
+            $document->metadata = json_encode([
+                "title" => "Zahtev za izdavanje licence za Sticanje licence #{$zahtev->id}",
+                "author" => $osoba->ime_roditelj_prezime,
+                "author_id" => $osoba->lib,
+                "description" => "",
+                "dopuna" => '',
+                "category" => 'Sticanje licence',
+                "created_at" => $document->registry_date,
+            ], JSON_UNESCAPED_UNICODE);
+            $document->save();
+
+            if ($registry->isDirty()) $registry->save();
+        }
+
         if ($zahtev->isDirty()) {
             $zahtev->save();
-            $response->message = "Ažuriran zahtev: $zahtev->id, status: " . REQUEST_SUBMITED;
+            $response->message = "Ažuriran zahtev: $zahtev->id, status: $zahtev->id";
             $response->status = TRUE;
         } else {
             $response->message = "Nema promena";
@@ -1089,9 +1150,11 @@ class ZahtevController extends Controller
         echo '<li><a href="/admin/clanstvo/osobaUpisiNapomenuBrisanje">osobaUpisiNapomenuBrisanje</a></li>';
         echo '<li><a href="/admin/clanstvo/nereseniAktivni">nereseniAktivni</a></li>';
         echo '<li><a href="/admin/clanstvo/copyZahteviLicenceRequest">copyZahteviLicenceRequest</a></li>';
+        echo '<li><a href="/admin/clanstvo/kreirajDokumenteZaZahteveZaMirovanje">kreirajDokumenteZaZahteveZaMirovanje</a></li>';
         echo '<li><a href="/admin/clanstvo/kreirajDokumenteZaStareZavedeneZahteve">kreirajDokumenteZaStareZavedeneZahteve</a></li>';
         echo '<li><a href="/admin/clanstvo/osobeKojeNisuPreuzeleLicencu">osobeKojeNisuPreuzeleLicencu</a></li>';
-        echo '<li><a href="/admin/clanstvo/greskeUClanarini">greskeUClanarini</a></li>';
+        echo '<li><a href="/admin/clanstvo/nevazeceLicence">nevazeceLicence</a></li>';
+        echo '<li><a href="/admin/clanstvo/addZvanjeIdToZahtevLicenca">addZvanjeIdToZahtevLicenca</a></li>';
 
         echo '</ol>';
 
@@ -1147,14 +1210,20 @@ class ZahtevController extends Controller
             case 'copyZahteviLicenceRequest':
                 $this->copyZahteviLicenceRequest($save);
                 break;
+            case 'kreirajDokumenteZaZahteveZaMirovanje':
+                $this->kreirajDokumenteZaZahteveZaMirovanje($save);
+                break;
             case 'kreirajDokumenteZaStareZavedeneZahteve':
                 $this->kreirajDokumenteZaStareZavedeneZahteve($save);
                 break;
             case 'osobeKojeNisuPreuzeleLicencu':
                 $this->osobeKojeNisuPreuzeleLicencu();
                 break;
-            case 'greskeUClanarini':
-                $this->greskeUClanarini();
+            case 'nevazeceLicence':
+                $this->nevazeceLicence();
+                break;
+            case 'addZvanjeIdToZahtevLicenca':
+                $this->addZvanjeIdToZahtevLicenca();
                 break;
             default:
 //                $this->count();
@@ -2629,7 +2698,6 @@ class ZahtevController extends Controller
     {
         //1. update zahtevLicenca
         //2. create documents
-
         DB::beginTransaction();
 
         $created = $zahtevLicencaOK = $documentOK = $registryOK = FALSE;
@@ -2646,410 +2714,287 @@ class ZahtevController extends Controller
         print_r($data);
         echo "</PRE>";*/
 
-        try {
+//        try {
 
-            $zahtevLicenca = \App\Models\ZahtevLicenca::find($data['id']);
-            $osoba = Osoba::find($zahtevLicenca->osoba);
+        $zahtevLicenca = \App\Models\SiPrijava::find($data['id']);
 //        ZAHTEV LICENCA
 
-            /*echo "<BR>";
-            echo "<BR>ZahtevLicenca id: $zahtevLicenca->id, status: $zahtevLicenca->status" . strtoupper($key??'');
-            echo "<PRE>";
-            print_r($zahtevLicenca->toArray());
-            echo "</PRE>";*/
+        /*echo "<BR>";
+        echo "<BR>ZahtevLicenca id: $zahtevLicenca->id, status: $zahtevLicenca->status" . strtoupper($key??'');
+        echo "<PRE>";
+        print_r($zahtevLicenca->toArray());
+        echo "</PRE>";*/
 
-            $licenca = $zahtevLicenca->licenca;
+//            $licenca = $zahtevLicenca->licenca;
 //        dd($licenca);
+        /*if (!empty($licenca)) {
+            // ima licencu izdatu po ovom zahtevu
+            if ($zahtevLicenca->status <> REQUEST_FINISHED) $zahtevLicenca->status == REQUEST_FINISHED;
+        } else {
+            // nema licencu izdatu po ovom zahtevu
+            // da li ima licencu sa tipom licence iz ovog zahteva ?
+            $licenca = Licenca::where('osoba', $osoba->id)
+                ->where('licencatip', $zahtevLicenca->licencatip)
+                ->whereNull('zahtev')
+                ->get();
+
             if (!empty($licenca)) {
-                // ima licencu izdatu po ovom zahtevu
-                if ($zahtevLicenca->status <> REQUEST_FINISHED) $zahtevLicenca->status == REQUEST_FINISHED;
-            } else {
-                // nema licencu izdatu po ovom zahtevu
-                // da li ima licencu sa tipom licence iz ovog zahteva ?
-                $licenca = Licenca::where('osoba', $osoba->id)
-                    ->where('licencatip', $zahtevLicenca->licencatip)
-                    ->whereNull('zahtev')
-                    ->get();
-
-                if (!empty($licenca)) {
-                    if ($licenca->count() != 1) {
-                        // TODO: problem!!!
-                    } else {
-                        $licenca = $licenca->first();
-                        $licenca->zahtev = $zahtevLicenca->id;
-                        if ($zahtevLicenca->status <> REQUEST_FINISHED) $zahtevLicenca->status = REQUEST_FINISHED;
-                        $licenca->save();
-
-                    }
-                }
-                if ($zahtevLicenca->status == REQUEST_FINISHED) {
-                    // kako je zavrsen a nema licencu ???
+                if ($licenca->count() != 1) {
                     // TODO: problem!!!
+                } else {
+                    $licenca = $licenca->first();
+                    $licenca->zahtev = $zahtevLicenca->id;
+                    if ($zahtevLicenca->status <> REQUEST_FINISHED) $zahtevLicenca->status = REQUEST_FINISHED;
+                    $licenca->save();
+
                 }
+            }
+            if ($zahtevLicenca->status == REQUEST_FINISHED) {
+                // kako je zavrsen a nema licencu ???
+                // TODO: problem!!!
+            }
 //            dd($osoba->licence[0]->tipLicence);
 
-            }
-            if ($zahtevLicenca->save()) {
-                $zahtevLicencaOK = TRUE;
-                echo "<BR>Model ZahtevLicenca $zahtevLicenca->id: " . (($zahtevLicenca->wasRecentlyCreated) ? " created" : " updated");
-            }
+        }
+        if ($zahtevLicenca->save()) {
+            $zahtevLicencaOK = TRUE;
+            echo "<BR>Model ZahtevLicenca $zahtevLicenca->id: " . (($zahtevLicenca->wasRecentlyCreated) ? " created" : " updated");
+        }*/
 
 //        dd('stop');
 
 //      DOCUMENTS
-            /*foreach ($zahtevLicencaMap as $newKey => $oldKey) {
-                if ($newKey == 'status') {
-                    $newData[$newKey] = $data[$oldKey][$zahtevLicenca->status];
-                } else {
-                    $requestData[$newKey] = $data[$oldKey];
-                }
-            }*/
-//        dd($newData['status']);
-            $documentMapZahtevLicenca = [
-                'document_category_id' => 5,    // zahtev za izdavanje licence
-                'document_type_id' => 1,        // zahtev
-                'registry_id' => 103,           // sticanje licence
-//            'registry_number' => NULL,
-                'registry_date' => $data['prijem'],
-                'status_id' => $data['status_id'][$zahtevLicenca->status],
-                'barcode' => 'barcode',
-                'user_id' => 'app_korisnik_id',
-                'metadata' => [
-                    "title" => "Zahtev za izdavanje licence za Sticanje licence #$zahtevLicenca->id",
-                    "author" => $zahtevLicenca->osobaId->ime_roditelj_prezime,
-                    "author_id" => $zahtevLicenca->osobaId->lib,
-                    "description" => "",
-                    "category" => "Sticanje licence",
-                    "created_at" => $data['datum'],
-                ],
-                'note' => 'napomena',
+        /*foreach ($zahtevLicencaMap as $newKey => $oldKey) {
+            if ($newKey == 'status') {
+                $newData[$newKey] = $data[$oldKey][$zahtevLicenca->status];
+            } else {
+                $requestData[$newKey] = $data[$oldKey];
+            }
+        }*/
+
+        $documentMapZahtevLicenca = [
+            'document_category_id' => 10,    // prijava za si
+            'document_type_id' => 1,         // original
+            'registry_id' => 104,            // prijave za polaganje si
+            'registry_number' => $data['zavodni_broj'],
+            'registry_date' => $data['prijem'],
+            'barcode' => 'barcode',
+            'status_id' => $data['status_id'][$zahtevLicenca->status_prijave],
+            'user_id' => 'app_korisnik_id',
+            'metadata' => [
+                "title" => "Prijava za polaganje stručnog ispita #$zahtevLicenca->id",
+                "author" => $zahtevLicenca->osoba->ime_roditelj_prezime,
+                "author_id" => $zahtevLicenca->osoba->lib,
+                "description" => "",
+                "category" => "Prijava za polaganje stručnog ispita",
+                "created_at" => Carbon::parse($data['created_at'])->format('Y-m-d'),
+            ],
+            'note' => 'napomena',
 //            'documentable_id' => '',  // request.id
 //            'documentable_type' => '',    //\App\Models\Membership
-                'created_at' => 'prijem',
-                'updated_at' => 'prijem',
-                'valid_from' => 'prijem',
-            ];
+            'created_at' => 'prijem',
+            'updated_at' => 'prijem',
+            'valid_from' => 'prijem',
+        ];
+//            dd($documentMapZahtevLicenca);
+//            dd($data);
 
-            foreach ($documentMapZahtevLicenca as $newKey => $oldKey) {
+        foreach ($documentMapZahtevLicenca as $newKey => $oldKey) {
 //            dd($newKey, $oldKey);
-                //modifikacija vrednosti
-                if ($newKey == 'document_category_id' or $newKey == 'document_type_id' or $newKey == 'registry_id' or $newKey == 'path') {
-                    $documentOdlukaData[$newKey] = $oldKey;
-                } else if ($newKey == 'status_id') {
-                    $documentOdlukaData[$newKey] = $oldKey;
-                } else if ($newKey == 'registry_date') {
-                    $documentOdlukaData[$newKey] = $oldKey;
-                } else if ($newKey == 'metadata') {
-                    $documentOdlukaData[$newKey] = json_encode($oldKey, JSON_UNESCAPED_UNICODE);
-                } else if ($newKey == 'note') {
-                    $documentOdlukaData[$newKey] = "Automatski kreiran na osnovu zahteva retroaktivno.";
-                } else {
-                    $documentOdlukaData[$newKey] = $data[$oldKey];
-                }
-            }
-
-            $document = Document::firstOrNew($documentOdlukaData);
-//        if($zahtevLicenca->status == 19) dd($document->toArray());
-
-            /*echo "<BR>";
-            echo "<BR>DOCUMENT id: $document->id" . strtoupper($key??'');
-            echo "<PRE>";
-            print_r($document->toArray());
-            echo "</PRE>";
-            echo "<BR>DOCUMENT UPDATE " . strtoupper($key??'');
-            echo "<PRE>";
-            print_r($documentOdlukaData);
-            echo "</PRE>";*/
-
-            if ($document->save()) {
-                $document->documentable()->associate($zahtevLicenca);
-                $document->barcode = "$zahtevLicenca->id#$document->id#{$data['prijem']}";
-                $document->save();
-                $documentOK = TRUE;
-                echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
-            }
-
-            $registry = Registry::find(103);
-            $registry->counter++;
-            if ($registry->save()) {
-                $registryOK = TRUE;
-            }
-
-            if ($zahtevLicencaOK && $documentOK && $registryOK) {
-                DB::commit();
-                $created = TRUE;
+            // modifikacija vrednosti
+            if ($newKey == 'document_category_id' or $newKey == 'document_type_id' or $newKey == 'registry_id' or $newKey == 'path') {
+                $documentOdlukaData[$newKey] = $oldKey;
+            } else if ($newKey == 'status_id') {
+                $documentOdlukaData[$newKey] = $oldKey;
+            } else if ($newKey == 'registry_date') {
+                $documentOdlukaData[$newKey] = $oldKey;
+            } else if ($newKey == 'registry_number') {
+                $documentOdlukaData[$newKey] = $oldKey;
+            } else if ($newKey == 'metadata') {
+                $documentOdlukaData[$newKey] = json_encode($oldKey, JSON_UNESCAPED_UNICODE);
+            } else if ($newKey == 'note') {
+                $documentOdlukaData[$newKey] = "Automatski kreiran na osnovu prijave retroaktivno.";
             } else {
-                DB::rollBack();
-                echo "DB ROLLBACK";
-                $created = FALSE;
+                $documentOdlukaData[$newKey] = $data[$oldKey];
+            }
+        }
+
+        $document = Document::firstOrNew($documentOdlukaData);
+
+//        echo "<BR>";
+//        echo "<BR>DOCUMENT id: $document->id" . strtoupper($key ?? '');
+//        echo "<PRE>";
+//        print_r($document->toArray());
+//        echo "</PRE>";
+//        echo "<BR>DOCUMENT UPDATE " . strtoupper($key ?? '');
+//            echo "<PRE>";
+//            print_r($documentOdlukaData);
+//            echo "</PRE>";
+
+        if ($document->save()) {
+            $document->documentable()->associate($zahtevLicenca);
+
+            if ($zahtevLicenca->status_prijave < REQUEST_IN_PROGRESS) {
+                $zahtevLicenca->status_prijave = REQUEST_IN_PROGRESS;
             }
 
-        } catch (\Exception $e) {
+            if (empty($zahtevLicenca->barcode)) {
+                $zahtevLicenca->barcode = "$zahtevLicenca->id#$document->id#{$data['prijem']}";
+            }
+            $document->barcode = $zahtevLicenca->barcode;
+
+            if ($zahtevLicenca->save()) {
+                $zahtevLicencaOK = TRUE;
+            }
+            $document->save();
+            $documentOK = TRUE;
+            echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
+        }
+
+        $registry = Registry::find(104);
+        $registry->counter++;
+        if ($registry->save()) {
+            $registryOK = TRUE;
+        }
+
+        if ($zahtevLicencaOK && $documentOK && $registryOK) {
+            DB::commit();
+            $created = TRUE;
+        } else {
+            DB::rollBack();
+            echo "DB ROLLBACK";
+            $created = FALSE;
+        }
+
+        /*} catch (\Exception $e) {
             DB::rollBack();
             dd($e);
             echo "Exception ! <br>DB ROLLBACK<br>" . $e->getMessage();
             $errorInfo = $e->getMessage();
-        }
+        }*/
 //        dd('kraj');
 
         return $created;
     }
 
-    private function updateMRCreateD(array $data)
+    private function createD(array $data): array
     {
-        //1. create requests
-        //2. create documents
-        //3. update membership
 
-        DB::beginTransaction();
+        $to_create = FALSE;
+        $to_register = FALSE;
+        $to_associate = FALSE;
+        $result = [];
 
-        $created = FALSE;
-
-        $membershipOK = FALSE;
-        $requestOK = FALSE;
-        $documentOK = FALSE;
-        $osobaOK = FALSE;
-
-        $membershipData = []; //reset array
-
-
-        $requestsMap = [
-//  REQUEST => $data
-            'osoba_id' => 'osoba_id',
-            'request_category_id' => 'request_category_id',
-            'status_id' => 'status_id',
-            'note' => 'napomena',
-//            'created_at' => 'created_at',
-            'updated_at' => 'updated_at',
-        ];
-        $membershipsMapPrijaveClanstvo = [
-//  MEMBERSHIP => $data
-            'osoba_id' => 'osoba_id',
-//            'started_at' => 'datum_odluke_uo',
-            'ended_at' => 'ended_at',
-            'updated_at' => 'updated_at',
-            'note' => 'napomena',
-            'status_id' => 'status_id_membership',
-        ];
-
-        $oldData = $data;
-
-        /*echo "<BR>";
-        echo "<BR>OLD DATA";
-        echo "<PRE>";
-        print_r($oldData);
-        echo "</PRE>";*/
+        $request = \App\Models\Request::where('id', $data['zahtev'])->where('request_category_id', 4)->first(); // request_category_id = 4 Zahtevi za mirovanje clanstva
+        if (empty($request)) {
+            $result[$data['zahtev']]['status'] = "problem";
+            $result[$data['zahtev']]['message'] = "There is no request with number {$data['zahtev']} in database";
+            return $result;
+        }
+        $document = $request->documents->where('document_category_id', 3); // document_category_id -> zahtev za mirovanje clanstva
+//        dd($document);
+        if ($document->count() > 1) {
+            // ima vise dokumenata kategorije zahtev za mirovanje clanstva po ovom zahtevu
+            $result[$data['zahtev']]['status'] = "problem";
+            $result[$data['zahtev']]['message'] = "Request $request->id has more than one document for category \"Zahtev za mirovanje clanstva\"";
+            return $result;
+        }
+        if ($document->count() == 1) {
+            $document = $document->first();
+            // vec ima dokument kategorije zahtev za mirovanje clanstva po ovom zahtevu
+            if (empty($document->registry_number) or empty($document->registry_date) or empty($document->valid_from) or empty($document->documentable_id)) {
+                $result[$data['zahtev']]['action'] = "Update";
+                // azurirati dokument
+                if (empty($document->registry_number) or empty($document->registry_date) or empty($document->valid_from)) {
+                    // zavedi
+                    $to_register = TRUE;
+                }
+                if (empty($document->documentable_id)) {
+                    // asociraj
+                    $to_associate = TRUE;
+                }
+            }
+        } else {
+            // kreiraj novi dokument
+            $to_create = TRUE;
+            $to_associate = TRUE;
+        }
+//        dd($result);
+//        dd($data);
 
         try {
 
-            $membership = Membership::where('osoba_id', $data['osoba_id'])->where('status_id', MEMBERSHIP_STARTED)->latest()->first();
-            $osoba = $membership->osoba;
-//        REQUESTS
-//            osobaNotClanNapomenaRequest
-            $request = \App\Models\Request::where('osoba_id', $data['osoba_id'])->where('request_category_id', 2)->latest()->first();
-            foreach ($requestsMap as $newKey => $oldKey) {
-                //modifikacija vrednosti
-                if ($newKey == 'note') {
-                    $requestData[$newKey] = /*!empty($request->note) ? "$request->note##Kreiran automatski za osobu koja je prestala da bude član (ima članarinu) i ima memebership." :*/
-                        "Kreiran automatski za osobu koja je prestala da bude član (ima članarinu) i ima memebership.";
-                } else {
-                    $requestData[$newKey] = $oldData[$oldKey];
-                }
-            }
-            $request->fill($requestData);
-
-            echo "<BR>";
-            /*echo "<BR>REQUEST $request->id";
-            echo "<PRE>";
-            print_r($request->toArray());
-            echo "</PRE>";*/
-            echo "<BR>REQUEST UPDATE $request->id";
-            echo "<PRE>";
-            print_r($requestData);
-            echo "</PRE>";
-
-            if ($request->save()) {
-                $request->requestable()->associate($membership);
-                $request->save();
-                $requestOK = TRUE;
-                echo "<BR>Model Request $request->id " . (($request->wasRecentlyCreated) ? " created" : " updated");
-            }
-
-//      DOCUMENTS
-//      DOCUMENTS KAD JE ZAHTEV
-            /*            $documentMapPrijaveClanstvo['zahtev_za_brisanje_iz_clanstva'] = [
-                            'document_category_id' => 2,
-                            'document_type_id' => 4,
-                            'registry_id' => 1,
-                            'registry_number' => '',
-                            'registry_date' => 'datum_prijema',
-                            'status_id' => DOCUMENT_REGISTERED,
-                            'barcode' => 'barcode',
-                            'user_id' => 'app_korisnik_id',
-                            'metadata' => [
-                                "title" => "Zahtev za brisanje iz članstva u IKS #$request->id",
-                                "author" => $request->osoba->ime_roditelj_prezime,
-                                "author_id" => $request->osoba->lib,
-                                "description" => "",
-                                "category" => "Članstvo",
-                                "created_at" => $oldData['datum_odluke_uo'],
-                            ],
-                            'note' => 'napomena',
-                            //            'documentable_id' => '',  // request.id
-                            //            'documentable_type' => '',    //\App\Models\Membership
-                            'created_at' => 'datum_prijema',
-                            'updated_at' => 'updated_at',
-                            'valid_from' => 'datum_prijema',
-                        ];*/
-//      DOCUMENT KAD JE RESENJE O PRESTANKU CLANSTVA
-            $documentMapPrijaveClanstvo['Resenje_o_prestanku_clanstva'] = [
-                'document_category_id' => 12,
-                'document_type_id' => 1,
-                'registry_id' => 27,
-                'registry_number' => 'broj_resenja_prestanak',
-                'registry_date' => 'datum_odluke_uo',
-
-                'status_id' => DOCUMENT_REGISTERED,
-                'barcode' => 'barcode',
-                'user_id' => 'app_korisnik_id',
-                'metadata' => [
-                    "title" => "Rešenje o prestanku članstva u IKS #$request->id",
-                    "author" => 'Inženjerska komora Srbije',
-                    "author_id" => '',
-                    "description" => "Za osobu: " . $request->osoba->ime_roditelj_prezime . ", id: " . $request->osoba->lib,
-                    "category" => "Članstvo",
-                    "created_at" => $oldData['datum_odluke_uo'],
-                ],
-                'note' => 'napomena',
-                'created_at' => 'datum_odluke_uo',
-                'updated_at' => 'updated_at',
-                'valid_from' => 'ended_at',
-
-            ];
-//      DOCUMENT KAD JE RESENJE O BRISANJU IZ EVIDENCIJE
-            $documentMapPrijaveClanstvo['Resenje_o_brisanju_iz_evidencije'] = [
-                'document_category_id' => 13,
-                'document_type_id' => 1,
-                'registry_id' => 28,
-                'registry_number' => 'broj_resenja_brisanje',
-                'registry_date' => 'datum_odluke_uo',
-
-                'status_id' => DOCUMENT_REGISTERED,
-                'barcode' => 'barcode',
-                'user_id' => 'app_korisnik_id',
-                'metadata' => [
-                    "title" => "Rešenje o brisanju iz evidencije IKS #$request->id",
-                    "author" => 'Inženjerska komora Srbije',
-                    "author_id" => '',
-                    "description" => "Za osobu: " . $request->osoba->ime_roditelj_prezime . ", id: " . $request->osoba->lib,
-                    "category" => "Članstvo",
-                    "created_at" => $oldData['datum_odluke_uo'],
-                ],
-                'note' => 'napomena',
-                'created_at' => 'datum_odluke_uo',
-                'updated_at' => 'updated_at',
-                'valid_from' => 'ended_at',
-
-            ];
-            foreach ($documentMapPrijaveClanstvo as $key => $documentMap) {
-                $zg = $request->osoba->zvanjeId->zvanje_grupa_id;
-                $reg = Registry::where('base_number', 0)->whereHas('registryDepartmentUnit', function ($q) use ($zg) {
+            $zg = $request->osoba->zvanjeId->zvanje_grupa_id;
+            $registry = Registry::where('base_number', 0)
+                ->whereHas('registryDepartmentUnit', function ($q) use ($zg) {
                     $q->where('label', "02-$zg");
                 })->get()[0];
-                $reg->counter++;
-//                $reg->save();
-                foreach ($documentMap as $newKey => $oldKey) {
-                    //modifikacija vrednosti
-                    if ($newKey == 'document_category_id' or $newKey == 'document_type_id' or $newKey == 'registry_id' or $newKey == 'path') {
-                        $documentOdlukaData[$newKey] = $oldKey;
-                    } else if ($newKey == 'status_id') {
-                        $documentOdlukaData[$newKey] = $oldKey;
-                    } else if ($newKey == 'registry_id') {
-                        $documentOdlukaData[$newKey] = $oldKey;
-                    } else if ($newKey == 'metadata') {
-                        $documentOdlukaData[$newKey] = json_encode($oldKey, JSON_UNESCAPED_UNICODE);
-                    } else if ($newKey == 'note') {
-                        $documentOdlukaData[$newKey] = "Automatski kreiran na osnovu zahteva retroaktivno.";
-                    } else {
-                        $documentOdlukaData[$newKey] = $oldData[$oldKey];
-                    }
+
+            if ($to_create) {
+                $document = new Document();
+
+                $document->document_category_id = 3; // document_category_id -> zahtev za mirovanje clanstva
+                $document->registry_id = $registry->id;
+                $document->registry_number = $data['zavodni_broj_zahteva'];
+                $document->status_id = 57; // zaveden
+                $document->registry_date = Carbon::parse($data['datum_prijema_zahteva'])->format('Y-m-d');
+                $document->metadata = json_encode([
+                    "Title" => "Zahtev za mirovanje članstva za Mirovanje članstva #$request->id",
+                    "Author" => $request->osoba->ime_roditelj_prezime,
+                    "Author_id" => $request->osoba->lib,
+                    "Description" => "",
+                    "Dopuna" => "",
+                    "category" => "Mirovanje članstva",
+                    "created_at" => Carbon::parse($data['datum_prijema_zahteva'])->format('Y-m-d'),
+                ], JSON_UNESCAPED_UNICODE);
+                $document->user_id = backpack_user()->id;
+                $document->valid_from = Carbon::parse($data['datum_prijema_zahteva'])->format('Y-m-d');
+                $document->note = "Automatski kreiran na osnovu podataka iz evidencije koju je vodila služba matičnih sekcija";
+                $document->document_type_id = 1;
+
+                $result[$data['zahtev']]['action'] = "Create";
+                empty($result[$data['zahtev']]['message']) ? $result[$data['zahtev']]['message'] = "Initializing new document model | Registering new document model | Associating new document model" : $result[$data['zahtev']]['action'] .= " | Initializing new document model | Registering new document model | Associating new document model";
+            }
+
+            if ($to_register) {
+                $document->registry_id = $registry->id;
+                $document->registry_number = $data['zavodni_broj_zahteva'];
+                $document->registry_date = Carbon::parse($data['datum_prijema_zahteva'])->format('Y-m-d');
+                $document->status_id = 57; // zaveden
+//                $document->barcode = ""; // barcode sadrzi id dokumenta, mora da se kreira nakon snimanja
+                $document->user_id = backpack_user()->id;
+                $document->valid_from = Carbon::parse($data['datum_prijema_zahteva'])->format('Y-m-d');
+                $document->note = "Automatski zaveden na osnovu podataka iz evidencije koju je vodila služba matičnih sekcija";
+
+                $result[$data['zahtev']]['action'] = "Update";
+                empty($result[$data['zahtev']]['message']) ? $result[$data['zahtev']]['message'] = "Registering existing document" : $result[$data['zahtev']]['message'] .= " | Registering existing document";
+            }
+
+            /*if ($document->save()) {
+
+                if ($to_associate) {
+                    $document->documentable()->associate($request);
+
+                    $result[$data['zahtev']]['action'] = "Associate";
+                    empty($result[$data['zahtev']]['message']) ? $result[$data['zahtev']]['message'] = "Associating existing document with related request" : $result[$data['zahtev']]['message'] .= " | Associating existing document with related request";
                 }
-//                $document = Document::where();
-                $document = Document::firstOrNew($documentOdlukaData);
-                /*echo "<BR>";
-                echo "<BR>DOCUMENT id: $document->id" . strtoupper($key);
-                echo "<PRE>";
-                print_r($document->toArray());
-                echo "</PRE>";*/
-                echo "<BR>DOCUMENT UPDATE " . strtoupper($key);
-                echo "<PRE>";
-                print_r($documentOdlukaData);
-                echo "</PRE>";
 
                 if ($document->save()) {
-                    $document->documentable()->associate($request);
+                    empty($document->barcode) ? $document->barcode = "$request->id#$document->id#$document->registry_number#$document->registry_date" : $document->barcode;
                     $document->save();
-                    $documentOK = TRUE;
-                    echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
+                    $result[$data['zahtev']]['status'] = 'success';
                 }
-            }
-//        MEMBERSHIPS
-            foreach ($membershipsMapPrijaveClanstvo as $newKey => $oldKey) {
-                //modifikacija vrednosti
-                if ($newKey == 'note') {
-//                    $empty=isEmpty($oldData[$oldKey]);
-                    $membershipData[$newKey] = !empty($membership->note) ? (!empty($oldData[$oldKey]) ? $membership->note . "##ended_at:" . $oldData[$oldKey] : $membership->note) : "ended_at:" . $oldData[$oldKey];
-                } else {
-                    $membershipData[$newKey] = $oldData[$oldKey];
-                }
-            }
-            echo "<BR>";
-            echo "<BR>MEMBERSHIP $membership->id";
-            echo "<PRE>";
-//            print_r($membership->toArray());
-            echo "</PRE>";
-            echo "<PRE>";
-            print_r($membershipData);
-            echo "</PRE>";
+            }*/
 
-            $membership->fill($membershipData);
-            if ($membership->save()) {
-                $membershipOK = TRUE;
-                echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
-            }
-
-            $osoba->clan = 0;
-            $osoba->updated_at = Carbon::now()->format("Y-m-d H:i:s");
-            echo "<BR>";
-            echo "<BR>OSOBA $osoba->id";
-            echo "<PRE>";
-//            print_r($osoba->toArray());
-            echo "</PRE>";
-
-
-            if ($osoba->save()) {
-                $osobaOK = TRUE;
-                echo "<BR>Model Osoba $osoba->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
-            }
-
-            if ($membershipOK && $requestOK && $documentOK && $osobaOK) {
-                DB::commit();
-                $created = TRUE;
-            } else {
-                DB::rollBack();
-                echo "DB ROLLBACK";
-                $created = FALSE;
-            }
+            $result[$data['zahtev']]['document'] = $document->toArray();
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            echo "<br>" . $e->getMessage();
-            $errorInfo = $e->getMessage();
+            $result[$data['zahtev']]['status'] = 'error';
+            empty($result[$data['zahtev']]['message']) ? $result[$data['zahtev']]['message'] = $e->getMessage() : $result[$data['zahtev']]['message'] .= " | {$e->getMessage()}";
         }
-//        dd('kraj');
-
-        return $created;
-//        }); //transaction
+//        dd('stop');
+        ksort($result[$data['zahtev']], SORT_STRING);
+        return $result;
     }
 
     private function copyArray(array $modelFrom)
@@ -3753,13 +3698,47 @@ class ZahtevController extends Controller
 
     }
 
+    private function kreirajDokumenteZaZahteveZaMirovanje($save = '')
+    {
+        $result = [];
+        $zahtevi = '';
+        $this->counter = 1;
+        $start = microtime(TRUE);
+
+        $mirovanjaImport = $this->getExcel('public/20220407_mirovanja.xlsx');
+        foreach ($mirovanjaImport->toArray() as $key => $value) {
+            $requests[$value['zahtev']] = $value;
+        }
+
+        foreach ($requests as $data_mirovanje) {
+
+            if ($save == 'save') {
+                $result_temp = $this->createD($data_mirovanje);
+                $result[$data_mirovanje['zahtev']] = $result_temp[$data_mirovanje['zahtev']];
+                array_push($result);
+            }
+            $zahtevi .= "{$data_mirovanje['zahtev']}, ";
+            $this->counter++;
+        }
+
+        $stop = microtime(TRUE) - $start;
+        echo "<br>Ukupno obradjeno: " . $this->counter;
+        echo "<br>Vreme izvrsavanja (sec): " . (int)$stop;
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
+        echo "<br>Zahtevi: $zahtevi<br><br>";
+
+        echo "<pre>";
+        print_r($result);
+        echo "</pre>";
+    }
+
     private function kreirajDokumenteZaStareZavedeneZahteve($save = '')
     {
         $print = [];
         $this->counter = 1;
         $start = microtime(TRUE);
 
-        $query = ZahtevLicenca::whereNotNull('prijem')
+        $query = SiPrijava::whereNotNull('datum_prijema')
 //            ->where('status', 19)    // Zastareo
 //            ->where('status', 20)    // Odbijen
 //            ->where('status', 22)    // Automatski
@@ -3817,35 +3796,25 @@ class ZahtevController extends Controller
 
                     $row['counter'] = $this->counter++;
                     $row['id'] = $zahtev->id;
-                    $row['osoba'] = $zahtev->osoba;
-                    $row['licencatip'] = $zahtev->licencatip;
-                    $row['status'] = $zahtev->status;
-                    $row['prijem'] = $zahtev->prijem;
-                    $row['zavodni_broj'] = $zahtev->zavodni_broj;
-                    $row['licenca_broj'] = $zahtev->licenca_broj;
-                    $row['licenca_broj_resenja'] = $zahtev->licenca_broj_resenja;
-                    $row['licenca_datum_resenja'] = $zahtev->licenca_datum_resenja;
-                    $row['si_prijava_id'] = $zahtev->si_prijava_id;
+                    $row['osoba'] = $zahtev->osoba_id;
+                    $row['status'] = $zahtev->status_prijave;
+                    $row['prijem'] = $zahtev->datum_prijema;
 
                     $print[] = $row;
 
                     $data = [
                         "action" => "D", // LSRMD
                         "id" => $zahtev->id,
-                        "osoba_id" => $zahtev->osoba,
-                        "datum" => $zahtev->datum,
-                        "prijem" => $zahtev->prijem,
+                        "osoba_id" => $zahtev->osoba_id,
+                        "prijem" => $zahtev->datum_prijema,
                         "request_category_id" => $zahtev->request_category_id,
                         "app_korisnik_id" => 14,
                         "barcode" => $zahtev->barcode,
-                        "created_at" => date('Y-m-d H:i:s', strtotime($zahtev->licenca_datum_resenja)),
-                        "updated_at" => Carbon::now()->format("Y-m-d H:i:s"),
+                        "created_at" => $zahtev->created_at,
+                        "updated_at" => $zahtev->updated_at,
                         "zavodni_broj" => $zahtev->zavodni_broj,
-                        "licenca_broj" => $zahtev->licenca_broj,
-                        "licenca_broj_resenja" => $zahtev->licenca_broj_resenja,
-                        "licenca_datum_resenja" => $zahtev->licenca_datum_resenja,
-                        "status_id" => [19 => 58, 20 => 57, 22 => 57, 52 => 57, 53 => 57, 54 => 58, 50 => 57, 51 => 57],
-                        "napomena" => 'Automatski kreiran na osnovu podataka iz tzahtev',
+                        "status_id" => [50 => 57, 51 => 57, 52 => 57, 53 => 57, 54 => 58],
+                        "napomena" => 'Automatski kreiran na osnovu podataka iz si_prijava',
                     ];
                     if ($save == 'save') {
                         $result = $this->updateZlCreateD($data);
@@ -3859,7 +3828,7 @@ class ZahtevController extends Controller
             })//            ->count()
         ;
 
-//        echo $this->outputHtmlTable($print);
+        echo $this->outputHtmlTable($print);
         $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
         echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
@@ -3917,40 +3886,82 @@ class ZahtevController extends Controller
         dd($query);
     }
 
-    public function greskeUClanarini()
+    public function nevazeceLicence()
     {
         $print = [];
         $this->counter = 1;
         $start = microtime(TRUE);
 
-//        platili i nisu platili istovremeno
-        /*$query = Osoba::whereHas('clanarine', function ($q) {
-            $q
-                ->where('rokzanaplatu', '>=', 'now()')
-                ->where('rokzanaplatu', '<', 'now()')
-                ->whereRaw('iznoszanaplatu = iznosuplate + pretplata');
+        $query = Osoba::whereHas('licence', function ($q) {
+            $q->where('status', '<>', 'D');
         })
-            ->whereDoesntHave('clanarine', function ($q) {
-                $q
-                    ->where('rokzanaplatu', '>=', 'now()');
-            })*/
-        $query = Osoba::whereHas('clanarine', function ($q) {
-//        novo clanstvo starije od poslednjeg rekorda starog clanstva
-            $q->where('poslednjaClanarina', function ($q) {
-                $q->whereRaw('substr(rokzanaplatu, 0, 4)', '<>', function ($q) {
-//                    $q->
-                });
+            ->chunkById(100, function ($osobe) use (&$print) {
+                $ids = '';
+                foreach ($osobe as $osoba) {
+                    $licence = DB::table('tlicenca')
+                        ->where('osoba', $osoba->id)
+//                        ->where('osoba', '2908980715220')
+//                        ->where('status', '<>', 'D')
+                        ->whereIn(DB::raw('substr(id, 1, 3)'), function ($q) {
+                            $q
+                                ->select(DB::raw('substr(id, 1, 3)'))
+                                ->from('tlicenca')
+                                ->groupBy(DB::raw('substr(id, 1, 3)'))
+                                ->having(DB::raw('count(substr(id, 1, 3))'), '>', 1);
+                        })
+                        ->get();
+
+                    $ids .= "$osoba->id, ";
+                }
+                echo "$ids<br><br>";
+                $print['counter'] = ++$this->counter;
+                $print['osoba'] = $osoba->id;
             });
-        })
-//            ->toSql()
-            ->count();
+
+        echo $this->outputHtmlTable($print);
+
+        $stop = microtime(TRUE) - $start;
+        echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
+        dd($query);
+    }
+
+    public function addZvanjeIdToZahtevLicenca()
+    {
+        $print = [];
+        $problem = '';
+        $this->counter = 1;
+        $start = microtime(TRUE);
+
+
+        $query = ZahtevLicenca::whereNull('zvanje_id')
+            ->chunkById(1000, function ($zahtevi) use (&$print, $problem) {
+                $ids = '';
+                foreach ($zahtevi as $zahtev) {
+                    $zahtev->zvanje_id = $zahtev->osobaId->zvanje;
+                    $ids .= "$zahtev->osoba, ";
+                    $print['counter'] = ++$this->counter;
+                    $print['zahtev'] = $zahtev->id;
+                    $print['osoba'] = $zahtev->osoba;
+                    $print['zvanje'] = $zahtev->zvanje_id;
+                    if ($zahtev->save()) {
+                        $print['saved'] = "<span style='color: darkgreen'>OK</span>";
+                    } else {
+                        $print['saved'] = "<span style='color: darkred'>NOT OK</span>";
+                        $problem .= "$zahtev->id, ";
+                    }
+
+                }
+                echo "$ids<br><br>";
+            });
+        echo "NISU AZURIRANI: $problem<br><br>";
 
 //        echo $this->outputHtmlTable($print);
 
         $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
         echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
-        dd($query);
+        dd('kraj');
     }
 
     /**

@@ -22,12 +22,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $razlog
  * @property string $prijem
  * @property string $preporuka2
+ * @property string $barcode
  * @property string $preporuka1
  * @property int $mestopreuzimanja
  * @property string $status_pregleda
  * @property string $datum_statusa_pregleda
  * @property string $licenca_datum_resenja
+ * @property string $licenca_broj_resenja
  * @property int $request_category_id
+ * @property int $zvanje_id
  * @property Licencatip $tipLicence
  * @property Osoba $osobaId
  * @property Licenca $licenca
@@ -36,6 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property RegPodoblast $regPodoblast
  * @property PrijavaClanstvo $prijavaClan
  * @property RequestCategory $requestCategory
+ * @property Zvanje $zvanje
  * @property Document[] $documents
 
  */
@@ -135,6 +139,11 @@ class ZahtevLicenca extends Model
     public function requestCategory()
     {
         return $this->belongsTo('App\Models\RequestCategory');
+    }
+
+    public function zvanje(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo('App\Models\Zvanje');
     }
 
     /**
