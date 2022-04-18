@@ -2174,7 +2174,7 @@ class ZahtevController extends Controller
             ->whereDoesntHave('osoba', function ($q) {
 //            ->whereHas('osoba', function ($q) {
                 $q->whereIn('id', [
-                    '6111250563610'
+                    '2511965710258'
                 ]);
             })
 //SVI
@@ -3895,7 +3895,7 @@ class ZahtevController extends Controller
         $query = Osoba::whereHas('licence', function ($q) {
             $q->where('status', '<>', 'D');
         })
-            ->chunkById(100, function ($osobe) use (&$print) {
+            ->chunkById(1000, function ($osobe) use (&$print) {
                 $ids = '';
                 foreach ($osobe as $osoba) {
                     $licence = DB::table('tlicenca')
@@ -3909,15 +3909,19 @@ class ZahtevController extends Controller
                                 ->groupBy(DB::raw('substr(id, 1, 3)'))
                                 ->having(DB::raw('count(substr(id, 1, 3))'), '>', 1);
                         })
-                        ->get();
-
+                        ->limit(1000)
+//                        ->count()
+                        ->get()
+//                    ->toSql()
+                    ;
+//dd($licence);
                     $ids .= "$osoba->id, ";
                 }
                 echo "$ids<br><br>";
                 $print['counter'] = ++$this->counter;
                 $print['osoba'] = $osoba->id;
             });
-
+//dd($print);
         echo $this->outputHtmlTable($print);
 
         $stop = microtime(TRUE) - $start;
