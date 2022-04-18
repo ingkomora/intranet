@@ -1046,6 +1046,12 @@ class OsobaCrudController extends CrudController
         $this->crud->field('roditelj')->tab('Lični podaci');
         $this->crud->field('devojackoprezime')->label('Devojačko prezime')->tab('Lični podaci');
         $this->crud->field('zvanjeId')->label('Zvanje')->tab('Lični podaci');
+        CRUD::field('datumrodjenja')->type('date_picker')->label('Datum rođenja')->date_picker_options([
+            'todayBtn' => true,
+            'format'   => 'dd.mm.yyyy.',
+            'language' => 'sr-Latn',
+        ])
+            ->tab('Lični podaci');
         $this->crud->field('rodjenjemesto')->label('Mesto rođenja')->tab('Lični podaci');
         $this->crud->field('rodjenjeopstina')->label('Opština rođenja')->tab('Lični podaci');
         $this->crud->field('rodjenjedrzava')->label('Država rođenja')->tab('Lični podaci');
