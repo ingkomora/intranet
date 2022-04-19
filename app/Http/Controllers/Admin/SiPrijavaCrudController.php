@@ -35,11 +35,12 @@ class SiPrijavaCrudController extends CrudController
             'name' => 'id',
             'label' => 'Broj prijave',
         ],
-        'osoba_id' => [
+        'osoba_id',
+        'osoba' => [
             'name' => 'osoba',
             'type' => 'relationship',
-            'label' => 'Ime prezime (jmbg)',
-            'attribute' => 'ime_prezime_jmbg',
+            'label' => 'Ime prezime',
+            'attribute' => 'full_name',
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
@@ -283,47 +284,20 @@ class SiPrijavaCrudController extends CrudController
 
         $this->crud->removeColumns(['tema', 'documents', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
 
+
         $this->crud->setColumnDetails('id', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, ",")) {
                     $searchTerm = trim($searchTerm, " ,.;");
                     $searchTerm = explode(",", $searchTerm);
                     $searchTermArray = array_map('trim', $searchTerm);
-//                    dd($column);
-                    $query->orWhereHas('osoba', function ($q) use ($searchTermArray) {
-                        $q->whereIn('id', $searchTermArray)
-                            ->orderBy('id');
-                    });
-                } else if (strstr($searchTerm, " ")) {
-                    $searchTerm = explode(" ", $searchTerm);
-                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
-                    });
+//                    dd($column);$column
+                    $query->whereIn('id', $searchTermArray)->orderBy('id');
                 } else {
-                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
-                        $q
-                            ->where('id', 'ilike', $searchTerm . '%');
-                    })
-                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                            $q
-                                ->where('id', 'ilike', $searchTerm . '%')
-                                ->orWhere('ime', 'ilike', $searchTerm . '%')
-                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
-                        });
+                    $query->orWhere('id', 'ilike', $searchTerm . '%');
                 }
             }
         ]);
-
-        $this->crud->setColumnDetails('documents', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('document/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
-        ]);
-
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -333,11 +307,30 @@ class SiPrijavaCrudController extends CrudController
                             ->where('prezime', 'ilike', $searchTerm[1] . '%');
                     });
                 } else {
-                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                        $q->where('id', 'ilike', $searchTerm . '%');
-                    });
+                    $query
+                        ->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%');
+                        })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+
                 }
             }
+        ]);
+
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
         ]);
 
 
