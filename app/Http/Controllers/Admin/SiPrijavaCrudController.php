@@ -87,7 +87,7 @@ class SiPrijavaCrudController extends CrudController
             ]
         ],
         'barcode' => [
-            'name' => 'strucni_rad',
+            'name' => 'barcode',
         ],
         'datum_prijema' => [
             'name' => 'datum_prijema',
@@ -282,6 +282,38 @@ class SiPrijavaCrudController extends CrudController
         $this->crud->addColumns($this->column_deffinition_array);
 
         $this->crud->removeColumns(['tema', 'documents', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
+
+        $this->crud->setColumnDetails('id', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+//                    dd($column);
+                    $query->orWhereHas('osoba', function ($q) use ($searchTermArray) {
+                        $q->whereIn('id', $searchTermArray)
+                            ->orderBy('id');
+                    });
+                } else if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+                }
+            }
+        ]);
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
