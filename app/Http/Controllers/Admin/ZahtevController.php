@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Str;
+use \Tesla\JMBG\JMBG;
 use App\Imports\ExcelImport;
 use App\Libraries\Helper;
 use App\Libraries\LibLibrary;
@@ -1155,6 +1157,7 @@ class ZahtevController extends Controller
         echo '<li><a href="/admin/clanstvo/osobeKojeNisuPreuzeleLicencu">osobeKojeNisuPreuzeleLicencu</a></li>';
         echo '<li><a href="/admin/clanstvo/nevazeceLicence">nevazeceLicence</a></li>';
         echo '<li><a href="/admin/clanstvo/addZvanjeIdToZahtevLicenca">addZvanjeIdToZahtevLicenca</a></li>';
+        echo '<li><a href="/admin/clanstvo/insertDatumRodjenjaFromJmbg">insertDatumRodjenjaFromJmbg</a></li>';
 
         echo '</ol>';
 
@@ -1224,6 +1227,9 @@ class ZahtevController extends Controller
                 break;
             case 'addZvanjeIdToZahtevLicenca':
                 $this->addZvanjeIdToZahtevLicenca();
+                break;
+            case 'insertDatumRodjenjaFromJmbg':
+                $this->insertDatumRodjenjaFromJmbg();
                 break;
             default:
 //                $this->count();
@@ -3895,8 +3901,10 @@ class ZahtevController extends Controller
         $query = Osoba::whereHas('licence', function ($q) {
             $q->where('status', '<>', 'D');
         })
-            ->chunkById(1000, function ($osobe) use (&$print) {
+            ->limit(1000)
+            ->chunkById(50, function ($osobe) use (&$print) {
                 $ids = '';
+                if ($this->counter == 49) dd('kraj');
                 foreach ($osobe as $osoba) {
                     $licence = DB::table('tlicenca')
                         ->where('osoba', $osoba->id)
@@ -3909,17 +3917,14 @@ class ZahtevController extends Controller
                                 ->groupBy(DB::raw('substr(id, 1, 3)'))
                                 ->having(DB::raw('count(substr(id, 1, 3))'), '>', 1);
                         })
-                        ->limit(1000)
-//                        ->count()
-                        ->get()
-//                    ->toSql()
-                    ;
+                        ->get();
 //dd($licence);
                     $ids .= "$osoba->id, ";
                 }
                 echo "$ids<br><br>";
                 $print['counter'] = ++$this->counter;
                 $print['osoba'] = $osoba->id;
+
             });
 //dd($print);
         echo $this->outputHtmlTable($print);
@@ -3928,6 +3933,108 @@ class ZahtevController extends Controller
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
         echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd($query);
+    }
+
+    public function insertDatumRodjenjaFromJmbg()
+    {
+        $print = [];
+        $this->counter = 1;
+        $osobaSave = FALSE;
+        $start = microtime(TRUE);
+//        dd(JMBG::for('9999999999999')->isValid());
+        $query = Osoba::whereNull('datumrodjenja')
+//            ->whereIn('id', ['0202952710364', '0202951780032'])
+            ->select('id', 'datumrodjenja')
+            ->chunkById(1000, function ($osobe) use (&$print, $osobaSave) {
+                $ids = '';
+
+                foreach ($osobe as $osoba) {
+
+                    $print[$osoba->id]['counter'] = $this->counter++;
+                    $print[$osoba->id]['osoba'] = $osoba->id;
+                    $print[$osoba->id]['datum_rodjenja'] = $osoba->datumrodjenja;
+                    $print[$osoba->id]['year'] = '';
+                    $print[$osoba->id]['jmbg_correct'] = '';
+                    $print[$osoba->id]['napomena'] = '';
+
+                    if (JMBG::for($osoba->id)->isValid()) {
+                        $dan_rodjenja = substr($osoba->id, 0, 2);
+                        $mesec_rodjenja = substr($osoba->id, 2, 2);
+                        $godina_rodjenja = '1' . substr($osoba->id, 4, 3);
+                        $datum_rodjenja = $godina_rodjenja . '-' . $mesec_rodjenja . '-' . $dan_rodjenja;
+
+                        if ($mesec_rodjenja === '02') { // februar
+                            $print[$osoba->id]['napomena'] = '02 | ';
+                            if (date('L', strtotime($datum_rodjenja)) and preg_match("/^[0-9]{4}-(02)-(0[1-9]|1[0-9]|2[0-9])$/", $datum_rodjenja)) {
+//                            prestupna
+                                $osobaSave = TRUE;
+                                $osoba->datumrodjenja = $datum_rodjenja;
+                                $print[$osoba->id]['jmbg_correct'] = 'true';
+                                $print[$osoba->id]['year'] = 'Leap';
+                                $print[$osoba->id]['datum_rodjenja'] = $osoba->datumrodjenja;
+                                $print[$osoba->id]['napomena'] .= 'leap';
+                                $print[$osoba->id]['osobaSave'] = $osobaSave;
+                            } elseif (!date('L', strtotime($datum_rodjenja)) and preg_match("/^[0-9]{4}-(02)-(0[1-9]|1[0-9]|2[0-8])$/", $datum_rodjenja)) {
+//                            nije prestupna
+                                $osobaSave = TRUE;
+                                $osoba->datumrodjenja = $datum_rodjenja;
+                                $print[$osoba->id]['jmbg_correct'] = 'true';
+                                $print[$osoba->id]['year'] = 'Not leap';
+                                $print[$osoba->id]['datum_rodjenja'] = $osoba->datumrodjenja;
+                                $print[$osoba->id]['napomena'] .= 'not leap';
+                                $print[$osoba->id]['osobaSave'] = $osobaSave;
+                            } else {
+                                $print[$osoba->id]['napomena'] .= 'not leap nor regular';
+                                $print[$osoba->id]['osobaSave'] = $osobaSave;
+                            }
+
+                        } else {
+//                            nije februar
+                            $print[$osoba->id]['napomena'] = '!02 | ';
+                            if (preg_match("/^[0-9]{4}-(0[13456789]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $datum_rodjenja)) {
+                                $osobaSave = TRUE;
+                                $print[$osoba->id]['jmbg_correct'] = 'true';
+                                $osoba->datumrodjenja = $datum_rodjenja;
+                                $print[$osoba->id]['datum_rodjenja'] = $osoba->datumrodjenja;
+                                $print[$osoba->id]['osoba'] = $osoba->id;
+                                $print[$osoba->id]['napomena'] .= 'pattern';
+                                $print[$osoba->id]['osobaSave'] = $osobaSave;
+                            } else {
+                                $print[$osoba->id]['jmbg_correct'] = 'false';
+                                $print[$osoba->id]['napomena'] .= 'not pattern';
+                                $print[$osoba->id]['osobaSave'] = $osobaSave;
+                            }
+                        }
+                    } else { // is not valid jmbg by the definition of isValid method from class JMBG
+                        $osobaSave = FALSE;
+                        $print[$osoba->id]['jmbg_correct'] = 'false';
+                        $print[$osoba->id]['napomena'] = '!isValid';
+                        $print[$osoba->id]['osobaSave'] = $osobaSave;
+                    }
+                    if ($osobaSave) {
+                        try {
+                            $osoba->save();
+                            $print[$osoba->id]['model_persisted'] = "<font color='#006400'>true</font>";
+                        } catch (\Exception $e) {
+                            $print[$osoba->id]['model_persisted'] = "<font color='#8b0000'>false: $osoba->id | {$e->getMessage()}</font>";
+
+                        }
+                    }
+                }
+                echo "$this->counter<br><br>";
+
+            });
+        $output = [];
+        foreach ($print as $osoba => $item) {
+            if ($item['osobaSave']) $output[$osoba] = $item;
+        }
+        echo $this->outputHtmlTable($output);
+//        dd('stop');
+
+        $stop = microtime(TRUE) - $start;
+        echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
+        dd('the end');
     }
 
     public function addZvanjeIdToZahtevLicenca()
