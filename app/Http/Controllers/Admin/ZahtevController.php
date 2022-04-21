@@ -3901,32 +3901,45 @@ class ZahtevController extends Controller
         $query = Osoba::whereHas('licence', function ($q) {
             $q->where('status', '<>', 'D');
         })
-            ->limit(1000)
-            ->chunkById(50, function ($osobe) use (&$print) {
+            ->select('id', 'ime', 'roditelj', 'prezime')
+            ->chunkById(1000, function ($osobe) use (&$print) {
                 $ids = '';
-                if ($this->counter == 49) dd('kraj');
                 foreach ($osobe as $osoba) {
-                    $licence = DB::table('tlicenca')
-                        ->where('osoba', $osoba->id)
-//                        ->where('osoba', '2908980715220')
-//                        ->where('status', '<>', 'D')
-                        ->whereIn(DB::raw('substr(id, 1, 3)'), function ($q) {
-                            $q
-                                ->select(DB::raw('substr(id, 1, 3)'))
-                                ->from('tlicenca')
-                                ->groupBy(DB::raw('substr(id, 1, 3)'))
-                                ->having(DB::raw('count(substr(id, 1, 3))'), '>', 1);
+//                    dd($osoba);
+                    $print[$osoba->id]['counter'] = $this->counter++;
+                    $print[$osoba->id]['jmbg'] = $osoba->id;
+                    $print[$osoba->id]['osoba'] = $osoba->ime_roditelj_prezime;
+
+                    $tipovi = $osoba->licence->pluck('licencatip')->toArray();
+
+                    $vrste_licenci = LicencaTip::whereIn('id', $tipovi)->pluck('idn')->toArray();
+
+                    $unique = array_unique($vrste_licenci);
+                    $duplicates = array_values(array_diff_assoc($vrste_licenci, $unique));
+//                    dd($vrste_licenci);
+                    $licence = Licenca::where('osoba', $osoba->id)
+                        ->where('status', '<>', 'D')
+                        ->whereHas('tipLicence', function ($q) use ($duplicates) {
+                            $q->whereIn('idn', $duplicates);
                         })
+                        ->select('id', 'status', 'licencatip')
+                        ->orderBy('id')
                         ->get();
-//dd($licence);
-                    $ids .= "$osoba->id, ";
+
+                    foreach ($licence as $licenca) {
+                        if (!isset($print[$osoba->id]['licence'])) {
+                            $print[$osoba->id]['licence'] = "$licenca->id ($licenca->status)";
+                        } else {
+                            $print[$osoba->id]['licence'] .= " | $licenca->id ($licenca->status)";
+                        }
+                        $ids .= "$licenca->id, ";
+                    }
                 }
                 echo "$ids<br><br>";
-                $print['counter'] = ++$this->counter;
-                $print['osoba'] = $osoba->id;
 
             });
-//dd($print);
+
+        dd($print);
         echo $this->outputHtmlTable($print);
 
         $stop = microtime(TRUE) - $start;
