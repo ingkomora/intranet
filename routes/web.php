@@ -11,8 +11,8 @@
 |
 */
 
-//Route::get('/', 'Admin\HomeController@dashboard');
-Route::view('/', 'welcome');
+Route::get('/', 'Admin\HomeController@dashboard');
+//Route::view('/', 'welcome');
 
 Route::middleware(['auth'])->group(function () {
 });
