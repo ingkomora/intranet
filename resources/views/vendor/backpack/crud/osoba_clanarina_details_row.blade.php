@@ -29,6 +29,37 @@
                     Nije dodeljen lib
                 @endif
             </p>
+            @role('admin')
+            @if($entry->memberships->isNotEmpty())
+                <h5>Memberships:</h5>
+                <table class="table table-sm table-striped">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>started_at</th>
+                        <th>ended_at</th>
+                        <th>status</th>
+{{--                        <th>note</th>--}}
+                        <th>created_at</th>
+                        <th>updated_at</th>
+                    </tr>
+                    </thead>
+                    @foreach($entry->memberships as $membership)
+                        <tr>
+                            <td>{{$membership->id}}</td>
+                            <td>{{!empty($membership->started_at) ? \Carbon\Carbon::parse($membership->started_at)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{!empty($membership->ended_at) ? \Carbon\Carbon::parse($membership->ended_at)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{$membership->status_id}}</td>
+{{--                            <td>{{$membership->note}}</td>--}}
+                            <td>{{!empty($membership->created_at) ? \Carbon\Carbon::parse($membership->created_at)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{!empty($membership->updated_at) ? \Carbon\Carbon::parse($membership->updated_at)->format('d.m.Y.') : '-'}}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            @else No data has been found
+            @endif
+            @endrole
+
             @if($entry->licence->isNotEmpty())
                 <h5>Licence:</h5>
                 <table class="table table-sm table-striped">
