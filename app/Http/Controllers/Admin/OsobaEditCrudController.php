@@ -179,7 +179,7 @@ class OsobaEditCrudController extends CrudController
         $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
         $this->crud->addClause('orderBy', 'ime');
 
-        if (!backpack_user()->hasRole(['admin', 'rk'])) {
+        if (!backpack_user()->hasRole(['admin']) or !backpack_user()->hasPermissionTo(['azuriranje adresa'])) {
             $this->crud->denyAccess(['create']);
         }
 
