@@ -16,11 +16,13 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class OsobaEditCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-/*    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation {
-        update as traitUpdate;
-    }*/
+
+    /*    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation {
+            update as traitUpdate;
+        }*/
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 
@@ -149,14 +151,14 @@ class OsobaEditCrudController extends CrudController
             'name' => 'prebivalistedrzava',
             'label' => 'Država',
         ],
-/*        'status_id' => [
-            'name' => 'status_id',
-            'type' => 'select',
-            'label' => 'Status',
-            'entity' => 'requests.status',
-            'attribute' => 'naziv',
-            'default' => OBRADJEN, // TODO: da postavi vrednost iz baze, a ne prvi status za opstu kategoriju
-        ],*/
+        /*        'status_id' => [
+                    'name' => 'status_id',
+                    'type' => 'select',
+                    'label' => 'Status',
+                    'entity' => 'requests.status',
+                    'attribute' => 'naziv',
+                    'default' => OBRADJEN, // TODO: da postavi vrednost iz baze, a ne prvi status za opstu kategoriju
+                ],*/
     ];
 
     /**
@@ -179,7 +181,9 @@ class OsobaEditCrudController extends CrudController
         $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
         $this->crud->addClause('orderBy', 'ime');
 
-        if (!backpack_user()->hasRole(['admin']) or !backpack_user()->hasPermissionTo(['azuriranje adresa'])) {
+        if (!backpack_user()->hasRole(['admin'])) {
+            $this->crud->denyAccess(['create']);
+        } else if (!backpack_user()->hasPermissionTo('azuriranje adresa')) {
             $this->crud->denyAccess(['create']);
         }
 
@@ -266,7 +270,7 @@ class OsobaEditCrudController extends CrudController
         ],
             FALSE,
             function () { // if the filter is active
-                $this->crud->addClause('where','prebivalisteadresa', '=', '/');
+                $this->crud->addClause('where', 'prebivalisteadresa', '=', '/');
 //                $this->crud->addClause('orWhere','prebivalistebroj', '=', '/');
             });
 
@@ -283,38 +287,38 @@ class OsobaEditCrudController extends CrudController
             });
 
         // dropdown filter
-/*        $this->crud->addFilter([
-            'name' => 'status',
-            'type' => 'dropdown',
-            'label' => 'Status'
-        ], function () {
-            return Request::existingStatuses();
-        },
-            function ($value) { // if the filter is active
-                $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
-                    $q->where('status_id', $value);
-                });
-            });*/
+        /*        $this->crud->addFilter([
+                    'name' => 'status',
+                    'type' => 'dropdown',
+                    'label' => 'Status'
+                ], function () {
+                    return Request::existingStatuses();
+                },
+                    function ($value) { // if the filter is active
+                        $this->crud->addClause('whereHas', 'requests', function ($q) use ($value) {
+                            $q->where('status_id', $value);
+                        });
+                    });*/
 
         // dropdown filter
-/*        $this->crud->addFilter([
-            'name' => 'clanarina',
-            'type' => 'select2_multiple',
-            'label' => 'Plaćena članarina za godinu:'
-        ],
-            function () {
-                return \DB::table('requests')
-                    ->select('id', 'note')
-                    ->distinct('note')
-                    ->orderBy('note', 'DESC')
-                    ->pluck('note', 'note')
-                    ->toArray();
-            },
-            function ($values) { // if the filter is active
-                $this->crud->addClause('whereHas', 'requests', function ($q) use ($values) {
-                    $q->whereIn('note', json_decode($values));
-                });
-            });*/
+        /*        $this->crud->addFilter([
+                    'name' => 'clanarina',
+                    'type' => 'select2_multiple',
+                    'label' => 'Plaćena članarina za godinu:'
+                ],
+                    function () {
+                        return \DB::table('requests')
+                            ->select('id', 'note')
+                            ->distinct('note')
+                            ->orderBy('note', 'DESC')
+                            ->pluck('note', 'note')
+                            ->toArray();
+                    },
+                    function ($values) { // if the filter is active
+                        $this->crud->addClause('whereHas', 'requests', function ($q) use ($values) {
+                            $q->whereIn('note', json_decode($values));
+                        });
+                    });*/
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -360,24 +364,24 @@ class OsobaEditCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-/*    public function update()
-    {
-//        todo: sta ako ima vise rekorda???
-//        dd($this->crud->getRequest()->status_id);
-        $request = Request::where('osoba_id', $this->crud->getRequest()->id)
-            ->where('request_category_id', 2)
-            ->first();
+    /*    public function update()
+        {
+    //        todo: sta ako ima vise rekorda???
+    //        dd($this->crud->getRequest()->status_id);
+            $request = Request::where('osoba_id', $this->crud->getRequest()->id)
+                ->where('request_category_id', 2)
+                ->first();
 
-//        dd($request);
-        $request->status_id = $this->crud->getRequest()->status_id;
-        if ($this->crud->getRequest()->status_id == KREIRAN) {
-            $request->status_id = OBRADJEN;
-        }
-        $request->save();
-        $response = $this->traitUpdate();
-        // do something after save
-        return $response;
-    }*/
+    //        dd($request);
+            $request->status_id = $this->crud->getRequest()->status_id;
+            if ($this->crud->getRequest()->status_id == KREIRAN) {
+                $request->status_id = OBRADJEN;
+            }
+            $request->save();
+            $response = $this->traitUpdate();
+            // do something after save
+            return $response;
+        }*/
 
     protected function showDetailsRow($id)
     {
