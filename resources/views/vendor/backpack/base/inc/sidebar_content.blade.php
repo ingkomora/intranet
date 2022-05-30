@@ -6,7 +6,7 @@
     <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book"></i>OSOBE</a>
     <ul class="nav-dropdown-items">
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba') }}'> Osobe</a></li>
-        @role('admin|sluzba_rk')
+        @role('admin|sluzba_rk|sluzba_opsta')
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('osoba-edit') }}'> Ažuriranje adresa</a></li>
         @endrole
         <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zvanje') }}'> Zvanja</a></li>
