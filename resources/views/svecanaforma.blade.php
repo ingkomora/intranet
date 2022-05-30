@@ -35,7 +35,7 @@
         <div id="lic-container">
             <div id="licencatekst">Број лиценце</div>
             <div id="licenca">{{$licenca}}</div>
-            <div id="resenje">издата решењем број {{$brojResenja}} од {{$datumResenja}}</div>
+            <div id="resenje">издата решењем број {{$brojResenja}} од {{$datumResenja}} године</div>
         </div>
         <table id="potpis">
             <tr>
