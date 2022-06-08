@@ -167,8 +167,11 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 $existingDocuments = $request->documents;
-                if ($request->{$requestStatusColumnName} <> REQUEST_SUBMITED) {
+                if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
                     $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
+                    return $result;
+                } else if ($request->{$requestStatusColumnName} > REQUEST_IN_PROGRESS) {
+                    $result['ERROR'][1] = "Greška 2.5! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su u obradi!";
                     return $result;
                 }
                 if (is_array($this->zavodjenje[$type]['document_category_id'])) {
