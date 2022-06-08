@@ -167,7 +167,7 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 $existingDocuments = $request->documents;
-                if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
+                if ($request->{$requestStatusColumnName} <> REQUEST_SUBMITED) {
                     $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
                     return $result;
                 }
@@ -260,7 +260,7 @@ class ZavodjenjeController extends Controller
 //                dd($documents);
                 foreach ($documents as $document) {
 //                dd($document);
-                    $resultDocument = $this->registerDocuments($request, $document, $registry_date, $type, $prilog);
+                    $resultDocument = $this->registerDocument($request, $document, $registry_date, $type, $prilog);
                     if (isset($result['ERROR'])) {
                         if ($resultDocument['ERROR'][$request->id]['status']) {
                             DB::rollBack();
@@ -306,7 +306,7 @@ class ZavodjenjeController extends Controller
      * @param $prilog
      * @return array|\Illuminate\Http\RedirectResponse
      */
-    protected function registerDocuments($request, $document, $registry_date, $type, $prilog)
+    protected function registerDocument($request, $document, $registry_date, $type, $prilog)
     {
         $registerDocument = FALSE;
         $result = array();
