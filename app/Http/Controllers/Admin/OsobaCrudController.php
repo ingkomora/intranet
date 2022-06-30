@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Operations\UpdateLicencaStatusOperation;
 use App\Http\Requests\OsobaRequest;
+use App\Models\Firma;
 use App\Models\Sekcija;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -686,19 +687,21 @@ class OsobaCrudController extends CrudController
                     $request->merge(['order' => ['column' => 'id', 'dir' => 'asc']]);
                 }*/
 
-        $this->crud->setColumnDetails('idn', [
+        $this->crud->setColumnDetails('id', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, ",")) {
+                    $searchTerm = str_replace(["\"","'"], "",$searchTerm);
                     $searchTerm = trim($searchTerm, " ,.;");
                     $searchTerm = explode(",", $searchTerm);
 //                    $searchTermArray = array_map('trim', $searchTerm);
                     $searchTermArray = array_map(function($item) {
                         return trim($item, ' \'",.;');
                     }, $searchTerm);
-                    $query->whereIn('id', $searchTermArray)->orderBy('id');
+//                    dd($searchTermArray);
+                    $query->orWhereIn('id', $searchTermArray);
                 } else if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
-                    $query->where('ime', 'ilike', $searchTerm[0] . '%')
+                    $query->orWhere('ime', 'ilike', $searchTerm[0] . '%')
                         ->where('prezime', 'ilike', $searchTerm[1] . '%');
                 } else {
                     $query->where('ime', 'ilike', $searchTerm . '%')
@@ -1075,12 +1078,13 @@ class OsobaCrudController extends CrudController
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firma',
+            'attribute' => 'naziv_mb',
             'label' => 'Firma po matičnom broju (pretraži po MB ili nazivu)',
             'tab' => 'Podaci o firmi',
             'ajax' => TRUE,
             'inline_create' => TRUE
         ]);
-        $this->crud->field('firma')->tab('Podaci o firmi');
+//        $this->crud->field('firma')->tab('Podaci o firmi');
 
 //        osiguranje
         //todo: ne radi, same name "osiguranja"
@@ -1301,7 +1305,7 @@ class OsobaCrudController extends CrudController
     public function fetchFirma()
     {
         return $this->fetch([
-            'model' => \App\Models\Firma::class, // required
+            'model' => Firma::class, // required
 //            'searchable_attributes' => ['mb'],
             'searchable_attributes' => ['mb', 'naziv'],
             'paginate' => 10, // items to show per page

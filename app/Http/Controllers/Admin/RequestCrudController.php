@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\UpdateZalbaStatusOperation;
 use App\Http\Requests\RequestRequest;
 use App\Models\Request;
 use App\Models\RequestCategory;
@@ -22,6 +23,7 @@ class RequestCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
+//    use UpdateZalbaStatusOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -30,17 +32,21 @@ class RequestCrudController extends CrudController
      */
     public function setup()
     {
+
         CRUD::setModel(\App\Models\Request::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/request');
         CRUD::setEntityNameStrings('zahtev', 'zahtevi');
 
+            $this->crud->denyAccess(['updatezalbastatus']);
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update']);
+            $this->crud->denyAccess(['create', 'delete', 'update','updatezalbastatus']);
         }
         if (backpack_user()->hasRole('sluzba_pravna')) {
             $this->crud->allowAccess(['update']);
         }
-
+        if (backpack_user()->hasPermissionTo('azuriraj status zalbe')) {
+            $this->crud->allowAccess(['updatezalbastatus']);
+        }
         CRUD::set('show.setFromDb', FALSE);
 
         $this->crud->enableDetailsRow();
@@ -418,6 +424,7 @@ class RequestCrudController extends CrudController
                 54 => 'Otkazan (54)',
                 58 => 'Storniran (58)',
                 100 => 'Odustao od žalbe (100)',
+                200 => 'Oglasna tabla (200)',
             ],
         ]);
 

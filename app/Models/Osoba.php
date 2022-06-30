@@ -25,6 +25,7 @@ use Tesla\JMBG\JMBG;
  * @property int $clan
  * @property string $lib
  * @property Zvanje $zvanjeId
+ * @property Firma $firma
  * @property Titula $titulaId
  * @property Licenca[] $licence
  * @property Request[] $requests
@@ -53,6 +54,9 @@ class Osoba extends Model
     // protected $fillable = [];
 //     protected $hidden = [];
     // protected $dates = [];
+//    public $identifiableAttribute = 'ime_prezime_jmbg';
+    public $identifiableAttribute = 'id';
+//    public $identifiableAttribute = 'lib';
     /**
      * The accessors to append to the model's array form.
      *
@@ -74,9 +78,6 @@ class Osoba extends Model
      */
     public $timestamps = TRUE;
 
-//    public $identifiableAttribute = 'ime_prezime_jmbg';
-    public $identifiableAttribute = 'id';
-//    public $identifiableAttribute = 'lib';
 
     /*
     |--------------------------------------------------------------------------
@@ -127,7 +128,7 @@ class Osoba extends Model
      */
     public function firma()
     {
-        return $this->belongsTo('App\Models\Firma', 'firma_mb', 'mb');
+        return $this->belongsTo('App\Models\Firma', 'firma_mb');
     }
 
     /**
