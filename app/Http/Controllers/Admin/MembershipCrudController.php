@@ -41,7 +41,13 @@ class MembershipCrudController extends CrudController
     {
         CRUD::column('id');
         CRUD::column('osoba_id');
-        CRUD::column('status_id');
+        $this->crud->addColumn([
+            'name' => 'osoba',
+            'type' => 'relationship',
+            'label' => 'Ime prezime',
+            'attribute' => 'full_name',
+        ]);
+        CRUD::column('status')/*->type('relationship')->attribute('naziv')*/;
         CRUD::column('started_at');
         CRUD::column('ended_at');
         CRUD::column('note');
@@ -53,6 +59,39 @@ class MembershipCrudController extends CrudController
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
+
+        $this->crud->setColumnDetails('osoba', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+//                    dd($column);
+                    $query->orWhereHas('osoba', function ($q) use ($searchTermArray) {
+                        $q->whereIn('id', $searchTermArray)
+                            ->orderBy('id');
+                    });
+                } else if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+                }
+            }
+        ]);
+
     }
 
     /**
