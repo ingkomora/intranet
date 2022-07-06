@@ -9,6 +9,8 @@ use App\Models\RequestCategory;
 use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 /**
  * Class RequestCrudController
@@ -23,7 +25,40 @@ class RequestCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
-//    use UpdateZalbaStatusOperation;
+    use UpdateZalbaStatusOperation;
+
+    protected $fields_definition_operation_array = [
+        'id' => [
+            'name' => 'id',
+//            'type' =>'hidden',
+            'attributes' => ['readonly' => 'readonly']
+        ],
+        'osoba_id' => [
+            'name' => 'osoba',
+            'type' => 'relationship',
+            'ajax' => TRUE,
+            'label' => 'Ime prezime (jmbg)',
+            'attribute' => 'ime_prezime_jmbg',
+            'attributes' => ['readonly' => 'readonly','disabled' => 'disabled'],
+        ],
+        'status' => [
+            'name' => 'status_id',
+            'type' => 'select_from_array',
+            'options' => [
+                41 => 'Žalba (41)',
+                43 => 'Poništen (43)',
+//                50 => 'Kreiran (50)',
+//                51 => 'Podnet (51)',
+                52 => 'U obradi (52)',
+                53 => 'Završen (53)',
+                54 => 'Otkazan (54)',
+                58 => 'Storniran (58)',
+                99 => 'Žalba u MGSI (99)',
+                100 => 'Odustao od žalbe (100)',
+                200 => 'Oglasna tabla (200)',
+            ],
+        ]
+    ];
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -37,9 +72,9 @@ class RequestCrudController extends CrudController
         CRUD::setRoute(config('backpack.base.route_prefix') . '/request');
         CRUD::setEntityNameStrings('zahtev', 'zahtevi');
 
-            $this->crud->denyAccess(['updatezalbastatus']);
+        $this->crud->denyAccess(['updatezalbastatus']);
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update','updatezalbastatus']);
+            $this->crud->denyAccess(['create', 'delete', 'update', 'updatezalbastatus']);
         }
         if (backpack_user()->hasRole('sluzba_pravna')) {
             $this->crud->allowAccess(['update']);
@@ -392,7 +427,7 @@ class RequestCrudController extends CrudController
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
             ],
-            'status_id' => [
+            'status' => [
                 'name' => 'status',
                 'type' => 'relationship',
                 'attribute' => 'naziv',
@@ -404,35 +439,8 @@ class RequestCrudController extends CrudController
 
         ]);
 
-        /*$this->crud->modifyField('status', [
-            'options' => (function ($query) {
-                return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
-            }),
-        ]);*/
-        // TODO: privremeno da bi marko mogao da oznaci zahteve (resenja) na koje je ulozena zalba
-        CRUD::removeField('status');
-        $this->crud->addField([
-            'name' => 'status_id',
-            'type' => 'select_from_array',
-            'options' => [
-                41 => 'Žalba (41)',
-                43 => 'Poništen (43)',
-                50 => 'Kreiran (50)',
-                51 => 'Podnet (51)',
-                52 => 'U obradi (52)',
-                53 => 'Završen (53)',
-                54 => 'Otkazan (54)',
-                58 => 'Storniran (58)',
-                100 => 'Odustao od žalbe (100)',
-                200 => 'Oglasna tabla (200)',
-            ],
-        ]);
 
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number']));
-         */
+
     }
 
     /**
@@ -445,6 +453,10 @@ class RequestCrudController extends CrudController
     {
         $this->setupCreateOperation();
 
+        $request = $this->crud->getCurrentEntry();
+
+//        if($request->status->naziv);
+//        dd($request->status->naziv);
         $this->crud->addField([
             'name' => 'created_at',
             'label' => 'Kreiran',
@@ -466,6 +478,27 @@ class RequestCrudController extends CrudController
                 'language' => 'sr_latin'
             ],
         ]);
+
+        //      TODO ako zahtev ima status koji samo neko sme da menja onda je disabled (univerzalno a ne samo pravnici)
+        if (!in_array($this->crud->getCurrentEntry()->status_id,[REQUEST_BOARD,ZALBA,PONISTEN])) {
+            $this->crud->modifyField('status', [
+                'options' => (function ($query) {
+                    return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
+                }),
+            ]);
+        } else {
+/*            Validator::make($request->all(), [
+                'status_id' => Rule::requiredIf(!in_array($this->crud->getCurrentEntry()->status_id,[REQUEST_BOARD,ZALBA,PONISTEN])),
+            ]);*/
+            $this->crud->modifyField('status', [
+                /*'options' => (function ($query) {
+                    return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
+                }),*/
+                'type'=>'relationship',
+//                'attribute'=>'naziv',
+                'attributes'=> ['disabled' => 'disabled']
+            ]);
+        }
     }
 
     protected function showDetailsRow($id)
