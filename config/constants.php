@@ -18,6 +18,7 @@ define('ZALBA', 41);        //PRIVREMEN
 define('OBAVESTEN', 42);    //PRIVREMEN
 define('PONISTEN', 43);     //PRIVREMEN
 define('ZALBA_ODUSTAO', 100);     //PRIVREMEN
+define('REQUEST_BOARD', 200);     //PRIVREMEN
 
 //PRIJAVE ZA STRUCNI ISPIT
 //AZURIRANO U KODU => REQUEST
@@ -128,8 +129,17 @@ define('OSIGURANJE_KOLEKTIVNO', 2);
 define('OSIGURANJE_INDIVIDUALNO', 3);
 
 //OSOBE  U KOM JE SVOJSTVU OSOBA U BAZI CLAN=?
-define('CLAN', 44);
-define('NIJE_CLAN', 45);
+//define('CLAN', 44);
+//define('NIJE_CLAN', 45);
+//define('KANDIDAT_LICENCA', 46);
+//define('KANDIDAT_SI', 47);
+//define('LICENCIRAN', 48);
+//define('OSTALI', 49);
+//OSOBE  U KOM JE SVOJSTVU OSOBA U BAZI CLAN=?
+define('MEMBER', 1);
+define('NOT_MEMBER', 0);
+define('MEMBER_ON_HOLD', 100);
+define('MEMBER_TO_DELETE', 10);
 define('KANDIDAT_LICENCA', 46);
 define('KANDIDAT_SI', 47);
 define('LICENCIRAN', 48);

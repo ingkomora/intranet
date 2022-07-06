@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\UnlockMembershipFeeRegistrationOperation;
 use App\Http\Controllers\Admin\Operations\UpdateLicencaStatusOperation;
 use App\Http\Requests\OsobaRequest;
 use App\Models\Firma;
@@ -22,6 +23,7 @@ class OsobaCrudController extends CrudController
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use UpdateLicencaStatusOperation;
+    use UnlockMembershipFeeRegistrationOperation;
 
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;

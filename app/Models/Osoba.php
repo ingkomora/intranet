@@ -34,6 +34,10 @@ use Tesla\JMBG\JMBG;
  * @property Clanarina $poslednjaPlacenaClanarina
  * @property Clanarina $poslednjaClanarina
  * @property Clanarina $izmirenaClanarina
+// * @property int $member
+// * @property int $notMember
+// * @property int $memberOnHold
+// * @property int $memberToDelete
  */
 class Osoba extends Model
 {
@@ -66,6 +70,11 @@ class Osoba extends Model
 
     protected $keyType = 'string';
     public $incrementing = FALSE;
+//TODO da li ovo ovako treba
+/*    public $member = MEMBER;
+    public $notMember = NOT_MEMBER;
+    public $memberToDelete = MEMBER_TO_DELETE;
+    public $memberOnHold = MEMBER_ON_HOLD;*/
 
     /**
      * @var array
