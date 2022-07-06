@@ -167,7 +167,9 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 $existingDocuments = $request->documents;
-                if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
+                if (in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
+                    // da moze da se zavede
+                } else if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
                     $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
                     return $result;
                 } else if ($request->{$requestStatusColumnName} > REQUEST_IN_PROGRESS) {
@@ -194,7 +196,7 @@ class ZavodjenjeController extends Controller
                     });
                     $document_category_id = reset($temp);
                 } else if (isset($data['prilog'])) {
-                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS)) {
+                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) OR !in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
                         $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
@@ -249,7 +251,7 @@ class ZavodjenjeController extends Controller
                         $documents[] = $document;
                     }
                 } else {
-                    if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) {
+                    if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS OR in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
                         $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
                         return $result;
                     } else {
@@ -319,7 +321,7 @@ class ZavodjenjeController extends Controller
         } else {
             $osoba = $request->osoba;
         }
-        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_IN_PROGRESS) {
+        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_IN_PROGRESS  OR in_array($request->{$this->zavodjenje[$type]['statusCol']},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
             if ($document->documentCategory->document_category_type_id == 11 and isset($prilog['text'])) {
                 $registerDocument = TRUE;
             }

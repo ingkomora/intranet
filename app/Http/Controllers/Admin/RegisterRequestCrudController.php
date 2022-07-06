@@ -273,7 +273,7 @@ class RegisterRequestCrudController extends CrudController
         ],
             FALSE,
             function () { // if the filter is active
-                $this->crud->addClause('where', 'status_id', REQUEST_SUBMITED); // apply the "active" eloquent scope
+                $this->crud->addClause('whereNotIn', 'status_id', [REQUEST_CREATED, REQUEST_CANCELED]); // apply the "active" eloquent scope
             });
 
         /*$this->crud->addFilter([
