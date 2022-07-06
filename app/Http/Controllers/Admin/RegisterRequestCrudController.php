@@ -248,7 +248,7 @@ class RegisterRequestCrudController extends CrudController
             'type' => 'dropdown',
             'label' => 'Status'
         ], function () {
-            return $this->crud->getModel()::existingStatuses(1);
+            return $this->crud->getModel()::existingStatuses();
         },
             function ($value) { // if the filter is active
                 $this->crud->addClause('where', 'status_id', $value);
