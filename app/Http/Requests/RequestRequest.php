@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RequestRequest extends FormRequest
 {
@@ -28,8 +29,10 @@ class RequestRequest extends FormRequest
         return [
              'osoba' => 'required',
              'requestCategory' => 'required',
-//             'status' => 'required',
-             'status_id' => 'required', // TODO: privremeno da bi marko mogao da oznaci zahteve (resenja) na koje je ulozena zalba
+//            TODO ovo ne radi
+             'status' => Rule::notIn([41,43,99,100,200]),
+//             'status' => Rule::requiredIf($request->user()->is_admin)Rule::notIn([41,43,99,100,200]),
+//             'status_id' => 'required,not_in:41,43,99,100,200', // TODO: privremeno da bi marko mogao da oznaci zahteve (resenja) na koje je ulozena zalba
         ];
     }
 
