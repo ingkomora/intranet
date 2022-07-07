@@ -13,39 +13,68 @@
         function unlockMembershipFeeRegistration(button) {
             // ask for confirmation before deleting an item
             // e.preventDefault();
-            var button = $(button);
-            var route = button.attr('data-route');
-            $.ajax({
-                url: route,
-                type: 'POST',
-                success: function (result) {
-                    // console.log(result.message);
-                    var message = result.message;
-
-                    // Show an alert with the result
-                    new Noty({
-                        type: "success",
-                        timeout: 10000,
-                        progressBar: true,
-                        text: message
-                    }).show();
-
-                    // Hide the modal, if any
-                    $('.modal').modal('hide');
-
-                    if (typeof crud !== 'undefined') {
-                        crud.table.ajax.reload();
+            // show confirm message
+            var message = "Da li ste sigurni da želite da otključate članarinu za osobu:\n {{$entry->ime_prezime_jmbg}}?";
+// TODO ne radi swal sa operacijom bez interfejsa: ERROR 405 method not allowed
+            /*swal({
+                title: "{{ trans('backpack::base.warning') }}",
+                text: message,
+                icon: "warning",
+                buttons: {
+                    cancel: {
+                        text: "{{ trans('backpack::crud.cancel') }}",
+                        value: null,
+                        visible: true,
+                        className: "bg-secondary",
+                        closeModal: true,
+                    },
+                    zavedi: {
+                        text: "Otključaj",
+                        value: true,
+                        visible: true,
+                        className: "bg-primary",
                     }
                 },
-                error: function (result) {
-                    // Show an alert with the result
-                    new Noty({
-                        type: "error",
-                        text: result.message
-                    }).show();
+            }).then((value) => {
+                // swal('You typed:' + input.value);
+                if (value) {*/
+
+                    var button = $(button);
+                    var route = button.attr('data-route');
+                    $.ajax({
+                        url: route,
+                        type: 'POST',
+                        success: function (result) {
+                            // console.log(result.message);
+                            var message = result.message;
+
+                            // Show an alert with the result
+                            new Noty({
+                                type: "success",
+                                timeout: 10000,
+                                progressBar: true,
+                                text: message
+                            }).show();
+
+                            // Hide the modal, if any
+                            $('.modal').modal('hide');
+
+                            if (typeof crud !== 'undefined') {
+                                crud.table.ajax.reload();
+                            }
+                        },
+                        error: function (result) {
+                            // Show an alert with the result
+                            new Noty({
+                                type: "error",
+                                text: result.message
+                            }).show();
+                        }
+                    });
                 }
-            });
-        }
+            /*});
+
+        }*/
     }
 
     // make it so that the function above is run after each DataTable draw event
