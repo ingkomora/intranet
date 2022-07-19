@@ -279,6 +279,12 @@ class DocumentCrudController extends CrudController
             'note',
             'path',
             'location',
+            'updated_at'=>[
+                'name' => 'updated_at',
+                'label' => 'Ažuriran',
+                'type' => 'date',
+                'format' => 'DD.MM.Y.'
+            ],
         ]);
 
         /**
@@ -339,14 +345,12 @@ class DocumentCrudController extends CrudController
 //            'barcode',
 //            'metadata',
 //            'note',
-            'documentable' => [
+            /*'documentable' => [ // ne može u create/update operaciji
                 'name' => 'documentable',
                 'type' => 'relationship',
-//                'model' => '\App\Models\Request', //todo ne moze ovako
-//                'model' => '\App\Models\ZahtevLicenca',
                 'attribute' => 'id',
                 'ajax' => TRUE
-            ],
+            ],*/
 //            'created_at',
 //            'updated_at',
         ]);
