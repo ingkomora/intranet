@@ -480,7 +480,7 @@ class RequestCrudController extends CrudController
         ]);
 
         //      TODO ako zahtev ima status koji samo neko sme da menja onda je disabled (univerzalno a ne samo pravnici)
-        if (!in_array($this->crud->getCurrentEntry()->status_id,[REQUEST_BOARD,ZALBA,PONISTEN])) {
+        if (!in_array($this->crud->getCurrentEntry()->status_id,[REQUEST_BOARD, ZALBA, ZALBA_MGSI, PONISTEN])) {
             $this->crud->modifyField('status', [
                 'options' => (function ($query) {
                     return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
