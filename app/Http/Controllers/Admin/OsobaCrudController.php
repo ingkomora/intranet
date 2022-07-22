@@ -506,12 +506,13 @@ class OsobaCrudController extends CrudController
 
 //        prikazuje samo osobe sa maticnim brojem od 13 karaktera
 
-        if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'update', 'delete']);
-            $this->crud->addClause('whereRaw', 'length(id) = 13');
+        $this->crud->denyAccess(['create', 'update', 'delete']);
+
+        if (!backpack_user()->hasRole(['admin'])) {
+            $this->crud->addClause('whereRaw', "length(id) = 13");
         }
 
-        if (backpack_user()->hasRole('sluzba_maticne_sekcije')){
+        if (backpack_user()->hasPermissionTo('azuriraj osobu')) {
             $this->crud->allowAccess(['update']);
         }
 
@@ -692,11 +693,11 @@ class OsobaCrudController extends CrudController
         $this->crud->setColumnDetails('id', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, ",")) {
-                    $searchTerm = str_replace(["\"","'"], "",$searchTerm);
+                    $searchTerm = str_replace(["\"", "'"], "", $searchTerm);
                     $searchTerm = trim($searchTerm, " ,.;");
                     $searchTerm = explode(",", $searchTerm);
 //                    $searchTermArray = array_map('trim', $searchTerm);
-                    $searchTermArray = array_map(function($item) {
+                    $searchTermArray = array_map(function ($item) {
                         return trim($item, ' \'",.;');
                     }, $searchTerm);
 //                    dd($searchTermArray);
@@ -1052,8 +1053,8 @@ class OsobaCrudController extends CrudController
         $this->crud->field('devojackoprezime')->label('Devojačko prezime')->tab('Lični podaci');
         $this->crud->field('zvanjeId')->label('Zvanje')->tab('Lični podaci');
         CRUD::field('datumrodjenja')->type('date_picker')->label('Datum rođenja')->date_picker_options([
-            'todayBtn' => true,
-            'format'   => 'dd.mm.yyyy.',
+            'todayBtn' => TRUE,
+            'format' => 'dd.mm.yyyy.',
             'language' => 'sr-Latn',
         ])
             ->tab('Lični podaci');
