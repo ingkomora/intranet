@@ -4,7 +4,7 @@
             <p>
                 <strong>{{$entry->ime ?? ''}} {{$entry->prezime ?? ''}}</strong>, {{$entry->zvanjeId->naziv ?? ''}}
                 <br>
-                <strong>Članstvo:</strong>
+                <strong>Svojstvo u IKS:</strong>
                 @switch($entry->clan)
                     @case(-1) {{"Funkcioner"}} @break
                     @case(AKTIVAN) {{"Član IKS"}} @break
@@ -31,7 +31,7 @@
             </p>
             @role('admin')
             @if($entry->memberships->isNotEmpty())
-                <h5>Memberships:</h5>
+                <h5>Članstvo:</h5>
                 <table class="table table-sm table-striped">
                     <thead>
                     <tr>
