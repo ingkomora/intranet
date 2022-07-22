@@ -511,7 +511,6 @@ class OsobaCrudController extends CrudController
         if (!backpack_user()->hasRole(['admin'])) {
             $this->crud->addClause('whereRaw', "length(id) = 13");
         }
-
         if (backpack_user()->hasPermissionTo('azuriraj osobu')) {
             $this->crud->allowAccess(['update']);
         }
