@@ -41,6 +41,7 @@ class RegistryRequestCategoryCrudController extends CrudController
     {
         CRUD::column('registry_id');
         CRUD::column('request_category_id');
+        CRUD::column('document_category_id');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
