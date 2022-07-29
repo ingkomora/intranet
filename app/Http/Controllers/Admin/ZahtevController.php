@@ -449,6 +449,13 @@ class ZahtevController extends Controller
                     $countNOK++;
                     continue;
 //                return Redirect::back()->withErrors(['Osoba ne postoji!']);
+                } else {
+                    $osoba = Osoba::find($licenca['jmbg']);
+                    if (is_null($osoba->lib)) {
+                        $lib = new LibLibrary();
+                        $lib->dodeliJedinstveniLib($osoba->id, Auth::user()->id);
+                        $this->logOsoba($osoba, LICENCE, "Ažurirana osoba: $osoba->ime $osoba->prezime($osoba->id), lib: $osoba->lib, status: $osoba->clan");
+                    }
                 }
             } else {
                 continue;
