@@ -34,7 +34,6 @@ class AppServiceProvider extends ServiceProvider
         Osoba::saved(function ($osoba){
             $lib = new LibLibrary();
             $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
-            $this->logOsoba($osoba, OSOBE, "Saved event has been fired $osoba->ime $osoba->prezime($osoba->id), lib: $osoba->lib, status: $osoba->clan");
         });
 
         config(['app.status_model', App\Models\Status::class]);
