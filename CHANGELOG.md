@@ -5,3 +5,4 @@
 Hard reset vraćena verzija backpack na 4
 settings: protected branch -> none
 new branch develop
+bash script post-commit for automated version numbering
