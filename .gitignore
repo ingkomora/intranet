@@ -16,3 +16,4 @@ yarn-error.log
 /xdebug.log
 /dev.sh
 composer.lock
+/version-commit.php
