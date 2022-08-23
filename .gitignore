@@ -17,3 +17,4 @@ yarn-error.log
 /dev.sh
 composer.lock
 /version-commit.php
+/CHANGELOG.md
