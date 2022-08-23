@@ -313,11 +313,11 @@ class ZahtevLicencaCrudController extends CrudController
                 'format' => 'dd.mm.yyyy.',
                 'language' => 'sr_latin',
             ]);
-        CRUD::field('documents')
+/*        CRUD::field('documents')
             ->type('relationship')
             ->ajax(TRUE)
             ->attribute('category_type_name_status_registry_number')
-        ;
+        ;*/
         CRUD::field('datum')->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',

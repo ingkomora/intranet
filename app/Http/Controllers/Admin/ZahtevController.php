@@ -449,6 +449,13 @@ class ZahtevController extends Controller
                     $countNOK++;
                     continue;
 //                return Redirect::back()->withErrors(['Osoba ne postoji!']);
+                } else {
+                    $osoba = Osoba::find($licenca['jmbg']);
+                    if (is_null($osoba->lib)) {
+                        $lib = new LibLibrary();
+                        $lib->dodeliJedinstveniLib($osoba->id, Auth::user()->id);
+                        $this->logOsoba($osoba, LICENCE, "Ažurirana osoba: $osoba->ime $osoba->prezime($osoba->id), lib: $osoba->lib, status: $osoba->clan");
+                    }
                 }
             } else {
                 continue;
@@ -2011,17 +2018,18 @@ class ZahtevController extends Controller
         where('request_category_id', 2)
 
 //            ->distinct('osoba_id')
-//            ->where('status_id', '=', REQUEST_SUBMITED)
+            ->whereNotIn('status_id', [ZALBA,REQUEST_BOARD])
 //            ->whereIn('id', $odustaliOdZalbe) //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
 //            ->where('status_id','<>', 41)   // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
             ->whereHas('osoba', function ($q) use ($osobeDuplicate, $osobeBrisanjeIds) {
                 $q
 //                    ->where('clan', 0)      // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 0
 //                    ->where('clan', 1)    //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO CLAN 1
+                    ->where('clan', 10)    //Priprema se za brisanje
 //                    ->where('napomena', 'ILIKE', 'Usled neplaćanja članarine')
 //                    ->where('napomena', 'ILIKE', '%Usled neplaćanja članarine.')
-                    ->whereNotIn('osoba_id', $osobeDuplicate)
-                    ->whereIn('osoba_id', $osobeBrisanjeIds)
+//                    ->whereNotIn('osoba_id', $osobeDuplicate)
+//                    ->whereIn('osoba_id', $osobeBrisanjeIds)
                     /*->whereIn('id', [
                         "0810964710092"
                     ])*/
@@ -2198,20 +2206,21 @@ class ZahtevController extends Controller
                 ]);
             })*/
 //SVI
-//            ->whereNotIn('status_id', [41, 43]) //nije zalba ili ponisten
+//            ->whereIn('status_id', [PONISTEN])
+            ->whereIn('status_id', [ZALBA,REQUEST_BOARD,PONISTEN])
 //            ->where('note', 'ilike', '%platio%')
 //            ->whereDate('updated_at', '<', '2022-03-16 00:00:00')
-//            ->whereHas('osoba', function ($q) {
-//                $q->where('clan', 10);
-                /*$q->whereIn('id', [
-                    '1306976370010'
-                ]);*/
-//            })
+/*            ->whereHas('osoba', function ($q) {
+                $q->where('clan', 10);
+//                $q->whereIn('id', [
+//                    '1306976370010'
+//                ]);
+            })*/
             ->orderBy('id')
             ->chunkById(1000, function ($requests) use ($save, &$errorStr) {
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
-                    $memberships = implode(',', $osoba->memberships->pluck('id')->toArray());
+                    $memberships = implode(',', $osoba->memberships->pluck('status_id','id')->toArray());
 //                    $requests = $osoba->requests;
                     $document = [];
                     $docreqStr = '';
@@ -2944,10 +2953,10 @@ class ZahtevController extends Controller
         echo "<PRE>";
         print_r($oldData);
         echo "</PRE>";*/
-
         try {
-
-            $membership = Membership::where('osoba_id', $data['osoba_id'])->where('status_id', MEMBERSHIP_STARTED)->latest()->first();
+//OBAVEZNO VRATITI NA STARTED
+            $membership = Membership::where('osoba_id', $data['osoba_id'])->where('status_id', MEMBERSHIP_ENDED)->latest()->first();
+//            $membership = Membership::where('osoba_id', $data['osoba_id'])->where('status_id', MEMBERSHIP_STARTED)->latest()->first();
             $osoba = $membership->osoba;
 //        REQUESTS
 //            osobaNotClanNapomenaRequest
@@ -3144,8 +3153,8 @@ class ZahtevController extends Controller
                 echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
             }
 
-//            $osoba->clan = 0;
-//            $osoba->updated_at = Carbon::now()->format("Y-m-d H:i:s");
+            $osoba->clan = 0;
+            $osoba->updated_at = Carbon::now()->format("Y-m-d H:i:s");
             echo "<BR>";
             echo "<BR>OSOBA $osoba->id";
             echo "<PRE>";
@@ -4413,5 +4422,16 @@ class ZahtevController extends Controller
         $dtF = new \DateTime('@0');
         $dtT = new \DateTime("@$seconds");
         return $dtF->diff($dtT)->format('%a dana, %h sati, %i minuta i %s sekundi');
+    }
+
+    public function modulo10($number)
+    {
+        $digits = array(0,9,4,6,8,2,7,1,3,5);
+        $next = 0;
+        for ($i = 0; $i < strlen($number); $i++){
+            $next = $digits[($next + substr($number, $i, 1)) % 10];
+        }
+        dd((10 - $next) % 10);
+        echo (10 - $next) % 10;
     }
 }

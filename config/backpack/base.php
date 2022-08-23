@@ -104,6 +104,7 @@ return [
 
     // Developer or company name. Shown in footer.
     'developer_name' => 'Inženjerska komora Srbije - Služba za informacione tehnologije',
+    'show_app_version' => true,
 
     // Developer website. Link in footer. Type false if you want to hide it.
     'developer_link' => 'http://www.ingkomora.rs',

@@ -1,48 +1,65 @@
 @extends('layouts.nalepnice')
 
-@section('title', 'Nalepnice - ' . $oblast)
+@section('title', 'Nalepnice')
 
 @section('style')
     <style>
-
-        .container {
-            width: 21cm;
-            /*height: 29.7cm;*/
-            /*margin: 0;*/
+        .a4 {
+            position: absolute;
+            left: -1.2cm;
+            top: -1.2cm;
+            width: 20.95cm;
+            height: 29.65cm;
+            margin: 0;
             padding: 0;
-            margin: 0 0 -2cm 0.1cm;
+            /*border: solid thin red;*/
+            box-sizing: border-box;
+            overflow:hidden;
+        }
 
+        .printarea {
+            position: absolute;
+            left: 1.3cm;
+            top: 1.2cm;
+            width: 18.25cm;
+            height: 27.25cm;
+            padding: 0;
+            margin: auto auto;
+            /*border: solid thin #0a1520;*/
+            box-sizing: border-box;
         }
 
         .row {
-            width: 21cm;
-            margin: 0;
-            /*margin-bottom: 0.1cm;*/
-        }
-
-        .col-6 {
-            /*background-color: #3f9ae5;*/
-            /*display: inline-block;*/
-            /*width: 50%;*/
-            width: 8.9cm;
-            height: 4.2cm;
-            /*box-sizing: border-box;*/
-            /*border: solid thin #0a1520;*/
-            float: left;
-            margin: 0;
-            padding: 0 0.5cm;
+            /*border: solid thin green;*/
+            box-sizing: border-box;
+            margin: 0 0 0.3cm 0;
+            padding: 0;
+            height: 4.25cm;
+            width: 100%;
         }
 
         .row:after {
-            /*.col-6:nth-child(2n+1) {*/
-            /*    background-color: red;*/
             clear: both;
         }
 
-        p {
-            margin: 0
+        .col {
+            left: 0;
+            top: 0.85cm;
+            width: 48%;
+            height: 100%;
+            /*border: solid thin blueviolet;*/
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            float: left;
         }
-        .broj-strane{
+
+        .content {
+            display: block;
+            padding-left: 0.2cm;
+        }
+
+        .broj-strane {
             position: absolute;
             bottom: -0.3cm;
             right: -0.3cm;
@@ -54,28 +71,31 @@
 @endsection
 @section('content')
     <?php $count = 0; $n = 0 ?>
-    @foreach($result AS $item)
-        @if($count%2 == 0)
-            <div class="row mx-0">
+    <div class="a4">
+        <div class="printarea">
+            @foreach($result as $item)
+                @if($count % 2 === 0)
+                    <div class="row">
+                        @endif
+                        <div class="col" @if($count % 2 === 0) style="float: right;" @endif>
+                            <span class="content">{{$item['category']}} ({{$item['id']}})</span>
+                            <span class="content">Ime i prezime: <strong>{{$item['osoba']}}</strong></span>
+                            <span class="content">Zavodni broj: <strong>{{$item['registry_number']}}</strong></span>
+                            <span class="content">Datum prijema: <strong>{{$item['registry_date']}}</strong></span>
+                            <span class="content">{{$item['prilogilidopuna']}}: <strong>{{$item['prilog']}}</strong></span>
+                        </div>
+                        <?php $count++; ?>
+                        @if($count % 2 === 0)
+                    </div>
                 @endif
-                <div class="col-6">
-                    <p><span style="font-size: smaller">{{$item['category']}} ({{$item['id']}})</span>
-                        <br>Ime i prezime: <strong>{{$item['osoba']}}</strong>
-                        <br>Zavodni broj: <strong>{{$item['registry_number']}}</strong>
-                        <br>Datum prijema: <strong>{{$item['registry_date']}}</strong>
-                        <br>{{$item['prilogilidopuna']}}: <strong>{{$item['prilog']}}</strong></p>
-                </div>
-                <?php $count++; ?>
-                @if($count%2 == 0)
-            </div>
-        @endif
-        @if($count == $n*12+1)
-            <div class="broj-strane">Strana {{$n+1}}</div>
-                <?php $n++; ?>
-        @endif
-        @if($count>=12 AND $count%12 == 0)
-            <div class="page-break"></div>
-        @endif
-    @endforeach
-
+                @if($count == $n * 12 + 1)
+                    <div class="broj-strane">Strana {{$n + 1}}</div>
+                    <?php $n++; ?>
+                @endif
+                @if($count >= 12 AND $count % 12 == 0)
+                    <div class="page-break"></div>
+                @endif
+            @endforeach
+        </div>
+    </div>
 @endsection

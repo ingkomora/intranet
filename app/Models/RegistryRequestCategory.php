@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 /**
  * @property integer $registry_id
  * @property integer $request_category_id
+ * @property integer $document_category_id
  * @property string $created_at
  * @property string $updated_at
  */

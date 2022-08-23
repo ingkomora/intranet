@@ -20,7 +20,8 @@ use Exception;
  * Verzija 1.1, od 22.05.2013.god.
  * Verzija 2.0 od 01.04.2020.god.
  */
-class LibLibrary {
+class LibLibrary
+{
     var $LOG_ERROR = 'E';
     var $LOG_INFO = 'I';
     var $LOG_WARNING = 'W';
@@ -32,7 +33,8 @@ class LibLibrary {
      * @param maticni broj $jmbg
      * @return string|NULL ukliko je doslo do greske u setovanju, u promenljivoj error cuva se tekst greske koji je takodje otisao i tu tlib_log
      */
-    public function dodeliJedinstveniLib($jmbg, $userid) {
+    public function dodeliJedinstveniLib($jmbg, $userid)
+    {
 
         $this->userid = $userid;
         $this->error = "";
@@ -93,11 +95,9 @@ class LibLibrary {
         } else {
             //log za pokusaj setovanja liba kada vec postoji
             DB::rollback();
-            if (!$this->log_lib($userid, $this->LOG_WARNING, "Za osobu $jmbg vec dodeljen lib: $libPostojeci")) {
-                return null;
-            }
+            $this->log_lib($userid, $this->LOG_WARNING, "Za osobu $jmbg vec dodeljen lib: $libPostojeci");
 
-            return $libPostojeci;
+            return null;
         }
     }
 
@@ -108,7 +108,8 @@ class LibLibrary {
      * @param sss - podatak prema specifikaciji LIB-a clana Komore $sss
      * @return string
      */
-    private function makeLib($ddmm, $gg, $pol, $sss) {
+    private function makeLib($ddmm, $gg, $pol, $sss)
+    {
         //MMPGGSSSDDK
         $mm = substr($ddmm, 2, 2);
         $dd = substr($ddmm, 0, 2);
@@ -121,7 +122,8 @@ class LibLibrary {
      * @param libBezKontrolne - LIB clana Komore bez kontrolnog broja libBezKontrolne
      * @return string
      */
-    private function izracunajKontrolniBroj($libBezKontrolne) {
+    private function izracunajKontrolniBroj($libBezKontrolne)
+    {
         //L = 11 - (( 7*(A+Đ) + 6*(B+E) + 5*(V+) + 4*(G+Z) + 3*(D+I)) % 11)
         ////MMPGGSSSDD
         ////ABVGDĐEZIL
@@ -146,7 +148,8 @@ class LibLibrary {
      * @param maticni broj $jmbg
      * @return string
      */
-    private function getGG($jmbg) {
+    private function getGG($jmbg)
+    {
         return substr($jmbg, 5, 2);
     }
 
@@ -155,7 +158,8 @@ class LibLibrary {
      * @param jmbg - maticni broj
      * @return string
      */
-    private function getPol($jmbg) {
+    private function getPol($jmbg)
+    {
         $jmbgJedinstveniBroj = substr($jmbg, 9, 3);
         if ((int)$jmbgJedinstveniBroj < 500)
             return "0";
@@ -167,7 +171,8 @@ class LibLibrary {
      * @param jmbg - maticni broj
      * @return string
      */
-    private function getMM($jmbg) {
+    private function getMM($jmbg)
+    {
         return substr($jmbg, 0, 4);
     }
 
@@ -176,7 +181,8 @@ class LibLibrary {
      * @param ddmm - podatak prema specifikaciji LIB-a clanova Komore $ddmm
      * @return string|NULL ukoliko je doslo do greske
      */
-    private function getNextSSS($ddmm) {
+    private function getNextSSS($ddmm)
+    {
         try {
             Lib::where('ddmm', $ddmm)->update(['sss' => DB::raw('sss+1')]);
 //        $q = "UPDATE tlib SET sss=sss+1 WHERE ddmm='$ddmm'";
@@ -186,7 +192,8 @@ class LibLibrary {
             return null;
         }
         try {
-            $sss = Lib::where('ddmm', $ddmm)->select('sss')->first()->toArray()['sss'];
+            $l = Lib::where('ddmm', $ddmm)->select('sss')->get();
+            if ($l->notEmpty()) $sss = $l->first()->toArray()['sss'];
         } catch (\Exception $e) {
             //log za gresku u citanju sss broja
             $this->log_lib($this->userid, $this->LOG_ERROR, "Nije moguce procitati sss za ddmm - $ddmm, greska: " . $e->getMessage());
@@ -202,13 +209,14 @@ class LibLibrary {
      * @param jmbg - maticni broj jmbg
      * @return LibLibrary broj clana Komore|NULL ukoliko lib nije setovan|-1 ukoliko je doslo do greske
      */
-    public function getLib($jmbg) {
+    public function getLib($jmbg)
+    {
         try {
             $lib = Osoba::where('id', $jmbg)->whereNotNull('lib')->firstOrFail();
         } catch (\Exception $e) {
             $this->log_lib($this->userid, $this->LOG_WARNING, "Ne postoji lib za $jmbg u tabeli tosoba");
 //            dd($e->getMessage());
-            return false;
+            return FALSE;
         }
         return $lib->lib;
     }
@@ -220,7 +228,8 @@ class LibLibrary {
      * @param $text - text log-a
      * @return NULL ukoliko nije azuriran LOG| 1 ukoliko jeste
      */
-    private function log_lib($userid, $level, $text) {
+    private function log_lib($userid, $level, $text)
+    {
         if ($level == $this->LOG_ERROR)
             $this->error = $text;
         try {
@@ -231,11 +240,11 @@ class LibLibrary {
             $logLib->text = $text;
             $logLib->save();
         } catch (Exception $e) {
-            dd($e->getMessage());
+//            dd($e->getMessage());
             $this->error = "Greska u insertovanju LOG-a: " . $e->getMessage();
-            return null;
+            return FALSE;
         }
-        return true;
+        return TRUE;
     }
 }
 

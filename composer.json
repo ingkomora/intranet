@@ -59,6 +59,9 @@
         "classmap": [
             "database/seeders",
             "database/factories"
+        ],
+        "files": [
+            "version-commit.php"
         ]
     },
     "autoload-dev": {

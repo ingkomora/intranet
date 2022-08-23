@@ -30,10 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+//        todo: ne radi prilikom unosa nove licence
         Osoba::saved(function ($osoba){
             $lib = new LibLibrary();
             $lib->dodeliJedinstveniLib($osoba->id, backpack_user()->id);
-
         });
 
         config(['app.status_model', App\Models\Status::class]);
