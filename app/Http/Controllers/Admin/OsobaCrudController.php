@@ -215,7 +215,7 @@ class OsobaCrudController extends CrudController
             'label' => 'Internet prezentacija',
         ],
         'firmatel' => [
-            'name' => 'firmaemail',
+            'name' => 'firmatel',
             'label' => 'Telefon',
             'type' => 'phone',
         ],
