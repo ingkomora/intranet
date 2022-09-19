@@ -28,7 +28,18 @@ class FunkcionerCrudController extends CrudController
     protected
         $column_definition_array = [
         'id',
-        'osoba_id',
+        'osoba_id' => [
+            'name' => 'osoba_id',
+            'label' => 'JMBG',
+        ],
+        'osoba' => [
+            'name' => 'osoba',
+            'type' => 'select',
+            'label' => 'Ime prezime',
+            'entity' => 'osoba',
+            'attribute' => 'ime_roditelj_prezime',
+            'model' => 'App\Models\Osoba',
+        ],
         'mandat_id' => [
             'name' => 'mandat_id',
             'label' => 'Mandat',
@@ -208,30 +219,7 @@ class FunkcionerCrudController extends CrudController
         $this->crud->setColumns($this->column_definition_array);
         $this->crud->addClause('orderBy', 'id');
 
-        $this->crud->setColumnDetails('osoba_id', [
-            'name' => 'osoba_id',
-            'type' => 'select',
-            'label' => 'Ime prezime (jmbg)',
-            'entity' => 'osoba',
-            'attribute' => 'ime_prezime_jmbg',
-            'model' => 'App\Models\Osoba',
-            'searchLogic' => function ($query, $column, $searchTerm) {
-                if (strstr($searchTerm, " ")) {
-                    $searchTerm = explode(" ", $searchTerm);
-                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
-                    });
-                } else {
-                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
-                        $q->where('ime', 'ilike', $searchTerm . '%')
-                            ->orWhere('prezime', 'ilike', $searchTerm . '%')
-                            ->orWhere('id', 'ilike', $searchTerm . '%');
-                    });
-                }
-            }
-        ]);
-
+        $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
 
         if (!backpack_user()->hasRole('admin')) {
@@ -265,6 +253,38 @@ class FunkcionerCrudController extends CrudController
             'napomena',
             'created_at',
             'updated_at',
+        ]);
+
+        $this->crud->setColumnDetails('osoba_id', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+//                    dd($column);
+                    $query->orWhereHas('osoba', function ($q) use ($searchTermArray) {
+                        $q->whereIn('id', $searchTermArray)
+                            ->orderBy('id');
+                    });
+                } else if (strstr($searchTerm, " ")) {
+                    $searchTerm = explode(" ", $searchTerm);
+                    $query->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                        $q->where('ime', 'ilike', $searchTerm[0] . '%')
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
+                    });
+                } else {
+                    $query->orWhereHas('osoba.licence', function ($q) use ($column, $searchTerm) {
+                        $q
+                            ->where('id', 'ilike', $searchTerm . '%');
+                    })
+                        ->orWhereHas('osoba', function ($q) use ($column, $searchTerm) {
+                            $q
+                                ->where('id', 'ilike', $searchTerm . '%')
+                                ->orWhere('ime', 'ilike', $searchTerm . '%')
+                                ->orWhere('prezime', 'ilike', $searchTerm . '%');
+                        });
+                }
+            }
         ]);
 
         $this->crud->setColumnDetails('status_id', [
@@ -345,6 +365,25 @@ class FunkcionerCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'region_id', json_decode($values));
             }
         );
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'nisuplatili',
+            'label' => 'Nisu platili članarinu'
+        ],
+            FALSE,
+            function () {
+                // if the filter is active
+                // apply the "active" eloquent scope
+                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '<', 'now()')
+                        ->whereRaw('iznoszanaplatu = iznosuplate + pretplata');
+                });
+                $this->crud->addClause('whereDoesntHave', 'clanarine', function ($query) {
+                    $query->where('rokzanaplatu', '>=', 'now()');
+                });
+
+            });
 
         /*
          * end
@@ -497,8 +536,16 @@ class FunkcionerCrudController extends CrudController
             } // to filter the results that are returned
         ]);
     }
+
     /*
      * end
      * Fetch operations
      */
+
+    protected function showDetailsRow($id)
+    {
+        $this->data['entry'] = $this->crud->getEntry($id)->osoba;
+        $this->data['crud'] = $this->crud;
+        return view('crud::osoba_details_row', $this->data);
+    }
 }
