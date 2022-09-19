@@ -111,6 +111,15 @@ class Funkcioner extends Model
         return $this->belongsTo('App\Models\Status', 'status_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clanarine()
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba', 'osoba_id')
+            ->orderBy('rokzanaplatu');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
