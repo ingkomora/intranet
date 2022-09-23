@@ -185,7 +185,14 @@ class Osoba extends Model
      */
     public function evidencijeMirovanja()
     {
-        return $this->hasMany('App\Models\Tevidencijamirovanja', 'osoba');
+        return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba');
+    }
+
+    public function aktivnaMirovanja(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba')
+            ->whereNull('datumprestanka')
+            ->whereRaw('datumkraja>=now()::date');
     }
 
     /**
