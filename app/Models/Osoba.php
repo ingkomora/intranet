@@ -71,10 +71,10 @@ class Osoba extends Model
     protected $keyType = 'string';
     public $incrementing = FALSE;
 //TODO da li ovo ovako treba
-/*    public $member = MEMBER;
-    public $notMember = NOT_MEMBER;
-    public $memberToDelete = MEMBER_TO_DELETE;
-    public $memberOnHold = MEMBER_ON_HOLD;*/
+    /*    public $member = MEMBER;
+        public $notMember = NOT_MEMBER;
+        public $memberToDelete = MEMBER_TO_DELETE;
+        public $memberOnHold = MEMBER_ON_HOLD;*/
 
     /**
      * @var array
@@ -167,9 +167,21 @@ class Osoba extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function funkcioneri()
+    public function funkcioneri(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany('App\Models\Funkcioner', 'osoba');
+        return $this->hasMany('App\Models\Funkcioner', 'osoba_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aktivniClanoviVeca()
+    {
+        return $this->hasMany('App\Models\Funkcioner', 'osoba_id')
+            ->whereHas('funkcionerMandat', function ($q) {
+                $q->where('mandat_tip_id', 6);
+            })
+            ->where('status_id', 1);
     }
 
     /**
