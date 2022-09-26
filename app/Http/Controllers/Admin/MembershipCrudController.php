@@ -355,8 +355,8 @@ class MembershipCrudController extends CrudController
         CRUD::field('id')->attributes(['readonly' => 'readonly'])->size(4);
         CRUD::field('osoba_id')->ajax(TRUE)->attribute('ime_prezime_licence')->size(8);
         CRUD::field('status_id')->type('select_from_array')->options([10 => 'Aktivno', 11 => 'Neaktivno', 12 => 'U mirovanju'])->size(4);
-        CRUD::field('started_at')->type('date')->format('DD.MM.YYYY')->size(4);
-        CRUD::field('ended_at')->type('date')->format('DD.MM.YYYY')->size(4);
+        CRUD::field('started_at')->type('date_picker')->date_picker_options(['todayBtn' => 'linked', 'format' => 'dd.mm.yyyy', 'language' => 'rs-latin'])->size(4);
+        CRUD::field('ended_at')->type('date_picker')->date_picker_options(['todayBtn' => 'linked', 'format' => 'dd.mm.yyyy', 'language' => 'rs-latin'])->size(4);
         CRUD::field('note');
 //        CRUD::field('created_at');
 //        CRUD::field('updated_at');
