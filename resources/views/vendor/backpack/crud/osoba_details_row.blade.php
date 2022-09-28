@@ -72,8 +72,8 @@
                     <tr>
                         <th>id</th>
                         <th>Početak</th>
-                        <th>Prestanak</th>
-                        <th>Datum prestanka na lični zahtev</th>
+                        <th>Trajanje</th>
+                        <th>Datum prestanka</th>
                         {{--<th>brresenja</th>--}}
                         {{--<th>brresenjaprestanka</th>--}}
                         {{--<th>created_date</th>--}}
@@ -83,7 +83,7 @@
                         <tr>
                             <td>{{$mirovanje->id}}</td>
                             <td>{{!empty($mirovanje->datumpocetka) ? \Carbon\Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y.') : '-'}}</td>
-                            <td>{{!empty($mirovanje->datumkraja) ? \Carbon\Carbon::parse($mirovanje->datumkraja)->format('d.m.Y.') : '-'}}</td>
+                            <td>{!! !empty($mirovanje->datumkraja) ? $mirovanje->datumkraja == '2099-12-31'? \Carbon\Carbon::parse($mirovanje->datumkraja)->format('d.m.Y.'): '<em>na neodređeno vreme</em>' : '-'!!}</td>
                             <td>{{!empty($mirovanje->datumprestanka) ? \Carbon\Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y.') : '-'}}</td>
                             {{--<td>{{$mirovanje->brresenja}}</td>--}}
                             {{--<td>{{$mirovanje->brresenjaprestanka}}</td>--}}
