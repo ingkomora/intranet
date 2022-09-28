@@ -240,12 +240,8 @@ class MembershipCrudController extends CrudController
     public function setupShowOperation()
     {
         $membership = $this->crud->getEntry(\Request::segment(3));
-        if ($membership->status_id == 12) {
-            $mirovanje = $membership->aktivnaMirovanja()->first();
 
-            $mirovanje->datumkraja = $mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : Carbon::parse($mirovanje->datumkraja)->format('d.m.Y');
-
-            $content = "
+        $content = "
             <table class='table'>
                 <thead>
                     <tr>
@@ -270,8 +266,15 @@ class MembershipCrudController extends CrudController
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </table>";
 
+        if ($membership->status_id == 12) {
+            $mirovanje = $membership->aktivnaMirovanja()->first();
+
+            $mirovanje->datumkraja = $mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : Carbon::parse($mirovanje->datumkraja)->format('d.m.Y');
+            $mirovanje->datumpocetka = !empty($mirovanje->datumpocetka) ? Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y') : '-';
+            $mirovanje->datumprestanka = !empty($mirovanje->datumprestanka) ? Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y') : '-';
+            $content .= "
             <table class='table'>
                 <thead>
                     <tr>
@@ -279,28 +282,28 @@ class MembershipCrudController extends CrudController
                     </tr>
                     <tr>
                         <th>Datum početka</th>
-                        <th>Datum završetka</th>
-                        <th>Datum prestanka na lični zahtev</th>
+                        <th>Trajanje</th>
+                        <th>Datum prestanka</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>" . Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y') . "</td>
-                        <td>" . $mirovanje->datumkraja . "</td>
-                        <td>" . Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y') . "</td>
+                        <td>$mirovanje->datumpocetka</td>
+                        <td>$mirovanje->datumkraja</td>
+                        <td>$mirovanje->datumprestanka</td>
                     </tr>
                 </tbody>
             </table>
             ";
-
-            Widget::add()
-                ->to('before_content')
-                ->type('alert')
-                ->class('alert border border-warning text-center text-dark mb-2 col-8')
-                ->heading('Dodatne informacije')
-                ->content($content);
-
         }
+
+        Widget::add()
+            ->to('before_content')
+            ->type('alert')
+            ->class('alert border border-warning text-center text-dark mb-2 col-8')
+            ->heading('Dodatne informacije')
+            ->content($content);
+
 
         CRUD::column('id');
         CRUD::column('osoba_id');
