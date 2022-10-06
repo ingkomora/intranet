@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Libraries\ProveraLibrary;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Tesla\JMBG\JMBG;
 
 /**
  * @property string $id
+ * @property int idn
  * @property string $ime
  * @property string $prezime
  * @property string $titula
@@ -23,6 +25,7 @@ use Tesla\JMBG\JMBG;
  * @property string $mobilnitel
  * @property string $kontaktemail
  * @property int $clan
+ * @property int $prebivalisteopstinaid
  * @property string $lib
  * @property Zvanje $zvanjeId
  * @property Firma $firma
@@ -30,14 +33,24 @@ use Tesla\JMBG\JMBG;
  * @property Licenca[] $licence
  * @property Request[] $requests
  * @property Membership[] $memberships
+ * @property Osiguranje[] $osiguranja
+ * @property Osiguranje[] $aktivnaOsiguranja
  * @property Clanarina $prvaClanarina
  * @property Clanarina $poslednjaPlacenaClanarina
  * @property Clanarina $poslednjaClanarina
  * @property Clanarina $izmirenaClanarina
-// * @property int $member
-// * @property int $notMember
-// * @property int $memberOnHold
-// * @property int $memberToDelete
+ * @property string ulica
+ * @property string broj
+ * @property string podbroj
+ * @property string sprat
+ * @property string stan
+ * @property int posta_opstina_id
+ * @property string posta_pb
+ * @property string posta_drzava
+ * // * @property int $member
+ * // * @property int $notMember
+ * // * @property int $memberOnHold
+ * // * @property int $memberToDelete
  */
 class Osoba extends Model
 {
@@ -70,6 +83,13 @@ class Osoba extends Model
 
     protected $keyType = 'string';
     public $incrementing = FALSE;
+
+    private $prebivaliste_array = ['prebivalisteadresa' => '', 'prebivalistebroj' => '', 'prebivalisteopstinaid' => '', 'prebivalistedrzava' => '', 'prebivalistemesto' => ''];
+    private $posta_array = ['ulica' => '', 'broj' => '', 'podbroj' => ''/*, 'sprat' => '', 'stan' => ''*/, 'posta_opstina_id' => '', 'posta_pb' => '', 'posta_drzava' => ''];
+    private $osnovne_strudije_array = ['diplfakultet' => '', 'diplmesto' => '', 'diplgodina' => '', 'diplbroj' => ''];
+    private $master_strudije_array = ['mrfakultet' => '', 'mrmesto' => '', 'mrgodina' => '', 'mrbroj' => ''];
+
+
 //TODO da li ovo ovako treba
     /*    public $member = MEMBER;
         public $notMember = NOT_MEMBER;
@@ -116,6 +136,11 @@ class Osoba extends Model
     public function isMale()
     {
         return substr($this->id, 9, 3) < 500;
+    }
+
+    private function getOpstina($opstina_id)
+    {
+        return Opstina::find($opstina_id);
     }
 
     /*
@@ -315,6 +340,18 @@ class Osoba extends Model
             ]);
     }
 
+    public function aktivnaOsiguranja()
+    {
+        return $this->belongsToMany('App\Models\Osiguranje', 'osiguranje_osoba', 'osoba_id', 'osiguranja_id')
+            ->where('status_polise_id', 1)
+            ->using('App\Models\OsiguranjeOsoba')
+            ->withPivot([
+                'datum_provere',
+                'created_at',
+                'updated_at',
+            ]);
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -420,8 +457,66 @@ class Osoba extends Model
     public function getLicenceArrayAttribute()
     {
         $licenceArray = $this->licence->where('status', '<>', 'D')->pluck('id')->toArray();
-        $licence = implode(', ', $licenceArray);
-        return $licence;
+        return implode(', ', $licenceArray);
+    }
+
+    public function getDataLicenceToArrayAttribute(): array
+    {
+        $licence = Licenca::where('osoba', $this->id)
+            ->where('status', '<>', 'D')
+            ->get(['id', 'datumuo', 'licencatip', 'zahtev', 'status']);
+        $licenca_data = [];
+        foreach ($licence as $key => $licenca) {
+            $licenca_data[$key] = "$licenca->id ({$licenca->tipLicence->oznaka} - {$licenca->licencatip}) od " . Carbon::parse($licenca->datumuo)->format('d.m.Y');
+        }
+        return $licenca_data;
+    }
+
+    public function getDataPrebivalisteToStringAttribute(): string
+    {
+        foreach ($this->prebivaliste_array as $key => $value) {
+            if (strstr($key, 'opstina')) {
+                if (!empty($this->$key)) $this->prebivaliste_array['prebivalisteopstina'] = $this->getOpstina($this->$key)->ime;
+                else unset($this->prebivaliste_array[$key]);
+            } else {
+                if (!empty($this->$key)) $this->prebivaliste_array[$key] = $this->$key;
+                else unset($this->prebivaliste_array[$key]);
+            }
+        }
+
+        return implode(', ', $this->prebivaliste_array);
+    }
+
+    public function getDataPostaToStringAttribute(): string
+    {
+        foreach ($this->posta_array as $key => $value) {
+            if (strstr($key, 'opstina')) {
+                if (!empty($value)) $this->posta_array['prebivalisteopstina'] = $this->getOpstina($this->$key)->ime;
+                else unset($this->posta_array[$key]);
+            } else {
+                if (!empty($value)) $this->posta_array[$key] = $this->$key;
+                else unset($this->posta_array[$key]);
+            }
+        }
+        return implode(', ', $this->posta_array);
+    }
+
+    public function getDataMasterStudijeToStringAttribute(): string
+    {
+        foreach ($this->master_strudije_array as $key => $value) {
+            if (!empty($this->$key)) $this->master_strudije_array[$key] = $this->$key;
+            else unset($this->master_strudije_array[$key]);
+        }
+        return implode(', ', $this->master_strudije_array);
+    }
+
+    public function getDataOsnovneStudijeToStringAttribute(): string
+    {
+        foreach ($this->osnovne_strudije_array as $key => $value) {
+            if (!empty($this->$key)) $this->osnovne_strudije_array[$key] = $this->$key;
+            else unset($this->osnovne_strudije_array[$key]);
+        }
+        return implode(', ', $this->osnovne_strudije_array);
     }
 
 

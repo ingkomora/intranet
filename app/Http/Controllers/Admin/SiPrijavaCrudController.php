@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\PrijavaRequest;
 use App\Http\Requests\SiPrijavaRequest;
 use App\Models\RegOblast;
 use App\Models\RegPodoblast;
@@ -13,6 +12,7 @@ use App\Models\VrstaPosla;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanel;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Backpack\CRUD\app\Library\Widget;
 
 /**
  * Class PrijavaCrudController
@@ -41,6 +41,14 @@ class SiPrijavaCrudController extends CrudController
             'type' => 'relationship',
             'label' => 'Ime prezime',
             'attribute' => 'full_name',
+        ],
+        'documents' => [
+            'name' => 'documents',
+            'type' => 'relationship',
+            'ajax' => TRUE,
+//            'attribute' => 'id',
+            'attribute' => 'category_type_name_status_registry_date',
+//            'attributes' => ['disabled' => 'disabled',],
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
@@ -136,6 +144,12 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ime prezime (jmbg)',
             'attribute' => 'ime_prezime_jmbg',
             'ajax' => TRUE,
+        ],
+        'documents' => [
+            'name' => 'documents',
+            'type' => 'relationship',
+            'ajax' => TRUE,
+            'attribute' => 'category_type_name_status_registry_date',
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
@@ -298,6 +312,7 @@ class SiPrijavaCrudController extends CrudController
                 }
             }
         ]);
+
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -331,6 +346,27 @@ class SiPrijavaCrudController extends CrudController
                 },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
+        ]);
+
+        $this->crud->setColumnDetails('documents', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('document/' . $related_key . '/show');
+                },
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
 
 
@@ -434,9 +470,61 @@ class SiPrijavaCrudController extends CrudController
     {
         $this->crud->set('show.setFromDb', FALSE);
 
-        $this->crud->setColumns($this->column_deffinition_array);
+        $si_prijava = $this->crud->getEntry(\Request::segment(3));
+        $osoba = $si_prijava->osoba;
 
-        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+        Widget::add([
+            'type' => 'view',
+            'view' => 'vendor.backpack.base.widgets.view-kandidat',
+            'osoba' => $osoba,
+        ]);
+
+        if ($si_prijava->reference->isNotEmpty()) {
+            Widget::add([
+                'type' => 'view-reference',
+                'wrapper' => ['class' => 'col-md-8 p-0'], // optional
+                'content' => [
+                    'header' => 'REFERENCE',
+                    'body' => $si_prijava->reference,
+                ]
+            ]);
+        }
+
+        if (backpack_user()->hasRole(['admin'])) {
+            $this->crud->setColumns($this->column_definition_array_admin);
+        } else {
+            $this->crud->setColumns($this->column_definition_array);
+        }
+
+        CRUD::column('zahtev')
+            ->type('model_function')
+            ->function_name('getZahtevLicencaStatusAttribute')
+            ->label('Zahtev za licencu')
+            ->before('reference');
+
+/*        CRUD::column('reference')
+            ->attribute('data_reference_to_array')
+            ->limit(500)
+            ->before('created_at')
+            ->wrapper([
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    $odgovorno_lice_licenca = Referenca::find($related_key)->odgovorno_lice_licenca_id;
+                    $odgovorno_lice = Licenca::find($odgovorno_lice_licenca)->osoba;
+                    return backpack_url('osoba/' . $odgovorno_lice . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
+            ]);*/
+
+        CRUD::column('documents')
+            ->type('relationship')
+            ->attribute('category_type_name_status_registry_number_registry_date')
+            ->limit(500)
+            ->before('status');
+
+        $this->crud->modifyColumn('vrstaPosla', ['limit' => 500,]);
+        $this->crud->modifyColumn('regOblast', ['limit' => 500,]);
+        $this->crud->modifyColumn('regPodOblast', ['limit' => 500,]);
 
         $this->crud->setColumnDetails('osoba', [
             'wrapper' => [
@@ -488,7 +576,8 @@ class SiPrijavaCrudController extends CrudController
     protected function setupCreateOperation()
     {
         $this->crud->setValidation(SiPrijavaRequest::class);
-        $this->crud->addFields($this->field_deffinition_array);
+
+        $this->crud->addFields($this->field_definition_array);
 
         $this->crud->modifyField('status_prijave', [
             'options' => (function ($query) {
