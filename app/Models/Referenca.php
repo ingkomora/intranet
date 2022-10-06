@@ -46,7 +46,7 @@ class Referenca extends Model
      * 
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -83,7 +83,8 @@ class Referenca extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function siPrijave() {
+    public function siPrijave()
+    {
         return $this->belongsToMany('App\Models\SiPrijava', 'referenca_si_prijava', 'referenca_id', 'si_prijava_id')
             ->using('App\Models\ReferencaSiPrijava')
             ->withPivot([
@@ -95,13 +96,21 @@ class Referenca extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function zahteviLicence() {
+    public function zahteviLicence()
+    {
         return $this->belongsToMany('App\Models\ZahtevLicenca', 'referenca_licenca_zahtev', 'referenca_id', 'licenca_zahtev_id')
             ->using('App\Models\ReferencaLicencaZahtev')
             ->withPivot([
                 'created_at',
                 'updated_at',
             ]);
+    }
+
+    public function getDataReferenceToArrayAttribute(): string
+    {
+        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id)->osobaId->ime_prezime_licence;
+        // todo: dodati jos informacija ako treba
+        return "$odgovorno_lice";
     }
 
 }
