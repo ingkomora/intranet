@@ -83,7 +83,7 @@
                         <tr>
                             <td>{{$mirovanje->id}}</td>
                             <td>{{!empty($mirovanje->datumpocetka) ? \Carbon\Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y.') : '-'}}</td>
-                            <td>{!! !empty($mirovanje->datumkraja) ? $mirovanje->datumkraja == '2099-12-31'? \Carbon\Carbon::parse($mirovanje->datumkraja)->format('d.m.Y.'): '<em>na neodređeno vreme</em>' : '-'!!}</td>
+                            <td>{!! !empty($mirovanje->datumkraja) ? ($mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : \Carbon\Carbon::parse($mirovanje->datumkraja)->format('d.m.Y.')) : '-'!!}</td>
                             <td>{{!empty($mirovanje->datumprestanka) ? \Carbon\Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y.') : '-'}}</td>
                             {{--<td>{{$mirovanje->brresenja}}</td>--}}
                             {{--<td>{{$mirovanje->brresenjaprestanka}}</td>--}}
