@@ -31,7 +31,7 @@ class Referenca extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'treferenca';
@@ -39,11 +39,11 @@ class Referenca extends Model
     /**
      * @var array
      */
-    protected $fillable = ['osoba', 'vrstaplana', 'uloga', 'broj', 'godinaizrade', 'godinausvajanja', 'lokacijamesto', 'lokacijaopstina', 'lokacijadrzava', 'firma', 'naziv', 'lokacijaadresa', 'investitor', 'odgprojektant','odgovorno_lice_licenca_id'];
+    protected $fillable = ['osoba', 'vrstaplana', 'uloga', 'broj', 'godinaizrade', 'godinausvajanja', 'lokacijamesto', 'lokacijaopstina', 'lokacijadrzava', 'firma', 'naziv', 'lokacijaadresa', 'investitor', 'odgprojektant', 'odgovorno_lice_licenca_id'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
     public $timestamps = TRUE;
@@ -108,9 +108,9 @@ class Referenca extends Model
 
     public function getDataReferenceToArrayAttribute(): string
     {
-        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id)->osobaId->ime_prezime_licence;
+        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id);
         // todo: dodati jos informacija ako treba
-        return "$odgovorno_lice";
+        return !is_null($odgovorno_lice) ? $odgovorno_lice->osobaId->ime_prezime_licence : '-';
     }
 
 }
