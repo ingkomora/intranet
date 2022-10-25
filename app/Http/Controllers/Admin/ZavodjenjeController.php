@@ -429,7 +429,9 @@ class ZavodjenjeController extends Controller
         $data['oblast'] = '';
         $filename = date("Ymd") . "_test";
 //        dd($data);
-        $pdf = PDF::loadView('nalepniceRamipa89x43', $data);
+//        $pdf = PDF::loadView('nalepniceRamipa89x43', $data);
+        $customPaper = array(0,0,143,284.2); // 10cm x 5cm rolna
+        $pdf = PDF::loadView('citizen100x50', $data)->setPaper($customPaper, 'landscape');
 //        return $pdf->stream("$filename.pdf");
 //        return $pdf->download("$filename.pdf");
 
