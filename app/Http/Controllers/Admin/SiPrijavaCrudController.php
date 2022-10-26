@@ -653,7 +653,7 @@ class SiPrijavaCrudController extends CrudController
         if ($si_prijava->reference->isNotEmpty()) {
             Widget::add([
                 'type' => 'view-reference',
-                'wrapper' => ['class' => 'col-md-8 p-0'], // optional
+                'wrapper' => ['class' => 'col-md-12 p-0'], // optional
                 'content' => [
                     'header' => 'REFERENCE',
                     'body' => $si_prijava->reference,

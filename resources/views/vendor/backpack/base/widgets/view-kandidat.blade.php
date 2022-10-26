@@ -153,7 +153,7 @@
     }
 </style>
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
 
         <div class="card">
             <div class="card-header h2 bg-css3 text-white text-center">O KANDIDATU
