@@ -240,7 +240,7 @@ class MembershipCrudController extends CrudController
     public function setupShowOperation()
     {
         $membership = $this->crud->getEntry(\Request::segment(3));
-
+        // osoba
         $content = "
             <table class='table'>
                 <thead>
@@ -268,13 +268,25 @@ class MembershipCrudController extends CrudController
                 </tbody>
             </table>";
 
-        if ($membership->status_id == 12) {
-            $mirovanje = $membership->aktivnaMirovanja()->first();
 
-            $mirovanje->datumkraja = $mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : Carbon::parse($mirovanje->datumkraja)->format('d.m.Y');
-            $mirovanje->datumpocetka = !empty($mirovanje->datumpocetka) ? Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y') : '-';
-            $mirovanje->datumprestanka = !empty($mirovanje->datumprestanka) ? Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y') : '-';
-            $content .= "
+        // mirovanje
+        $mirovanje = $membership->poslednjeMirovanje();
+        if (!empty($mirovanje)) {
+            if (empty($mirovanje->datumprestanka)) {
+
+                $class = '';
+                $icon = '';
+
+                if ($mirovanje->datumkraja < Carbon::now() and empty($mirovanje->datumprestanka)) {
+                    $class = "class='border border-danger text-danger'";
+                    $icon = "<i class='las la-exclamation-triangle'></i>";
+                }
+
+                $mirovanje->datumkraja = $mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : Carbon::parse($mirovanje->datumkraja)->format('d.m.Y');
+                $mirovanje->datumpocetka = !empty($mirovanje->datumpocetka) ? Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y') : '-';
+                $mirovanje->datumprestanka = !empty($mirovanje->datumprestanka) ? Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y') : '-';
+
+                $content .= "
             <table class='table'>
                 <thead>
                     <tr>
@@ -289,18 +301,19 @@ class MembershipCrudController extends CrudController
                 <tbody>
                     <tr>
                         <td>$mirovanje->datumpocetka</td>
-                        <td>$mirovanje->datumkraja</td>
+                        <td $class>$icon $mirovanje->datumkraja</td>
                         <td>$mirovanje->datumprestanka</td>
                     </tr>
                 </tbody>
             </table>
             ";
+            }
         }
 
         Widget::add()
             ->to('before_content')
             ->type('alert')
-            ->class('alert border border-warning text-center text-dark mb-2 col-8')
+            ->class('alert border border-warning text-center text-dark mb-2 col-12')
             ->heading('Dodatne informacije')
             ->content($content);
 

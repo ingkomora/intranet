@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property Clanarina[] $clanarine
  * @property Request[] $requests
  * @property Request[] $zahtevZaMirovanje
- * @property Request[] $aktivnaMirovanja
+ * @property EvidencijaMirovanja $poslednjeMirovanje
+ * @property EvidencijaMirovanja[] $aktivnaMirovanja
  */
 class Membership extends Model
 {
@@ -68,6 +69,12 @@ class Membership extends Model
     {
         return $this->hasMany(Request::class, 'osoba_id', 'osoba_id')
             ->where('request_category_id', 4);
+    }
+
+    public function poslednjeMirovanje()
+    {
+        return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba', 'osoba_id')
+            ->orderByDesc('id')->first();
     }
 
     public function aktivnaMirovanja(): \Illuminate\Database\Eloquent\Relations\HasMany
