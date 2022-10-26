@@ -310,13 +310,14 @@ class SiPrijavaCrudController extends CrudController
             'name' => 'tema',
             'wrapper' => ['class' => 'col-md-8 my-3',],
         ],
-        'documents' => [
-            'name' => 'documents',
-            'type' => 'relationship',
-            'ajax' => TRUE,
-            'attribute' => 'category_type_name_status_registry_date',
+        // todo: omoguciti posle update-a na backpack 5 pro
+//        'documents' => [
+//            'name' => 'documents',
+//            'type' => 'relationship',
+//            'ajax' => TRUE,
+//            'attribute' => 'category_type_name_status_registry_date',
 //            'attributes' => ['disabled' => 'disabled',],
-        ],
+//        ],
         'datum_prijema' => [
             'name' => 'datum_prijema',
             'label' => 'Datum prijema',
