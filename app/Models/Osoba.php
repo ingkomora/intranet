@@ -51,6 +51,7 @@ use Tesla\JMBG\JMBG;
  * // * @property int $notMember
  * // * @property int $memberOnHold
  * // * @property int $memberToDelete
+ * @property Korisnik $korisnik
  */
 class Osoba extends Model
 {
@@ -176,6 +177,11 @@ class Osoba extends Model
     public function postaOpstinaId()
     {
         return $this->belongsTo('App\Models\Opstina', 'posta_opstina_id')->orderBy('ime', 'desc');
+    }
+
+    public function korisnik()
+    {
+        return $this->hasOne('App\Models\Korisnik', 'osoba', 'id');
     }
 
     /**
