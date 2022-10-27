@@ -25,7 +25,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property Osiguranje[] $osiguravajuceKuce
  * @property Osiguranje[] $ugovaracOsiguranja
  */
-class Firma extends Model {
+class Firma extends Model
+{
     use CrudTrait;
 
     /**
@@ -40,7 +41,7 @@ class Firma extends Model {
      *
      * @var array
      */
-    protected $appends = ['naziv_mb'];
+    protected $appends = ['naziv_mb', 'naziv_pib_mb_adresa_mesto'];
 
     /**
      * The "type" of the auto-incrementing ID.
@@ -52,21 +53,21 @@ class Firma extends Model {
     /**
      * @var array
      */
-    protected $fillable = ['mb', 'pib', 'naziv', 'drzava', 'mesto', 'pb', 'adresa', 'opstina_id', 'fax', 'telefon', 'email', 'web', 'created_at', 'updated_at'];
+    protected $id = ['id'];
 
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     public $identifiableAttribute = 'naziv';
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function opstina()
+    public function opstina(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo('App\Models\Opstina', 'opstina_id');
     }
@@ -74,21 +75,24 @@ class Firma extends Model {
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function osiguravajuceKuce() {
+    public function osiguravajuceKuce(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
         return $this->hasMany('App\Models\Osiguranje', 'osiguravajuca_kuca_mb', 'mb');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function ugovaracOsiguranja() {
+    public function ugovaracOsiguranja(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
         return $this->hasMany('App\Models\Osiguranje', 'ugovarac_osiguranja_mb', 'mb');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function osobe() {
+    public function osobe(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
         return $this->hasMany('App\Models\Osoba', 'firma_mb', 'mb');
     }
 
@@ -104,8 +108,14 @@ class Firma extends Model {
      * @param string $value
      * @return string
      */
-    public function getNazivMbAttribute() {
+    public function getNazivMbAttribute(): string
+    {
         return "{$this->naziv} ($this->mb)";
+    }
+
+    public function getNazivPibMbAdresaMestoAttribute(): string
+    {
+        return "{$this->naziv} ($this->mb), $this->adresa $this->mesto";
     }
 
 
