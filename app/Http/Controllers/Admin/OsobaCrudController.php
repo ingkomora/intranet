@@ -1069,11 +1069,16 @@ class OsobaCrudController extends CrudController
         $this->crud->field('prebivalistemesto')->label('Mesto')->tab('Podaci o prebivalištu');
         $this->crud->field('opstinaId')->label('Opština')->tab('Podaci o prebivalištu');
         $this->crud->field('prebivalisteadresa')->label('Adresa')->tab('Podaci o prebivalištu');
-        $this->crud->field('ulica')->tab('Podaci o prebivalištu');
-        $this->crud->field('broj')->tab('Podaci o prebivalištu');
-        $this->crud->field('podbroj')->tab('Podaci o prebivalištu');
-        $this->crud->field('sprat')->tab('Podaci o prebivalištu');
-        $this->crud->field('stan')->tab('Podaci o prebivalištu');
+
+        // adresa za dostavu poste
+        $this->crud->field('ulica')->tab('Adresa za dostavu pošte');
+        $this->crud->field('broj')->hint('***Upisati "bb" ukoliko nema broj')->tab('Adresa za dostavu pošte');
+        $this->crud->field('podbroj')->tab('Adresa za dostavu pošte');
+        $this->crud->field('sprat')->tab('Adresa za dostavu pošte');
+        $this->crud->field('stan')->tab('Adresa za dostavu pošte');
+        $this->crud->field('postaOpstinaId')->label('Opština')->tab('Adresa za dostavu pošte');
+        $this->crud->field('posta_pb')->type('number')->label('Poštanski broj')->tab('Adresa za dostavu pošte');
+        $this->crud->field('posta_drzava')->label('Država')->tab('Adresa za dostavu pošte');
 
 //        firma
         $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly' => 'readonly']);
@@ -1190,7 +1195,7 @@ class OsobaCrudController extends CrudController
         ]);
 
 //        portal
-        $this->crud->field('lozinka')->tab('Portal');
+        $this->crud->field('lozinka')->attributes(['disabled'=>'disabled'])->tab('Portal');
         $this->crud->field('biografija')->tab('Portal');
         $this->crud->field('licniweb')->label('Web')->tab('Portal');
         $this->crud->addField([

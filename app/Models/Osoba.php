@@ -173,6 +173,11 @@ class Osoba extends Model
         return $this->belongsTo('App\Models\Opstina', 'prebivalisteopstinaid')->orderBy('ime', 'desc');
     }
 
+    public function postaOpstinaId()
+    {
+        return $this->belongsTo('App\Models\Opstina', 'posta_opstina_id')->orderBy('ime', 'desc');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
