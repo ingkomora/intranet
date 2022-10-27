@@ -410,7 +410,13 @@ class OsobaCrudController extends CrudController
             'label' => 'PORTAL',
             'name' => 'portal',
         ],
-        'lozinka',
+        'username' => [
+            'name' => 'korisnik',
+            'label' => 'Korisničko ime',
+            'type' => 'relationship',
+            'attribute' => 'username',
+        ],
+//        'lozinka', // postoji u bazi ali null
         'biografija',
         'licniweb',
         'adresaprikazi' => [
@@ -660,6 +666,7 @@ class OsobaCrudController extends CrudController
             'clan',
 
 //        portal
+            'korisnik',
             'lozinka',
             'biografija',
             'licniweb',
@@ -830,7 +837,8 @@ class OsobaCrudController extends CrudController
                         </script>
                         '
         ]);
-//        studije
+
+//        obrazovanje
 //        start
         $this->crud->modifyColumn('dipl', [
             'type' => 'custom_html',
@@ -1044,44 +1052,56 @@ class OsobaCrudController extends CrudController
             'label' => 'JMBG',
             'attributes' => ['readonly' => 'readonly'],
             'tab' => 'Lični podaci',
+            'wrapper' => ['class' => 'col-4'],
         ]);
-        $this->crud->field('lib')->tab('Lični podaci')->attributes(['readonly' => 'readonly']);;
-        $this->crud->field('ime')->tab('Lični podaci');
-        $this->crud->field('prezime')->tab('Lični podaci');
-        $this->crud->field('roditelj')->tab('Lični podaci');
-        $this->crud->field('devojackoprezime')->label('Devojačko prezime')->tab('Lični podaci');
-        $this->crud->field('zvanjeId')->label('Zvanje')->tab('Lični podaci');
         CRUD::field('datumrodjenja')->type('date_picker')->label('Datum rođenja')->date_picker_options([
             'todayBtn' => TRUE,
             'format' => 'dd.mm.yyyy.',
             'language' => 'sr-Latn',
-        ])
-            ->tab('Lični podaci');
-        $this->crud->field('rodjenjemesto')->label('Mesto rođenja')->tab('Lični podaci');
-        $this->crud->field('rodjenjeopstina')->label('Opština rođenja')->tab('Lični podaci');
-        $this->crud->field('rodjenjedrzava')->label('Država rođenja')->tab('Lični podaci');
-        $this->crud->field('kontakttel')->label('Broj telefona')->tab('Lični podaci');
-        $this->crud->field('mobilnitel')->label('Broj mobilnog telefona')->tab('Lični podaci');
-        $this->crud->field('kontaktemail')->label('Mail')->tab('Lični podaci')->type('email');
+        ])->size(4)->tab('Lični podaci');
+        $this->crud->field('lib')->size(4)->tab('Lični podaci')->attributes(['readonly' => 'readonly']);;
+        $this->crud->field('ime')->size(3)->tab('Lični podaci');
+        $this->crud->field('prezime')->size(3)->tab('Lični podaci');
+        $this->crud->field('roditelj')->size(3)->tab('Lični podaci');
+        $this->crud->field('devojackoprezime')->size(3)->label('Devojačko prezime')->tab('Lični podaci');
+        $this->crud->field('zvanjeId')->label('Zvanje')->tab('Lični podaci');
+
+        $this->crud->field('rodjenjemesto')->size(3)->label('Mesto rođenja')->tab('Lični podaci');
+        $this->crud->field('rodjenjeopstina')->size(3)->label('Opština rođenja')->tab('Lični podaci');
+        $this->crud->field('rodjenjedrzava')->size(3)->label('Država rođenja')->tab('Lični podaci');
+        $this->crud->addField([
+            'name' => 'st_drzavljanstvoscg',
+            'label' => 'Državljanstvo SCG',
+            'tab' => 'Lični podaci',
+            'type' => 'select_from_array',
+            'options' => ['N' => 'Ne', 'D' => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
+        ]);
+        $this->crud->field('kontakttel')->size(4)->label('Broj telefona')->tab('Lični podaci');
+        $this->crud->field('mobilnitel')->size(4)->label('Broj mobilnog telefona')->tab('Lični podaci');
+        $this->crud->field('kontaktemail')->size(4)->label('imeil')->tab('Lični podaci')->type('email');
 
 //        prebivaliste
-        $this->crud->field('prebivalistebroj')->label('Poštanski broj')->tab('Podaci o prebivalištu');
-        $this->crud->field('prebivalistemesto')->label('Mesto')->tab('Podaci o prebivalištu');
-        $this->crud->field('opstinaId')->label('Opština')->tab('Podaci o prebivalištu');
-        $this->crud->field('prebivalisteadresa')->label('Adresa')->tab('Podaci o prebivalištu');
+        $this->crud->field('prebivalisteadresa')->size(6)->label('Adresa')->tab('Podaci o prebivalištu');
+        $this->crud->field('prebivalistemesto')->size(6)->label('Mesto')->tab('Podaci o prebivalištu');
+        $this->crud->field('prebivalistebroj')->size(4)->label('Poštanski broj')->tab('Podaci o prebivalištu');
+        $this->crud->field('opstinaId')->size(4)->label('Opština')->tab('Podaci o prebivalištu');
+        $this->crud->field('prebivalistedrzava')->size(4)->label('Država')->tab('Podaci o prebivalištu');
 
         // adresa za dostavu poste
-        $this->crud->field('ulica')->tab('Adresa za dostavu pošte');
-        $this->crud->field('broj')->hint('***Upisati "bb" ukoliko nema broj')->tab('Adresa za dostavu pošte');
-        $this->crud->field('podbroj')->tab('Adresa za dostavu pošte');
-        $this->crud->field('sprat')->tab('Adresa za dostavu pošte');
-        $this->crud->field('stan')->tab('Adresa za dostavu pošte');
-        $this->crud->field('postaOpstinaId')->label('Opština')->tab('Adresa za dostavu pošte');
-        $this->crud->field('posta_pb')->type('number')->label('Poštanski broj')->tab('Adresa za dostavu pošte');
-        $this->crud->field('posta_drzava')->label('Država')->tab('Adresa za dostavu pošte');
+        $this->crud->field('ulica')->size(5)->tab('Adresa za dostavu pošte');
+        $this->crud->field('broj')->size(3)->hint('***Upisati "bb" ukoliko nema broj')->tab('Adresa za dostavu pošte');
+        $this->crud->field('podbroj')->size(2)->tab('Adresa za dostavu pošte');
+        $this->crud->field('sprat')->size(1)->tab('Adresa za dostavu pošte');
+        $this->crud->field('stan')->size(1)->tab('Adresa za dostavu pošte');
+        $this->crud->field('posta_pb')->size(4)->type('number')->label('Poštanski broj')->tab('Adresa za dostavu pošte');
+        $this->crud->field('postaOpstinaId')->size(4)->label('Opština')->tab('Adresa za dostavu pošte');
+        $this->crud->field('posta_drzava')->size(4)->label('Država')->tab('Adresa za dostavu pošte');
 
 //        firma
-        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->tab('Podaci o firmi')->attributes(['readonly' => 'readonly']);
+        $this->crud->field('firmanaziv')->label('Naziv firme ako nema MB')->attributes(['readonly' => 'readonly'])->tab('Podaci o firmi');
+//        $this->crud->field('firmaopstinaid')->label('Opština firme')->attributes(['readonly' => 'readonly'])->tab('Podaci o firmi');
+//        $this->crud->field('firmafax')->label('Fax firme')->tab('Podaci o firmi');
         $this->crud->addField([
             'type' => 'relationship',
             'name' => 'firma',
@@ -1147,26 +1167,26 @@ class OsobaCrudController extends CrudController
             'tab' => 'Obrazovanje',
             'value' => '<div class="p-3 text-center" style="background-color: rgba(124,105,239,0.2)"><h4>OSNOVNE STUDIJE</h4></div>'
         ]);
-        $this->crud->field('diplfakultet')->label('Naziv fakulteta')->tab('Obrazovanje');
-        $this->crud->field('diplmesto')->label('Mesto')->tab('Obrazovanje');
-        $this->crud->field('dipldrzava')->label('Država')->tab('Obrazovanje');
-        $this->crud->field('diplodsek')->label('Odsek')->tab('Obrazovanje');
-        $this->crud->field('diplsmer')->label('Smer')->tab('Obrazovanje');
-        $this->crud->field('diplgodina')->label('Godina završetka')->tab('Obrazovanje');
-        $this->crud->field('diplbroj')->label('Broj diplome')->tab('Obrazovanje');
+        $this->crud->field('diplfakultet')->size(4)->label('Naziv fakulteta')->tab('Obrazovanje');
+        $this->crud->field('diplmesto')->size(4)->label('Mesto')->tab('Obrazovanje');
+        $this->crud->field('dipldrzava')->size(4)->label('Država')->tab('Obrazovanje');
+        $this->crud->field('diplodsek')->size(4)->label('Odsek')->tab('Obrazovanje');
+        $this->crud->field('diplsmer')->size(4)->label('Smer')->tab('Obrazovanje');
+        $this->crud->field('diplgodina')->size(2)->label('Godina završetka')->tab('Obrazovanje');
+        $this->crud->field('diplbroj')->size(2)->label('Broj diplome')->tab('Obrazovanje');
         $this->crud->addField([
             'name' => 'separatorMS',
             'type' => 'custom_html',
             'tab' => 'Obrazovanje',
             'value' => '<div class="p-3 text-center" style="background-color: rgba(124,105,239,0.2)"><h4>MASTER STUDIJE</h4></div>'
         ]);
-        $this->crud->field('mrfakultet')->label('Naziv fakulteta')->tab('Obrazovanje');
-        $this->crud->field('mrmesto')->label('Mesto')->tab('Obrazovanje');
-        $this->crud->field('mrdrzava')->label('Država')->tab('Obrazovanje');
-        $this->crud->field('mrodsek')->label('Odsek')->tab('Obrazovanje');
-        $this->crud->field('mrsmer')->label('Smer')->tab('Obrazovanje');
-        $this->crud->field('mrgodina')->label('Godina završetka')->tab('Obrazovanje');
-        $this->crud->field('mrbroj')->label('Broj diplome')->tab('Obrazovanje');
+        $this->crud->field('mrfakultet')->size(4)->label('Naziv fakulteta')->tab('Obrazovanje');
+        $this->crud->field('mrmesto')->size(4)->label('Mesto')->tab('Obrazovanje');
+        $this->crud->field('mrdrzava')->size(4)->label('Država')->tab('Obrazovanje');
+        $this->crud->field('mrodsek')->size(4)->label('Odsek')->tab('Obrazovanje');
+        $this->crud->field('mrsmer')->size(4)->label('Smer')->tab('Obrazovanje');
+        $this->crud->field('mrgodina')->size(2)->label('Godina završetka')->tab('Obrazovanje');
+        $this->crud->field('mrbroj')->size(2)->label('Broj diplome')->tab('Obrazovanje');
 
 //        funkcije
         $this->crud->addFields([
@@ -1175,6 +1195,7 @@ class OsobaCrudController extends CrudController
                 'label' => 'Funkcija id',
                 'tab' => 'Podaci o statusu u IKS',
                 'attributes' => ['readonly' => 'readonly'],
+                'wrapper' => ['class' => 'col-4'],
             ],
             'clanskupstine' => [
                 'name' => 'clanskupstine',
@@ -1183,6 +1204,7 @@ class OsobaCrudController extends CrudController
                 'options' => [0 => 'Ne', 1 => 'Da'],
                 'tab' => 'Podaci o statusu u IKS',
 //                'attributes' => ['readonly' => 'readonly'],
+                'wrapper' => ['class' => 'col-4'],
             ],
             'clan' => [
                 'name' => 'clan',
@@ -1191,19 +1213,19 @@ class OsobaCrudController extends CrudController
                 'options' => [-1 => 'Funkcioner', 0 => 'Nije član', 1 => 'Član', 100 => 'Na čekanju', 10 => 'Priprema se brisanje iz članstva'],
                 'tab' => 'Podaci o statusu u IKS',
 //                'attributes' => ['readonly' => 'readonly'],
+                'wrapper' => ['class' => 'col-4'],
             ],
         ]);
 
 //        portal
-        $this->crud->field('lozinka')->attributes(['disabled'=>'disabled'])->tab('Portal');
-        $this->crud->field('biografija')->tab('Portal');
-        $this->crud->field('licniweb')->label('Web')->tab('Portal');
+        $this->crud->field('licniweb')->size(3)->label('Web')->tab('Portal');
         $this->crud->addField([
             'name' => 'adresaprikazi',
             'label' => 'Prikaži adresu prebivališta',
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da', 2 => 'Prikaži samo grad i opštinu'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'telefonprikazi',
@@ -1211,6 +1233,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'mobilniprikazi',
@@ -1218,6 +1241,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'faxprikazi',
@@ -1225,6 +1249,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'mailprikazi',
@@ -1232,6 +1257,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'prikazisliku',
@@ -1239,6 +1265,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'dozvolareklamnimail',
@@ -1246,6 +1273,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3'],
         ]);
         $this->crud->addField([
             'name' => 'imalp',
@@ -1253,6 +1281,7 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
+            'wrapper' => ['class' => 'col-3 mt-2'],
         ]);
         $this->crud->addField([
             'name' => 'zaposlen',
@@ -1260,27 +1289,25 @@ class OsobaCrudController extends CrudController
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da', 3 => 'Penzioner'],
+            'wrapper' => ['class' => 'col-3 mt-2'],
         ]);
+        $this->crud->field('lozinka')->attributes(['disabled' => 'disabled'])->tab('Portal');
+        $this->crud->field('biografija')->tab('Portal');
 
 //        razno
-        $this->crud->field('napomena')->tab('Razno');
-        $this->crud->field('vrsta_poslova')->tab('Razno');
-        $this->crud->addField([
-            'name' => 'st_drzavljanstvoscg',
-            'label' => 'Državljanstvo SCG',
-            'tab' => 'Portal',
-            'type' => 'select_from_array',
-            'options' => ['N' => 'Ne', 'D' => 'Da'],
-        ]);
+        $this->crud->field('napomena')->size(6)->tab('Razno');
+        $this->crud->field('vrsta_poslova')->size(6)->tab('Razno');
         $this->crud->addField([
             'name' => 'temp_dms_password',
             'tab' => 'Razno',
             'attributes' => ['readonly' => 'readonly'],
+            'wrapper' => ['class' => 'col-6'],
         ]);
         $this->crud->addField([
             'name' => 'primary_serial',
             'tab' => 'Razno',
             'attributes' => ['readonly' => 'readonly'],
+            'wrapper' => ['class' => 'col-6'],
         ]);
         /*        $this->crud->addField([   // DateTime
                     'name' => 'created_at',

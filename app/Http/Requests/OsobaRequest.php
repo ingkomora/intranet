@@ -49,18 +49,22 @@ class OsobaRequest extends FormRequest
             'rodjenjemesto' => 'required',
             'rodjenjeopstina' => 'required',
             'rodjenjedrzava' => 'required',
+
             'prebivalistebroj' => 'required',
             'prebivalistemesto' => 'required',
-            'opstinaId' => 'required',
+            'prebivalistedrzava' => 'required',
+            'opstinaId' => 'required', // prebivalisteopstinaid
             'prebivalisteadresa' => 'required',
+
             'ulica' => 'required',
             'broj' => 'required',
 //            'podbroj' => 'required',
 //            'sprat' => 'required',
 //            'stan' => 'required',
-            'posta_opstina_id' => 'required',
+            'postaOpstinaId' => 'required',
             'posta_pb' => 'required | integer',
             'posta_drzava' => 'required',
+
             'firma' => 'required',
             'diplfakultet' => 'required',
             'diplmesto' => 'required',
