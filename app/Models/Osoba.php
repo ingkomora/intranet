@@ -163,7 +163,7 @@ class Osoba extends Model
      */
     public function firma()
     {
-        return $this->belongsTo('App\Models\Firma', 'firma_mb');
+        return $this->belongsTo('App\Models\Firma', 'firma_mb', 'mb');
     }
 
     /**
@@ -528,6 +528,21 @@ class Osoba extends Model
             else unset($this->osnovne_strudije_array[$key]);
         }
         return implode(', ', $this->osnovne_strudije_array);
+    }
+
+    public function getSpojenDatumRodjenjaAttribute()
+    {
+        if (empty($this->rodjenjedan) and empty($this->rodjenjemesec) and empty($this->rodjenjegodina)) {
+            $result = '-';
+        } else {
+            $result = "$this->rodjenjedan.$this->rodjenjemesec.$this->rodjenjegodina";
+        }
+        return $result;
+    }
+
+    public function getDatumRodjenja()
+    {
+        return !empty($this->datumrodjenja) ? Carbon::parse($this->datumrodjenja)->format('d.m.Y') : '-';
     }
 
 

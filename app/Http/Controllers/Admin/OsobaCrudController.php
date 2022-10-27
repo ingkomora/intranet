@@ -114,38 +114,51 @@ class OsobaCrudController extends CrudController
             'name' => 'rodjenjedrzava',
             'label' => 'Država',
         ],
-        'rodjenjedan' => [
-            'name' => 'rodjenjedan',
-            'label' => 'Dan',
+//        'rodjenjedan' => [
+//            'name' => 'rodjenjedan',
+//            'label' => 'Dan',
+//        ],
+//        'rodjenjemesec' => [
+//            'name' => 'rodjenjemesec',
+//            'label' => 'Mesec',
+//        ],
+//        'rodjenjegodina' => [
+//            'name' => 'rodjenjegodina',
+//            'label' => 'Godina',
+//        ],
+        'spojen_datum_rodjenja' => [
+            'name' => 'datum_rodjenja',
+            'label' => 'Datum rođenja (spojen)',
+            'type' => 'model_function',
+            'function_name' => 'getSpojenDatumRodjenjaAttribute',
         ],
-        'rodjenjemesec' => [
-            'name' => 'rodjenjemesec',
-            'label' => 'Mesec',
+// ne moze zato sto kad je null u bazi auto castuje u danasnji datum, uradjeno preko custom model funkcije
+//        'datumrodjenja' => [
+//            'name' => 'datumrodjenja',
+//            'label' => 'Datum',
+//            'type' => 'date',
+//            'format' => 'DD.MM.Y.',
+//        ],
+        'datumrodjenja' => [
+            'name' => 'datumrodjenja',
+            'label' => 'Datum rođenja',
+            'type' => 'model_function',
+            'function_name' => 'getDatumRodjenja',
         ],
-        'rodjenjegodina' => [
-            'name' => 'rodjenjegodina',
-            'label' => 'Godina',
-        ],
-        'rodjenjeopstinaid' => [
+        'rodjenjeopstinaid' => [  // columns with same relationship name
             'name' => 'opstinaId',
             'label' => 'Opština (relacija)',
             'type' => 'relationship',
             'attribute' => 'ime',
         ],
-        'rodjenjeinodrzava' => [
-            'name' => 'rodjenjeinodrzava',
-            'label' => 'Država',
-        ],
-        'rodjenjeinomesto' => [
-            'name' => 'rodjenjeinomesto',
-            'label' => 'Mesto',
-        ],
-        'datumrodjenja' => [
-            'name' => 'datumrodjenja',
-            'label' => 'Datum',
-            'type' => 'date',
-            'format' => 'DD.MM.Y.'
-        ],
+//        'rodjenjeinodrzava' => [
+//            'name' => 'rodjenjeinodrzava',
+//            'label' => 'Država',
+//        ],
+//        'rodjenjeinomesto' => [
+//            'name' => 'rodjenjeinomesto',
+//            'label' => 'Mesto',
+//        ],
 
 //        adrese
         'adrese' => [
@@ -157,31 +170,32 @@ class OsobaCrudController extends CrudController
             'label' => 'ADRESA PREBIVALIŠTA',
             'name' => 'prebivaliste',
         ],
-        'prebivalistedrzava' => [
-            'name' => 'prebivalistedrzava',
-            'label' => 'Država',
-        ],
-        'prebivalistebroj' => [
-            'name' => 'prebivalistebroj',
-            'label' => 'Poštanski broj',
+        'prebivalisteadresa' => [
+            'name' => 'prebivalisteadresa',
+            'label' => 'Adresa',
         ],
         'prebivalistemesto' => [
             'name' => 'prebivalistemesto',
             'label' => 'Mesto',
         ],
-        'prebivalisteopstinaid' => [
+        'prebivalistebroj' => [
+            'name' => 'prebivalistebroj',
+            'label' => 'Poštanski broj',
+        ],
+        'prebivalisteopstinaid' => [ // columns with same relationship name
             'name' => 'opstinaId',
             'label' => 'Opština (relacija)',
             'type' => 'relationship',
             'attribute' => 'ime',
+            'key' => 'prebivalisteopstinaid',
         ],
         'prebivalisteopstina' => [
             'name' => 'prebivalisteopstina',
             'label' => 'Opština',
         ],
-        'prebivalisteadresa' => [
-            'name' => 'prebivalisteadresa',
-            'label' => 'Adresa',
+        'prebivalistedrzava' => [
+            'name' => 'prebivalistedrzava',
+            'label' => 'Država',
         ],
         'posta' => [
             'label' => 'ADRESA ZA DOSTAVLJANJE POŠTE',
@@ -192,11 +206,42 @@ class OsobaCrudController extends CrudController
         'podbroj',
         'sprat',
         'stan',
+        'posta_pb' => [
+            'name' => 'posta_pb',
+            'label' => 'Poštanski broj',
+        ],
+        'postaOpstinaId' => [
+            'name' => 'postaOpstinaId',
+            'label' => 'Opština (relacija)',
+            'type' => 'relationship',
+            'attribute' => 'ime',
+        ],
+        'posta_drzava' => [
+            'name' => 'posta_drzava',
+            'label' => 'Država',
+        ],
 
 //        firma
         'firma' => [
             'label' => 'PODACI O FIRMI',
             'name' => 'firma',
+        ],
+        // iz tabele firme
+        'firma_novo' => [
+            'label' => 'PODACI IZ TABELE FIRME',
+            'name' => 'firma_novo',
+        ],
+        'firma_mb' => [
+            'name' => 'firma',
+            'type' => 'relationship',
+            'key' => 'firma_mb',
+            'attribute' => 'naziv_pib_mb_adresa_mesto',
+            'limit' => 500,
+        ],
+        // iz tabele tosoba
+        'firma_staro' => [
+            'label' => 'PODACI IZ TABELE OSOBE',
+            'name' => 'firma_staro',
         ],
         'firmanaziv' => [
             'name' => 'firmanaziv',
@@ -221,7 +266,7 @@ class OsobaCrudController extends CrudController
         ],
         'firmaemail' => [
             'name' => 'firmaemail',
-            'label' => 'Mejl',
+            'label' => 'imejl',
             'type' => 'email',
         ],
         'firmaopstinaid' => [
@@ -234,11 +279,6 @@ class OsobaCrudController extends CrudController
             'name' => 'firmafax',
             'label' => 'Faks',
             'type' => 'phone',
-        ],
-        'firma_mb' => [
-            'name' => 'firma',
-            'type' => 'relationship',
-            'attribute' => 'naziv_mb',
         ],
 
 //        obrazovanje
@@ -445,7 +485,7 @@ class OsobaCrudController extends CrudController
         ],
         'mailprikazi' => [
             'name' => 'mailprikazi',
-            'label' => 'Prikaži mejl adresu',
+            'label' => 'Prikaži imejl adresu',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
         ],
@@ -457,7 +497,7 @@ class OsobaCrudController extends CrudController
         ],
         'dozvolareklamnimail' => [
             'name' => 'dozvolareklamnimail',
-            'label' => 'Dozvoli prijem obaveštenja na mejl',
+            'label' => 'Dozvoli prijem obaveštenja na imejl',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
         ],
@@ -533,7 +573,7 @@ class OsobaCrudController extends CrudController
         $this->crud->removeColumns([
 //            separatori
 //            start
-            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma', 'obrazovanje', 'osiguranjasection', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
+            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma', 'firma_staro', 'firma_novo', 'obrazovanje', 'osiguranjasection', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
 //            end
 
             'devojackoprezime',
@@ -837,6 +877,35 @@ class OsobaCrudController extends CrudController
                         </script>
                         '
         ]);
+//        firma
+//        start
+        $this->crud->modifyColumn('firma_staro', [
+            'type' => 'custom_html',
+            'value' => '<div id="firmastaroseparator"></div>
+                        <script>
+                            var row = document.getElementById("firmastaroseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("firmastaroseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
+                        </script>
+                        '
+        ]);
+        $this->crud->modifyColumn('firma_novo', [
+            'type' => 'custom_html',
+            'value' => '<div id="firmanovoseparator"></div>
+                        <script>
+                            var row = document.getElementById("firmanovoseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("firmanovoseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.08)";
+                        </script>
+                        '
+        ]);
+//        end
 
 //        obrazovanje
 //        start
@@ -1253,7 +1322,7 @@ class OsobaCrudController extends CrudController
         ]);
         $this->crud->addField([
             'name' => 'mailprikazi',
-            'label' => 'Prikaži mejl adresu',
+            'label' => 'Prikaži imejl adresu',
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
@@ -1269,7 +1338,7 @@ class OsobaCrudController extends CrudController
         ]);
         $this->crud->addField([
             'name' => 'dozvolareklamnimail',
-            'label' => 'Dozvoli prijem obaveštenja na mejl',
+            'label' => 'Dozvoli prijem obaveštenja na imejl',
             'tab' => 'Portal',
             'type' => 'select_from_array',
             'options' => [0 => 'Ne', 1 => 'Da'],
