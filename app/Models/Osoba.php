@@ -144,6 +144,23 @@ class Osoba extends Model
         return Opstina::find($opstina_id);
     }
 
+    public function getOsiguranjaData()
+    {
+        $osiguranja = $this->osiguranja;
+
+        $results = $osiguranja->map(function ($osiguranje, $value) {
+            return $osiguranje->osiguranje_data;
+        });
+//        dd($results);
+        $result = '';
+        $counter = 0;
+        foreach ($results as $string) {
+            $result .= $counter === 0 ? "$string" : "<br>$string";
+            $counter++;
+        }
+        return $result;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -348,7 +365,9 @@ class Osoba extends Model
                 'datum_provere',
                 'created_at',
                 'updated_at',
-            ]);
+            ])
+            ->orderByDesc('polisa_datum_pocetka')
+            ;
     }
 
     public function aktivnaOsiguranja()

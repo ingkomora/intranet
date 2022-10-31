@@ -222,9 +222,9 @@ class OsobaCrudController extends CrudController
         ],
 
 //        firma
-        'firma' => [
+        'firma_sep' => [
             'label' => 'PODACI O FIRMI',
-            'name' => 'firma',
+            'name' => 'firma_sep',
         ],
         // iz tabele firme
         'firma_novo' => [
@@ -405,22 +405,15 @@ class OsobaCrudController extends CrudController
         'docunetsmer',
 
 //        osiguranja
-        /*        'osiguranjasection' => [
-                    'label' => 'PODACI O OSIGURANJU',
-                    'name' => 'osiguranjasection',
-                ],
-                'osiguranjetip' => [
-                    'name' => 'osiguranjetip',
-                    'label' => 'Tip osiguranja',
-                    'type' => 'select2',
-                    'model' => 'App\Models\Osiguranje',
-                    'attribute', 'osiguranjeTip.naziv'
-                ],
-                'osiguranja' => [
-                    'name' => 'osiguranja.firmaOsiguravajucaKuca',
-                    'label' => 'Osiguravajuća kuća',
-                    'attribute', 'naziv'
-                ],*/
+        'osiguranjasection' => [
+            'label' => 'PODACI O OSIGURANJU',
+            'name' => 'osiguranjasection',
+        ],
+
+        'osiguranja_data' => [
+            'name' => 'osiguranja_data',
+            'label' => 'Osiguranja',
+        ],
 
 
 //        funkcije
@@ -573,23 +566,13 @@ class OsobaCrudController extends CrudController
         $this->crud->removeColumns([
 //            separatori
 //            start
-            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma', 'firma_staro', 'firma_novo', 'obrazovanje', 'osiguranjasection', 'dipl', 'mr', 'funkcije', 'portal', 'razno',
+            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma_sep', 'firma_staro', 'firma_novo', 'obrazovanje', 'dipl', 'mr', 'osiguranjasection', 'funkcije', 'portal', 'razno',
 //            end
 
             'devojackoprezime',
             'prezime_staro',
-            /*'zvanje' => [
-                'name' => 'zvanjeId',
-                'type' => 'relationship',
-                'label' => 'Zvanje',
-            ],*/
-            'titula' => [
-                'name' => 'titula',
-                'type' => 'select',
-                'entity' => 'titulaId',
-                'model' => 'App\Models\Titula',
-                'attribute' => 'naziv',
-            ],
+//            'zvanje',
+            'titula',
             'kontakttel',
             'mobilnitel',
             'kontaktfax',
@@ -607,25 +590,27 @@ class OsobaCrudController extends CrudController
             'rodjenjeinodrzava',
             'rodjenjeinomesto',
             'datumrodjenja',
+            'datum_rodjenja',
+            'spojen_datum_rodjenja',
 
 //        adrese
 //        prebivaliste
-            'prebivalisteopstinaid' => [
-                'name' => 'opstinaId',
-                'type' => 'relationship',
-                'attribute' => 'ime',
-            ],
+            'prebivalisteopstinaid',
             'prebivalistebroj',
             'prebivalistemesto',
             'prebivalisteopstina',
             'prebivalisteadresa',
             'prebivalistedrzava',
+            'opstinaId',
 //        posta
             'ulica',
             'broj',
             'podbroj',
             'sprat',
             'stan',
+            'posta_pb',
+            'posta_drzava',
+            'postaOpstinaId',
 
 //        firma
             'firmanaziv',
@@ -634,17 +619,10 @@ class OsobaCrudController extends CrudController
             'firmaweb',
             'firmatel',
             'firmaemail',
-            'firmaopstinaid' => [
-                'name' => 'opstinaId',
-                'type' => 'relationship',
-                'attribute' => 'ime',
-            ],
+            'firmaopstinaid',
             'firmafax',
-            'firma_mb' => [
-                'name' => 'firma',
-                'type' => 'relationship',
-                'attribute' => 'naziv_mb',
-            ],
+            'firma_mb',
+            'firma',
 
 //        obrazovanje
 //        dipl
@@ -724,7 +702,7 @@ class OsobaCrudController extends CrudController
             'primary_serial',
 
 //        razno
-//    'napomena',
+            'napomena',
             'vrsta_poslova',
             'bolonja',
             'st_drzavljanstvoscg',
@@ -939,6 +917,7 @@ class OsobaCrudController extends CrudController
         ]);
 //        end
 
+//        osiguranja
         $this->crud->modifyColumn('osiguranjasection', [
             'type' => 'custom_html',
             'value' => '<div id="osiguranjaseparator"></div>
@@ -952,7 +931,13 @@ class OsobaCrudController extends CrudController
                         </script>
                         '
         ]);
+        $this->crud->modifyColumn('osiguranja_data', [
+            'type'=>'model_function',
+            'function_name'=>'getOsiguranjaData',
+        ]);
 
+
+//        rodjenje
         $this->crud->modifyColumn('rodjenje', [
             'type' => 'custom_html',
             'value' => '<div id="rseparator"></div>
@@ -1010,6 +995,7 @@ class OsobaCrudController extends CrudController
         ]);
 //        end
 
+//        firma
         $this->crud->modifyColumn('firma', [
             'type' => 'custom_html',
             'value' => '<div id="fseparator"></div>
@@ -1091,17 +1077,6 @@ class OsobaCrudController extends CrudController
             ]
         ]);
 
-//        todo: link
-        /*        $this->crud->modifyColumn('firmaweb', [
-                    'wrapper' => [
-                        'href' => function ($entry) {
-                            dd($entry->id);
-                            return '//' . $entry->firmaweb;
-                        },
-                        'class' => 'btn btn-sm btn-outline-info mr-1',
-                        'target' => '_blank',
-                    ]
-                ]);*/
     }
 
     protected function setupCreateOperation()
