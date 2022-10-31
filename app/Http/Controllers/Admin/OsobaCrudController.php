@@ -624,6 +624,8 @@ class OsobaCrudController extends CrudController
             'firma_mb',
             'firma',
 
+            'osiguranja_data',
+
 //        obrazovanje
 //        dipl
             'diplfakultet',
@@ -932,8 +934,8 @@ class OsobaCrudController extends CrudController
                         '
         ]);
         $this->crud->modifyColumn('osiguranja_data', [
-            'type'=>'model_function',
-            'function_name'=>'getOsiguranjaData',
+            'type' => 'model_function',
+            'function_name' => 'getOsiguranjaData',
         ]);
 
 
