@@ -53,7 +53,7 @@ class Firma extends Model
     /**
      * @var array
      */
-    protected $id = ['id'];
+    protected $guarded = ['id'];
 
     /**
      * Indicates if the model should be timestamped.
