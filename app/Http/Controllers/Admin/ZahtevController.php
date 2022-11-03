@@ -433,6 +433,10 @@ class ZahtevController extends Controller
                     $broj = $licenca['broj_zahteva'];
                     $tip = 'broj_zahteva';
                 }
+            } else if (!empty($licenca['tip'])) {
+                $broj = $licenca['tip'];
+                $tip = 'tip_licence';
+                $jmbg = $licenca['jmbg'];
             } else if (!empty($licenca['broj_prijave'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_prijave'], 'siprijava');
                 if (is_null($licenca['jmbg'])) {
@@ -447,7 +451,15 @@ class ZahtevController extends Controller
                 $broj = $licenca['broj'];
                 $tip = 'broj_licence';
             }
-//            dd($licenca['jmbg']);
+
+            // da li postoji licenca
+            $licenca_exist = Licenca::find($licenca['broj']);
+            if (!empty($licenca_exist)) {
+                $messageLicencaNOK .= ' Licenca broj ' . $licenca['broj'] . ' se vec nalazi u Registru!';
+                $countNOK++;
+                continue;
+            }
+
             if (!is_null($licenca['jmbg'])) {
                 if (!$this->checkOsoba(trim($licenca['jmbg']))) {
                     $falseJMBG[$licenca['jmbg']] = 'Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
@@ -467,24 +479,18 @@ class ZahtevController extends Controller
                 continue;
             }
 
-            $respZ = $this->getZahtevLicenca($broj, $tip);
+            // da li ima i koji je zahtev za licencu
+            $respZ = $this->getZahtevLicenca($broj, $tip, $jmbg);
 
             if ($respZ->status) {
-                if ($respZ->zahtev->status <= REQUEST_IN_PROGRESS) {
-//                  AZURIRAJ ZAHTEV
-                    $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
-                } else {
-//                  ZAHTEV JE VEC OBRADJEN
-                    $messageLicencaNOK .= " Zahtev za broj licence: " . $licenca['broj'] . ' je ' . strtoupper($respZ->zahtev->status) . ",";
-                    $countNOK++;
-                }
+                // AZURIRAJ ZAHTEV
+                $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
             } else {
-//              KREIRAJ ZAHTEV
+                // KREIRAJ ZAHTEV
                 $respZ = $this->kreirajZahtevLicenca($licenca);
             }
-//            TODO prikazati status licence u toasteru i zasto explode!!!
+
             if ($respZ->status) {
-//            dd($respZ);
                 $this->log($respZ->zahtev, LICENCE, $respZ->message);
                 $respL = $this->getLicenca($respZ->zahtev->licenca_broj);
                 if ($respZ->status) {
@@ -575,37 +581,76 @@ class ZahtevController extends Controller
      * @param string $tip
      * @return \stdClass
      */
-    private function getZahtevLicenca($broj, $tip = 'broj_licence')
+    private function getZahtevLicenca($broj, $tip = 'broj_licence', $jmbg = ''): \stdClass
     {
         $response = new \stdClass();
+        $response->status = FALSE;
+
         switch ($tip) {
             case 'broj_zahteva':
-                $zahtev = ZahtevLicenca::where('id', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('id', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
             case 'broj_licence':
-                $zahtev = ZahtevLicenca::where('licenca_broj', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('licenca_broj', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
             case 'broj_prijave':
-                $zahtev = ZahtevLicenca::where('si_prijava_id', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('si_prijava_id', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
+                break;
+            case 'tip_licence':
+                $zahtevi = ZahtevLicenca::where('licencatip', $broj)->where('osoba', $jmbg)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
         }
-        if (!$zahtev->isEmpty()) {
-            if (count($zahtev) > 1) {
-//                IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE
-                $response->status = FALSE;
-                $response->message = "IMA VIŠE ZAHTEVA ZA ISTI BROJ: $broj";
-            } else if (count($zahtev) == 1) {
-//                IMA JEDAN ZAHTEV
+
+        if ($zahtevi->isNotEmpty()) {
+
+            if ($zahtevi->count() > 1) {
+                // IMA VIŠE ZAHTEVA
+
+                // da li u kolekciji postoji neki zahtev sa statusom 22 (automatski)
+                if ($zahtevi->contains('status', ZAHTEV_LICENCA_AUTOMATSKI)) {
+
+                    $zahtev_automatski = $zahtevi->where('status', ZAHTEV_LICENCA_AUTOMATSKI)->first();
+
+                    // svi ostali zahtevi se otkazuju
+                    $zahtevi->each(function ($model) use ($zahtev_automatski) {
+                        if ($model->id != $zahtev_automatski->id) {
+                            $model->status = REQUEST_CANCELED;
+                            $model->save();
+                        }
+                    });
+                    $response->status = TRUE;
+                    $response->zahtev = $zahtev_automatski;
+                    $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
+
+                } else {
+                    // zahtevi sa drugim statusima (koji nisu 22)
+                    $zahtev = $zahtevi->first();
+
+                    $zahtevi->each(function ($model) use ($zahtev) {
+                        if ($model->id != $zahtev->id) {
+                            $model->status = REQUEST_CANCELED;
+                            $model->save();
+                        }
+                    });
+                    $response->status = TRUE;
+                    $response->zahtev = $zahtev;
+                    $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
+
+                }
+
+            } else {
+                // IMA JEDAN ZAHTEV
                 $response->status = TRUE;
-                $response->zahtev = $zahtev[0];
-                $response->message = "Pronadjen zahtev: " . $response->zahtev->id;
+                $response->zahtev = $zahtevi->first();
+                $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
             }
         } else {
-//                NEMA ZAHTEVA
+            // NEMA ZAHTEVA
             $response->status = FALSE;
             $response->broj = $broj;
             $response->zahtev = NULL;
         }
+
         return $response;
     }
 
@@ -617,15 +662,21 @@ class ZahtevController extends Controller
     private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca)
     {
         $response = new \stdClass();
+
+        // LicencaTip model na osnovu odabranog tipa licence iz formulara
         $tipLicence = LicencaTip::find($licenca['tip']);
+
         if (is_null($tipLicence)) {
             $response->zahtev = $zahtev;
             $response->message = "neispravan tip licence: " . $licenca['tip'];
             $response->status = FALSE;
             return $response;
         }
+
+        // Osoba model na osnovu unetog jmbg iz formulara
         $osoba = Osoba::find($licenca['jmbg']);
 
+        // postavljanje vrednosti
         $zahtev->osoba = $licenca['jmbg'];
         $zahtev->licenca_broj = $licenca['broj'];
         $zahtev->licenca_broj_resenja = $licenca['broj_resenja'];
@@ -647,7 +698,7 @@ class ZahtevController extends Controller
             $response->status = FALSE;
         } else if ($document->count() == 1) {
             $document = $document->first();
-        } else { // ako empty($document)
+        } else { // nema dokument
             $document = new Document();
         }
 
@@ -658,6 +709,7 @@ class ZahtevController extends Controller
 
         $label = '02-' . $osoba->zvanjeId->zvanje_grupa_id;
 
+        // trazimo skraceni delovodnik
         $registry = Registry::where('status_id', AKTIVAN)
             ->whereHas('registryDepartmentUnit', function ($q) use ($label) {
                 $q->where('label', "$label");
@@ -667,11 +719,20 @@ class ZahtevController extends Controller
             })
             ->get();
 
-        if ($registry->count() != 1) {
-//            todo: greska
+
+        if (empty($registry)) {
+            // nema
+            $response->message = "Nije pronadjen delovodnik prilikom kreiranja zahteva broj $zahtev->id";
+            $response->status = FALSE;
+        } else if ($registry->count() > 1) {
+            // ima vise od 1
+            $response->message = "Postoji {$registry->count()} pronadjenih delovodnika prilikom kreiranja zahteva broj $zahtev->id";
+            $response->status = FALSE;
         } else {
+            // ima tacno 1
             $registry = $registry->first();
         }
+
         if (empty($document->registry_number)) {
             $registry->counter++;
             $document->registry_id = $registry->id;
@@ -679,6 +740,7 @@ class ZahtevController extends Controller
         }
         $document->user_id = backpack_user()->id;
         $document->valid_from = $zahtev->prijem;
+
 
         if ($document->save()) {
 //            dd($document);
