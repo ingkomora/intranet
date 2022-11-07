@@ -99,7 +99,7 @@ trait PromenaPodatakaObradaBulkOperation
 
             } else if ($zahtev->obradjen === 0 or $zahtev->obradjen === 300) {
                 foreach ($zahtev->osoba_related_fields as $zahtev_field => $osoba_field) {
-                    if (!empty($zahtev->{$zahtev_field})) {
+//                    if (!empty($zahtev->{$zahtev_field})) {
                         if ($osoba->{$osoba_field} !== $zahtev->{$zahtev_field}) {
                             $osoba->{$osoba_field} = $zahtev->{$zahtev_field};
                             $azurna_polja_u_bazi &= FALSE;
@@ -116,7 +116,7 @@ trait PromenaPodatakaObradaBulkOperation
                                 $mail_data->fields[$zahtev->public_fields[$zahtev_field]]['neazurirano'] = $osoba->{$osoba_field}; // polja koja se azuriraju
                             }
                         }
-                    }
+//                    }
                 }
 
                 $result['azurna_polja_u_bazi'][$id] = $azurna_polja_u_bazi;
