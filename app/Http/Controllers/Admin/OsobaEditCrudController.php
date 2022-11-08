@@ -183,7 +183,7 @@ class OsobaEditCrudController extends CrudController
 
         if (!backpack_user()->hasRole(['admin'])) {
             $this->crud->denyAccess(['create']);
-        } else if (!backpack_user()->hasPermissionTo('azuriranje adresa')) {
+        } else if (!backpack_user()->hasPermissionTo('update addresses')) {
             $this->crud->denyAccess(['create']);
         }
 
