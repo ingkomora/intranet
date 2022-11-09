@@ -26,13 +26,15 @@ class ZavodjenjeController extends Controller
     protected $result;
     protected $brprijava;
     protected $zavodjenje = [
+        // document_category_id' => [<document_category_id> => <request_category_id>, ...]
         'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblastsi', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
         'licence' => ['document_category_id' => [5, 25], 'registry_type' => 'oblast', 'url' => 'licence', 'statusRel' => 'statusId', 'statusCol' => 'status', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
         'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2, 27 => 1, 28 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
         'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5, 29 => 4, 30 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
         'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
         'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
-        'registrydatadelete' => ['document_category_id' => [36 => 11], 'registry_type' => '01', 'url' => 'registrydatadelete', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za brisanje podataka upisanih u Registar'],
+        'registrydataupdate' => ['document_category_id' => [7 => 9], 'registry_type' => '01', 'url' => 'registrydataupdate', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za promenu podataka upisanih u Registar'],
+        'registryuverenje' => ['document_category_id' => [9 => 8], 'registry_type' => '01', 'url' => 'registryuverenje', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje uverenja o podacima upisanim u Registar'],
     ];
 
     public function show($type)
