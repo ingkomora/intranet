@@ -116,6 +116,22 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestCategory = [11];
                 $this->requestableModel = '\App\Models\Request';
                 break;
+            case 'registerrequestregistrydataupdate':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za promenu podataka upisanih u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydataupdate');
+                CRUD::addClause('whereIn', 'request_category_id', [9]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [9];
+                $this->requestableModel = '\App\Models\Request';
+                break;
+            case 'registerrequestregistryuverenje':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za izdavanje uverenja o podacima upisanim u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistryuverenje');
+                CRUD::addClause('whereIn', 'request_category_id', [8]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [8];
+                $this->requestableModel = '\App\Models\Request';
+                break;
         }
 
         $this->crud->set('show.setFromDb', FALSE);
@@ -170,8 +186,8 @@ class RegisterRequestCrudController extends CrudController
         if (\Request::segment(2) == 'registerrequestsfl') {
             CRUD::addColumn('note')->beforeColumn('status');
 
-            $this->crud->setColumnDetails('note',[
-                'label'=> 'Licenca',
+            $this->crud->setColumnDetails('note', [
+                'label' => 'Licenca',
             ]);
         }
 
