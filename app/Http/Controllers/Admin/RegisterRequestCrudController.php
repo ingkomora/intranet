@@ -98,7 +98,6 @@ class RegisterRequestCrudController extends CrudController
                 $allowCreate = TRUE;
 //                $this->requestableModel = '\App\Models\Licenca';
                 $this->requestableModel = '\App\Models\ZahtevLicenca';
-
                 break;
             case 'registerrequestresenjeclanstvo':
                 CRUD::setEntityNameStrings('zahtev', 'Rešenja o prestanku i brisanju iz članstva');
@@ -107,6 +106,14 @@ class RegisterRequestCrudController extends CrudController
 //                CRUD::addClause('whereHas', 'documents');
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [1, 2];
+                $this->requestableModel = '\App\Models\Request';
+                break;
+            case 'registerrequestregistrydatadelete':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za brisanje podataka upisanih u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydatadelete');
+                CRUD::addClause('whereIn', 'request_category_id', [11]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [11];
                 $this->requestableModel = '\App\Models\Request';
                 break;
         }

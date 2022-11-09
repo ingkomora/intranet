@@ -91,11 +91,12 @@
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestclanstvo') }}'> Zahtevi članstvo</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestmirovanjeclanstva') }}'> Zahtevi mirovanje</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydatadelete') }}'> Zahtevi za brisanje podataka iz Registra</a></li>
             <li class="divider">
             <li class="nav-title">Delovodnici</li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document') }}'> Delovodnici</a></li>
             <li class="divider">
-            @role('admin')
+                @role('admin')
             <li class="nav-title">Admin</li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestpromenapodataka') }}'> Zahtevi za promenu podataka</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestresenjeclanstvo') }}'> Rešenja članstvo</a></li>
