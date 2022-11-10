@@ -98,7 +98,6 @@ class RegisterRequestCrudController extends CrudController
                 $allowCreate = TRUE;
 //                $this->requestableModel = '\App\Models\Licenca';
                 $this->requestableModel = '\App\Models\ZahtevLicenca';
-
                 break;
             case 'registerrequestresenjeclanstvo':
                 CRUD::setEntityNameStrings('zahtev', 'Rešenja o prestanku i brisanju iz članstva');
@@ -107,6 +106,30 @@ class RegisterRequestCrudController extends CrudController
 //                CRUD::addClause('whereHas', 'documents');
                 $this->requestCategoryType = 1;
                 $this->requestCategory = [1, 2];
+                $this->requestableModel = '\App\Models\Request';
+                break;
+            case 'registerrequestregistrydatadelete':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za brisanje podataka upisanih u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydatadelete');
+                CRUD::addClause('whereIn', 'request_category_id', [11]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [11];
+                $this->requestableModel = '\App\Models\Request';
+                break;
+            case 'registerrequestregistrydataupdate':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za promenu podataka upisanih u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydataupdate');
+                CRUD::addClause('whereIn', 'request_category_id', [9]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [9];
+                $this->requestableModel = '\App\Models\Request';
+                break;
+            case 'registerrequestregistryuverenje':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za izdavanje uverenja o podacima upisanim u Registar');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistryuverenje');
+                CRUD::addClause('whereIn', 'request_category_id', [8]);
+                $this->requestCategoryType = 2;
+                $this->requestCategory = [8];
                 $this->requestableModel = '\App\Models\Request';
                 break;
         }
@@ -163,8 +186,8 @@ class RegisterRequestCrudController extends CrudController
         if (\Request::segment(2) == 'registerrequestsfl') {
             CRUD::addColumn('note')->beforeColumn('status');
 
-            $this->crud->setColumnDetails('note',[
-                'label'=> 'Licenca',
+            $this->crud->setColumnDetails('note', [
+                'label' => 'Licenca',
             ]);
         }
 

@@ -31,7 +31,7 @@ class Referenca extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'treferenca';
@@ -39,14 +39,14 @@ class Referenca extends Model
     /**
      * @var array
      */
-    protected $fillable = ['osoba', 'vrstaplana', 'uloga', 'broj', 'godinaizrade', 'godinausvajanja', 'lokacijamesto', 'lokacijaopstina', 'lokacijadrzava', 'firma', 'naziv', 'lokacijaadresa', 'investitor', 'odgprojektant','odgovorno_lice_licenca_id'];
+    protected $fillable = ['osoba', 'vrstaplana', 'uloga', 'broj', 'godinaizrade', 'godinausvajanja', 'lokacijamesto', 'lokacijaopstina', 'lokacijadrzava', 'firma', 'naziv', 'lokacijaadresa', 'investitor', 'odgprojektant', 'odgovorno_lice_licenca_id'];
 
     /**
      * Indicates if the model should be timestamped.
-     * 
+     *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -83,7 +83,8 @@ class Referenca extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function siPrijave() {
+    public function siPrijave()
+    {
         return $this->belongsToMany('App\Models\SiPrijava', 'referenca_si_prijava', 'referenca_id', 'si_prijava_id')
             ->using('App\Models\ReferencaSiPrijava')
             ->withPivot([
@@ -95,13 +96,21 @@ class Referenca extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function zahteviLicence() {
+    public function zahteviLicence()
+    {
         return $this->belongsToMany('App\Models\ZahtevLicenca', 'referenca_licenca_zahtev', 'referenca_id', 'licenca_zahtev_id')
             ->using('App\Models\ReferencaLicencaZahtev')
             ->withPivot([
                 'created_at',
                 'updated_at',
             ]);
+    }
+
+    public function getDataReferenceToArrayAttribute(): string
+    {
+        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id);
+        // todo: dodati jos informacija ako treba
+        return !is_null($odgovorno_lice) ? $odgovorno_lice->osobaId->ime_prezime_licence : '-';
     }
 
 }

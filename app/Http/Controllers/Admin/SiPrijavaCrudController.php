@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\PrijavaRequest;
 use App\Http\Requests\SiPrijavaRequest;
+use App\Models\Document;
+use App\Models\Licenca;
+use App\Models\Osoba;
+use App\Models\Referenca;
 use App\Models\RegOblast;
 use App\Models\RegPodoblast;
 use App\Models\Sekcija;
 use App\Models\SiPrijava;
 use App\Models\SiVrsta;
 use App\Models\VrstaPosla;
+use App\Models\ZahtevLicenca;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanel;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Backpack\CRUD\app\Library\Widget;
 
 /**
  * Class PrijavaCrudController
@@ -27,20 +32,35 @@ class SiPrijavaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use Operations\RegisterRequestBulkOperation;
 
     protected
-        $column_deffinition_array = [
+        $column_definition_array_admin = [
         'id' => [
             'name' => 'id',
             'label' => 'Broj prijave',
         ],
-        'osoba_id',
+        'status_prijave' => [
+            'name' => 'status',
+            'label' => 'Status',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+        ],
+        'osoba_id' => ['name' => 'osoba_id', 'label' => 'jmbg'],
         'osoba' => [
             'name' => 'osoba',
             'type' => 'relationship',
             'label' => 'Ime prezime',
             'attribute' => 'full_name',
+        ],
+        'documents' => [
+            'name' => 'documents',
+            'type' => 'relationship',
+            'ajax' => TRUE,
+//            'attribute' => 'id',
+            'attribute' => 'category_type_name_status_registry_date',
+//            'attributes' => ['disabled' => 'disabled',],
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
@@ -71,12 +91,6 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Vrsta ispita',
             'type' => 'relationship',
             'attributes' => 'naziv',
-        ],
-        'status_prijave' => [
-            'name' => 'status',
-            'label' => 'Status',
-            'type' => 'relationship',
-            'attribute' => 'naziv',
         ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
@@ -122,24 +136,34 @@ class SiPrijavaCrudController extends CrudController
             'format' => 'DD.MM.Y. HH:mm:ss',
         ],
     ],
-        $field_deffinition_array = [
+        $column_definition_array = [
         'id' => [
             'name' => 'id',
             'label' => 'Broj prijave',
-            'attributes' => [
-                'readonly' => 'readonly'
-            ]
         ],
-        'osoba_id' => [
+        'status_prijave' => [
+            'name' => 'status',
+            'label' => 'Status',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+        ],
+        'osoba_id' => ['name' => 'osoba_id', 'label' => 'jmbg'],
+        'osoba' => [
             'name' => 'osoba',
             'type' => 'relationship',
-            'label' => 'Ime prezime (jmbg)',
-            'attribute' => 'ime_prezime_jmbg',
+            'label' => 'Ime prezime',
+            'attribute' => 'full_name',
+        ],
+        'documents' => [
+            'name' => 'documents',
+            'type' => 'relationship',
             'ajax' => TRUE,
+            'attribute' => 'category_type_name_status_registry_date',
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
-            'label' => 'Vesta posla',
+            'label' => 'Vrsta posla',
+            'type' => 'relationship',
             'attribute' => 'naziv',
         ],
         'reg_oblast_id' => [
@@ -158,20 +182,13 @@ class SiPrijavaCrudController extends CrudController
             'name' => 'zvanje',
             'label' => 'Zvanje',
             'type' => 'relationship',
-            'attribute' => 'naziv',
+            'attribute' => 'skrnaziv',
         ],
         'si_vrsta_id' => [
             'name' => 'siVrsta',
             'label' => 'Vrsta ispita',
             'type' => 'relationship',
-            'attribute' => 'naziv',
-        ],
-        'status_prijave' => [
-            'name' => 'status_prijave',
-            'label' => 'Status',
-            'type' => 'select2',
-            'entity' => 'status',
-            'attribute' => 'naziv',
+            'attributes' => 'naziv',
         ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
@@ -182,29 +199,25 @@ class SiPrijavaCrudController extends CrudController
                 1 => 'Ima stručni rad',
             ]
         ],
-        'barcode' => [
-            'name' => 'strucni_rad',
+        /*'barcode' => [
+            'name' => 'barcode',
         ],
         'datum_prijema' => [
             'name' => 'datum_prijema',
             'label' => 'Datum prijema',
-            'type' => 'date_picker',
-            'date_picker_options' => [
-                'todayBtn' => 'linked',
-                'format' => 'dd.mm.yyyy.',
-                'language' => 'sr-latn'
-            ],
+            'type' => 'date',
+            'format' => 'DD.MM.Y.',
         ],
         'app_korisnik_id' => [
             'name' => 'user',
             'label' => 'Zaveo korisnik',
             'type' => 'relationship',
-            'attribute' => 'name',
+            'attributes' => 'id',
         ],
         'zavodni_broj' => [
             'name' => 'zavodni_broj',
             'label' => 'Zavodni broj',
-        ],
+        ],*/
         'tema' => [
             'name' => 'tema',
         ],
@@ -213,21 +226,145 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Kreirana',
             'type' => 'datetime',
             'format' => 'DD.MM.Y. HH:mm:ss',
-            'attributes' => [
-                'readonly' => 'readonly'
-            ]
         ],
         'updated_at' => [
             'name' => 'updated_at',
             'label' => 'Ažurirana',
             'type' => 'datetime',
             'format' => 'DD.MM.Y. HH:mm:ss',
-            'attributes' => [
-                'readonly' => 'readonly'
-            ]
         ],
-    ];
-    protected $allowRegister = FALSE;
+    ],
+
+        $field_definition_array = [
+        'id' => [
+            'name' => 'id',
+            'label' => 'Broj prijave',
+            'attributes' => ['readonly' => 'readonly',],
+            'wrapper' => ['class' => 'col-md-3 my-3',],
+        ],
+        'barcode' => [
+            'name' => 'barcode',
+            'wrapper' => ['class' => 'col-md-3 my-3',],
+        ],
+        'status_prijave' => [
+            'name' => 'status_prijave',
+            'label' => 'Status',
+            'type' => 'select2',
+            'entity' => 'status',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-3 my-3',],
+        ],
+        'si_vrsta_id' => [
+            'name' => 'siVrsta',
+            'label' => 'Vrsta ispita',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-3 my-3',],
+        ],
+        'osoba_id' => [
+            'name' => 'osoba',
+            'type' => 'relationship',
+            'label' => 'Ime prezime (jmbg)',
+            'attribute' => 'ime_prezime_jmbg',
+            'ajax' => TRUE,
+            'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+        'zvanje_id' => [
+            'name' => 'zvanje',
+            'label' => 'Zvanje',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+        'vrsta_posla_id' => [
+            'name' => 'vrstaPosla',
+            'label' => 'Vrsta posla',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'reg_oblast_id' => [
+            'name' => 'regOblast',
+            'label' => 'Oblast',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'reg_pod_oblast_id' => [
+            'name' => 'regPodOblast',
+            'label' => 'Uža oblast',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'strucni_rad' => [
+            'name' => 'strucni_rad',
+            'label' => 'Stručni rad',
+            'type' => 'select_from_array',
+            'options' => [
+                0 => 'Rad izrađuje sa mentorom',
+                1 => 'Ima stručni rad',
+            ],
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'tema' => [
+            'name' => 'tema',
+            'wrapper' => ['class' => 'col-md-8 my-3',],
+        ],
+        // todo: omoguciti posle update-a na backpack 5 pro
+//        'documents' => [
+//            'name' => 'documents',
+//            'type' => 'relationship',
+//            'ajax' => TRUE,
+//            'attribute' => 'category_type_name_status_registry_date',
+//            'attributes' => ['disabled' => 'disabled',],
+//        ],
+        'datum_prijema' => [
+            'name' => 'datum_prijema',
+            'label' => 'Datum prijema',
+            'type' => 'date_picker',
+            'date_picker_options' => [
+                'todayBtn' => 'linked',
+                'format' => 'dd.mm.yyyy.',
+//                'language' => 'sr-latn'
+            ],
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'app_korisnik_id' => [
+            'name' => 'user',
+            'label' => 'Zaveo korisnik',
+            'type' => 'relationship',
+            'attribute' => 'name',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'zavodni_broj' => [
+            'name' => 'zavodni_broj',
+            'label' => 'Zavodni broj',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'created_at' => [
+            'name' => 'created_at',
+            'label' => 'Kreirana',
+            'type' => 'datetime_picker',
+            'datetime_picker_options' => [
+                'format' => 'DD.MM.YYYY HH:mm',
+            ],
+            'allows_null' => TRUE,
+            'attributes' => ['readonly' => 'readonly'],
+            'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+        'updated_at' => [
+            'name' => 'updated_at',
+            'label' => 'Ažurirana',
+            'type' => 'datetime_picker',
+            'datetime_picker_options' => [
+                'format' => 'DD.MM.YYYY HH:mm',
+            ],
+            'allows_null' => TRUE,
+            'attributes' => ['readonly' => 'readonly'],
+            'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+    ],
+        $allowRegister = FALSE;
 
     public function setup()
     {
@@ -244,6 +381,12 @@ class SiPrijavaCrudController extends CrudController
             case 'siprijava':
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/siprijava');
                 CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
+
+                // disabling RegisterRequestBulkOperation
+                $this->crud->operation('list', function () {
+                    $this->crud->denyAccess(['registerrequestbulk']);
+                    $this->crud->disableBulkActions();
+                });
 //                CRUD::addClause('where', 'request_category_id', 7);
 //                $this->requestCategoryType = 1;
 //                $this->requestCategory = [10];
@@ -268,21 +411,26 @@ class SiPrijavaCrudController extends CrudController
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
+
         if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
             $this->crud->allowAccess(['registerrequestbulk']);
         }
 
         CRUD::enableExportButtons();
-//        CRUD::enableDetailsRow();
+        CRUD::enableDetailsRow();
 
         CRUD::set('show.setFromDb', FALSE);
+
     }
 
     protected function setupListOperation()
     {
-        $this->crud->addColumns($this->column_deffinition_array);
-
-        $this->crud->removeColumns(['tema', 'documents', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at']);
+        if (backpack_user()->hasRole('admin')) {
+            $this->crud->addColumns($this->column_definition_array_admin);
+        } else {
+            $this->crud->addColumns($this->column_definition_array);
+        }
+        $this->crud->removeColumns(['tema', 'strucni_rad', 'user', 'barcode', 'created_at', 'updated_at', 'zahtev', 'datum_prijema', 'zavodni_broj']);
 
 
         $this->crud->setColumnDetails('id', [
@@ -298,6 +446,7 @@ class SiPrijavaCrudController extends CrudController
                 }
             }
         ]);
+
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
@@ -323,14 +472,47 @@ class SiPrijavaCrudController extends CrudController
             }
         ]);
 
+        $this->crud->setColumnDetails('status', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
+                    }
+                },
+            ]
+        ]);
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
 
 
@@ -405,17 +587,17 @@ class SiPrijavaCrudController extends CrudController
             });
 
         // daterange filter
-        $this->crud->addFilter([
-            'type' => 'date_range',
-            'name' => 'from_to',
-            'label' => 'Rok za prijavu'
-        ],
-            FALSE,
-            function ($value) { // if the filter is active, apply these constraints
-                $dates = json_decode($value);
-                $this->crud->addClause('where', 'datum_prijema', '>=', date('Y-m-d', strtotime($dates->from)));
-                $this->crud->addClause('where', 'datum_prijema', '<=', date('Y-m-d', strtotime($dates->to)));
-            });
+        /*        $this->crud->addFilter([
+                    'type' => 'date_range',
+                    'name' => 'from_to',
+                    'label' => 'Rok za prijavu'
+                ],
+                    FALSE,
+                    function ($value) { // if the filter is active, apply these constraints
+                        $dates = json_decode($value);
+                        $this->crud->addClause('where', 'datum_prijema', '>=', date('Y-m-d', strtotime($dates->from)));
+                        $this->crud->addClause('where', 'datum_prijema', '<=', date('Y-m-d', strtotime($dates->to)));
+                    });*/
 
         if ($this->allowRegister) {
             $this->crud->addFilter([
@@ -428,15 +610,93 @@ class SiPrijavaCrudController extends CrudController
                     $this->crud->addClause('where', 'status_prijave', REQUEST_SUBMITED); // apply the "active" eloquent scope
                 });
         }
+
+        if (backpack_user()->hasRole('admin') and !$this->allowRegister) {
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'zl',
+                'label' => 'Nema zahtev'
+            ],
+                FALSE,
+                function () { // if the filter is active
+                    $this->crud->addClause('whereDoesntHave', 'zahtevLicenca'); // apply the "active" eloquent scope
+                });
+        }
+
+        if (backpack_user()->hasRole('admin') and !$this->allowRegister) {
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'licenciran',
+                'label' => 'Licencirani'
+            ],
+                FALSE,
+                function () { // if the filter is active
+                    $this->crud->addClause('whereHas', 'osoba', function ($q) {
+                        $q->whereHas('licence');
+                    }); // apply the "active" eloquent scope
+                });
+        }
     }
 
     protected function setupShowOperation()
     {
         $this->crud->set('show.setFromDb', FALSE);
 
-        $this->crud->setColumns($this->column_deffinition_array);
+        $si_prijava = $this->crud->getEntry(\Request::segment(3));
+        $osoba = $si_prijava->osoba;
 
-        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+        Widget::add([
+            'type' => 'view',
+            'view' => 'vendor.backpack.base.widgets.view-kandidat',
+            'osoba' => $osoba,
+        ]);
+
+        if ($si_prijava->reference->isNotEmpty()) {
+            Widget::add([
+                'type' => 'view-reference',
+                'wrapper' => ['class' => 'col-md-12 p-0'], // optional
+                'content' => [
+                    'header' => 'REFERENCE',
+                    'body' => $si_prijava->reference,
+                ]
+            ]);
+        }
+
+        if (backpack_user()->hasRole(['admin'])) {
+            $this->crud->setColumns($this->column_definition_array_admin);
+        } else {
+            $this->crud->setColumns($this->column_definition_array);
+        }
+
+        CRUD::column('zahtev')
+            ->type('model_function')
+            ->function_name('getZahtevLicencaStatusAttribute')
+            ->label('Zahtev za licencu')
+            ->before('reference');
+
+/*        CRUD::column('reference')
+            ->attribute('data_reference_to_array')
+            ->limit(500)
+            ->before('created_at')
+            ->wrapper([
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    $odgovorno_lice_licenca = Referenca::find($related_key)->odgovorno_lice_licenca_id;
+                    $odgovorno_lice = Licenca::find($odgovorno_lice_licenca)->osoba;
+                    return backpack_url('osoba/' . $odgovorno_lice . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
+            ]);*/
+
+        CRUD::column('documents')
+            ->type('relationship')
+            ->attribute('category_type_name_status_registry_number_registry_date')
+            ->limit(500)
+            ->before('status');
+
+        $this->crud->modifyColumn('vrstaPosla', ['limit' => 500,]);
+        $this->crud->modifyColumn('regOblast', ['limit' => 500,]);
+        $this->crud->modifyColumn('regPodOblast', ['limit' => 500,]);
 
         $this->crud->setColumnDetails('osoba', [
             'wrapper' => [
@@ -444,51 +704,94 @@ class SiPrijavaCrudController extends CrudController
                     return backpack_url('osoba/' . $related_key . '/show');
                 },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
+                'target' => '_blank',
             ],
         ]);
 
-
-        /*        $this->crud->setColumnDetails('vrstaPosla', [
-                    'wrapper' => [
-                        'href' => function ($crud, $column, $entry, $related_key) {
-                            return backpack_url('vrsta-posla/' . $related_key . '/show');
-                        },
-                        'class' => 'btn btn-sm btn-outline-info mr-1',
-                    ],
-                ]);
-
-                $this->crud->setColumnDetails('regOblast', [
-                    'wrapper' => [
-                        'href' => function ($crud, $column, $entry, $related_key) {
-                            return backpack_url('regoblast/' . $related_key . '/show');
-                        },
-                        'class' => 'btn btn-sm btn-outline-info mr-1',
-                    ],
-                ]);
-
-                $this->crud->setColumnDetails('regPodOblast', [
-                    'wrapper' => [
-                        'href' => function ($crud, $column, $entry, $related_key) {
-                            return backpack_url('regPodOblast/' . $related_key . '/show');
-                        },
-                        'class' => 'btn btn-sm btn-outline-info mr-1',
-                    ],
-                ]);*/
+        $this->crud->setColumnDetails('status', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
+                    }
+                },
+            ]
+        ]);
 
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
+
+        $this->crud->setColumnDetails('zahtev', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    if (!is_null($entry->zahtevLicenca)) {
+                        $zl = $entry->zahtevLicenca->id;
+                        return backpack_url('zahtevlicenca/' . $zl . '/show');
+                    }
+                },
+                'target' => '_blank',
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $zahtev = ZahtevLicenca::where('si_prijava_id', $entry->id)->first();
+                    if (!is_null($zahtev)) {
+                        switch ($zahtev->status) {
+                            case REQUEST_CREATED:
+                            case REQUEST_SUBMITED:
+                            case REQUEST_IN_PROGRESS:
+                            default:
+                                return 'btn btn-sm btn-outline-secondary';
+                            case REQUEST_FINISHED:
+                                return 'btn btn-sm btn-outline-success';
+                            case REQUEST_CANCELED:
+                            case REQUEST_PROBLEM:
+                                return 'btn btn-sm btn-outline-danger';
+                            case PRIJAVA_OTKLJUCANA:
+                            case ZAHTEV_LICENCA_ZAKLJUCAN:
+                                return 'btn btn-sm btn-outline-warning';
+                        }
+                    } else {
+                        return 'text-danger';
+                    }
+                },
+            ],
+        ]);
+
     }
 
     protected function setupCreateOperation()
     {
         $this->crud->setValidation(SiPrijavaRequest::class);
-        $this->crud->addFields($this->field_deffinition_array);
+
+        $this->crud->addFields($this->field_definition_array);
 
         $this->crud->modifyField('status_prijave', [
             'options' => (function ($query) {
@@ -502,13 +805,23 @@ class SiPrijavaCrudController extends CrudController
         $this->setupCreateOperation();
     }
 
-    /*    protected function showDetailsRow($id)
-        {
-            $this->crud->hasAccessOrFail('details_row');
+    protected function showDetailsRow($id)
+    {
+        $this->data['entry'] = $this->crud->getEntry($id)->osoba;
+        $this->data['crud'] = $this->crud;
+        return view('crud::osoba_details_row', $this->data);
+    }
 
-            $this->data['entry'] = $this->crud->getEntry($id);
-            $this->data['crud'] = $this->crud;
-            // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-            return view('crud::osoba_details_row', $this->data);
-        }*/
+    public function fetchDocuments()
+    {
+        return $this->fetch([
+            'model' => \App\Models\Document::class, // required
+            'searchable_attributes' => [],
+            'paginate' => 10, // items to show per page
+            'query' => function ($model) {
+                $searchTerm = request()->input('q') ?? FALSE;
+                return $model->where('id', 'ilike', $searchTerm . '%');
+            } // to filter the results that are returned
+        ]);
+    }
 }

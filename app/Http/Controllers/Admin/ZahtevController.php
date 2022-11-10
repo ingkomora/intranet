@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Imports\MirovanjeImport;
+use App\Models\EvidencijaMirovanja;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use phpDocumentor\Reflection\Types\Collection;
+use phpDocumentor\Reflection\Types\Mixed_;
 use \Tesla\JMBG\JMBG;
 use App\Imports\ExcelImport;
 use App\Libraries\Helper;
@@ -121,8 +127,8 @@ class ZahtevController extends Controller
         $messageZahtevOK = 'Zahtevi: ';
         $messageZahtevNOK = 'Zahtevi: ';
         $messageInfo = '';
-        $flagOK = false;
-        $flagNOK = false;
+        $flagOK = FALSE;
+        $flagNOK = FALSE;
         $count = 0;
         $countOK = 0;
         $countNOK = 0;
@@ -165,7 +171,7 @@ class ZahtevController extends Controller
                 $licencaTipNaziv = $licencaTip->naziv;
                 $temp = '';
                 $nazivArr = array_filter(array_keys(PROFESIONALNI_NAZIV[$gen]), function ($value) use ($licencaTipNaziv, $temp) {
-                    return strpos($licencaTipNaziv, $value) !== false;
+                    return strpos($licencaTipNaziv, $value) !== FALSE;
                 });
                 if ($nazivArr) {
                     $lenArr = array_map('strlen', $nazivArr);
@@ -297,7 +303,7 @@ class ZahtevController extends Controller
                 Storage::delete($pdfFiles);
 
                 $dataZip['message'] = "Generisane svečane forme za unete brojeve licenci ($countOK)" . $messageInfo;
-                $dataZip['status'] = true;
+                $dataZip['status'] = TRUE;
                 $dataZip['filename'] = $filename;
                 $dataZip['action'] = 'obradizahtevsvecanaforma';
 //            return response()->download(public_path($filename), $filename)->deleteFileAfterSend(true);
@@ -307,7 +313,7 @@ class ZahtevController extends Controller
         } else if ($countOK == 1) {
             //download one file
             //TODO: lokacija sa koje se fajl preuzima
-            return response()->download(public_path("storage/pdf/$data->filename.pdf"))->deleteFileAfterSend(true);
+            return response()->download(public_path("storage/pdf/$data->filename.pdf"))->deleteFileAfterSend(TRUE);
 //            return response()->download(public_path($temp . $data->filename . "pdf"))->deleteFileAfterSend(true);
         } else {
             //nema fajlova za download
@@ -339,7 +345,7 @@ class ZahtevController extends Controller
 //        dd($request->zipfile);
         ob_end_clean();
         //TODO: lokacija sa koje se fajl preuzima
-        return response()->download(public_path($request->zipfile), $request->zipfile)->deleteFileAfterSend(true);
+        return response()->download(public_path($request->zipfile), $request->zipfile)->deleteFileAfterSend(TRUE);
 //        return response()->download(public_path('temp/' . $request->zipfile), $request->zipfile)->deleteFileAfterSend(true);
 
     }
@@ -369,12 +375,12 @@ class ZahtevController extends Controller
             $validated = $request->validate([
                 'licence' => [
                     function ($attribute, $values, $fail) {
-                        $error = false;
+                        $error = FALSE;
                         foreach ($values as $value) {
                             $zahtev = ZahtevLicenca::where(['licenca_broj' => $value['broj']])->first();
                             if (!is_null($zahtev)) {
                                 if ($zahtev->osoba !== $value['jmbg']) {
-                                    $error = true;
+                                    $error = TRUE;
                                     $fail('JMBG: ' . $value['jmbg'] . ' se ne slaže sa brojem licence, proverite unos.');
                                 }
                             }
@@ -385,8 +391,8 @@ class ZahtevController extends Controller
         }
         $messageLicencaOK = 'Licence: ';
         $messageLicencaNOK = 'Licence: ';
-        $flagOK = false;
-        $flagNOTOK = false;
+        $flagOK = FALSE;
+        $flagNOTOK = FALSE;
         $countOK = 0;
         $countNOK = 0;
         $falseJMBG = [];
@@ -431,6 +437,10 @@ class ZahtevController extends Controller
                     $broj = $licenca['broj_zahteva'];
                     $tip = 'broj_zahteva';
                 }
+            } else if (!empty($licenca['tip'])) {
+                $broj = $licenca['tip'];
+                $tip = 'tip_licence';
+                $jmbg = $licenca['jmbg'];
             } else if (!empty($licenca['broj_prijave'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_prijave'], 'siprijava');
                 if (is_null($licenca['jmbg'])) {
@@ -445,7 +455,15 @@ class ZahtevController extends Controller
                 $broj = $licenca['broj'];
                 $tip = 'broj_licence';
             }
-//            dd($licenca['jmbg']);
+
+            // da li postoji licenca
+            $licenca_exist = Licenca::find($licenca['broj']);
+            if (!empty($licenca_exist)) {
+                $messageLicencaNOK .= ' Licenca broj ' . $licenca['broj'] . ' se vec nalazi u Registru!';
+                $countNOK++;
+                continue;
+            }
+
             if (!is_null($licenca['jmbg'])) {
                 if (!$this->checkOsoba(trim($licenca['jmbg']))) {
                     $falseJMBG[$licenca['jmbg']] = 'Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
@@ -465,24 +483,18 @@ class ZahtevController extends Controller
                 continue;
             }
 
-            $respZ = $this->getZahtevLicenca($broj, $tip);
+            // da li ima i koji je zahtev za licencu
+            $respZ = $this->getZahtevLicenca($broj, $tip, $jmbg);
 
             if ($respZ->status) {
-                if ($respZ->zahtev->status <= REQUEST_IN_PROGRESS) {
-//                  AZURIRAJ ZAHTEV
-                    $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
-                } else {
-//                  ZAHTEV JE VEC OBRADJEN
-                    $messageLicencaNOK .= " Zahtev za broj licence: " . $licenca['broj'] . ' je ' . strtoupper($respZ->zahtev->status) . ",";
-                    $countNOK++;
-                }
+                // AZURIRAJ ZAHTEV
+                $respZ = $this->azurirajZahtevLicenca($respZ->zahtev, $licenca);
             } else {
-//              KREIRAJ ZAHTEV
+                // KREIRAJ ZAHTEV
                 $respZ = $this->kreirajZahtevLicenca($licenca);
             }
-//            TODO prikazati status licence u toasteru i zasto explode!!!
+
             if ($respZ->status) {
-//            dd($respZ);
                 $this->log($respZ->zahtev, LICENCE, $respZ->message);
                 $respL = $this->getLicenca($respZ->zahtev->licenca_broj);
                 if ($respZ->status) {
@@ -494,11 +506,11 @@ class ZahtevController extends Controller
                 }
                 if ($respL->status) {
                     $messageLicencaOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
-                    $flagOK = true;
+                    $flagOK = TRUE;
                     $countOK++;
                 } else {
                     $messageLicencaNOK .= $respL->licenca->id . " " . $respL->licenca->status . " (" . explode(" ", trim($respL->message))[0] . "), ";
-                    $flagNOTOK = true;
+                    $flagNOTOK = TRUE;
                     $countNOK++;
                 }
                 $result[$licenca['broj']] = [
@@ -528,16 +540,16 @@ class ZahtevController extends Controller
     private function checkDate($date)
     {
         $dt = DateTime::createFromFormat("Y-m-d", $date);
-        return $dt !== false && !array_sum($dt::getLastErrors());
+        return $dt !== FALSE && !array_sum($dt::getLastErrors());
     }
 
     private function checkOsoba($jmbg)
     {
         $osoba = Osoba::find($jmbg);
         if (!is_null($osoba)) {
-            return true;
+            return TRUE;
         } else {
-            return false;
+            return FALSE;
         }
 
     }
@@ -583,37 +595,76 @@ class ZahtevController extends Controller
      * @param string $tip
      * @return \stdClass
      */
-    private function getZahtevLicenca($broj, $tip = 'broj_licence')
+    private function getZahtevLicenca($broj, $tip = 'broj_licence', $jmbg = ''): \stdClass
     {
         $response = new \stdClass();
+        $response->status = FALSE;
+
         switch ($tip) {
             case 'broj_zahteva':
-                $zahtev = ZahtevLicenca::where('id', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('id', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
             case 'broj_licence':
-                $zahtev = ZahtevLicenca::where('licenca_broj', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('licenca_broj', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
             case 'broj_prijave':
-                $zahtev = ZahtevLicenca::where('si_prijava_id', $broj)->get();
+                $zahtevi = ZahtevLicenca::where('si_prijava_id', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
+                break;
+            case 'tip_licence':
+                $zahtevi = ZahtevLicenca::where('licencatip', $broj)->where('osoba', $jmbg)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
         }
-        if (!$zahtev->isEmpty()) {
-            if (count($zahtev) > 1) {
-//                IMA VIŠE ZAHTEVA ZA ISTI BROJ LICENCE
-                $response->status = false;
-                $response->message = "IMA VIŠE ZAHTEVA ZA ISTI BROJ: $broj";
-            } else if (count($zahtev) == 1) {
-//                IMA JEDAN ZAHTEV
-                $response->status = true;
-                $response->zahtev = $zahtev[0];
-                $response->message = "Pronadjen zahtev: " . $response->zahtev->id;
+
+        if ($zahtevi->isNotEmpty()) {
+
+            if ($zahtevi->count() > 1) {
+                // IMA VIŠE ZAHTEVA
+
+                // da li u kolekciji postoji neki zahtev sa statusom 22 (automatski)
+                if ($zahtevi->contains('status', ZAHTEV_LICENCA_AUTOMATSKI)) {
+
+                    $zahtev_automatski = $zahtevi->where('status', ZAHTEV_LICENCA_AUTOMATSKI)->first();
+
+                    // svi ostali zahtevi se otkazuju
+                    $zahtevi->each(function ($model) use ($zahtev_automatski) {
+                        if ($model->id != $zahtev_automatski->id) {
+                            $model->status = REQUEST_CANCELED;
+                            $model->save();
+                        }
+                    });
+                    $response->status = TRUE;
+                    $response->zahtev = $zahtev_automatski;
+                    $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
+
+                } else {
+                    // zahtevi sa drugim statusima (koji nisu 22)
+                    $zahtev = $zahtevi->first();
+
+                    $zahtevi->each(function ($model) use ($zahtev) {
+                        if ($model->id != $zahtev->id) {
+                            $model->status = REQUEST_CANCELED;
+                            $model->save();
+                        }
+                    });
+                    $response->status = TRUE;
+                    $response->zahtev = $zahtev;
+                    $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
+
+                }
+
+            } else {
+                // IMA JEDAN ZAHTEV
+                $response->status = TRUE;
+                $response->zahtev = $zahtevi->first();
+                $response->message = "Pronadjen zahtev broj " . $response->zahtev->id;
             }
         } else {
-//                NEMA ZAHTEVA
-            $response->status = false;
+            // NEMA ZAHTEVA
+            $response->status = FALSE;
             $response->broj = $broj;
             $response->zahtev = NULL;
         }
+
         return $response;
     }
 
@@ -625,15 +676,21 @@ class ZahtevController extends Controller
     private function azurirajZahtevLicenca(ZahtevLicenca $zahtev, $licenca)
     {
         $response = new \stdClass();
+
+        // LicencaTip model na osnovu odabranog tipa licence iz formulara
         $tipLicence = LicencaTip::find($licenca['tip']);
+
         if (is_null($tipLicence)) {
             $response->zahtev = $zahtev;
             $response->message = "neispravan tip licence: " . $licenca['tip'];
-            $response->status = false;
+            $response->status = FALSE;
             return $response;
         }
+
+        // Osoba model na osnovu unetog jmbg iz formulara
         $osoba = Osoba::find($licenca['jmbg']);
 
+        // postavljanje vrednosti
         $zahtev->osoba = $licenca['jmbg'];
         $zahtev->licenca_broj = $licenca['broj'];
         $zahtev->licenca_broj_resenja = $licenca['broj_resenja'];
@@ -652,10 +709,10 @@ class ZahtevController extends Controller
         $document = $zahtev->documents->where('document_category_id', 5); // zahtev za izdavanje licence
         if ($document->count() > 1) {
             $response->message = "Postoji {$document->count()} dokumenata za zahtev broj $zahtev->id";
-            $response->status = false;
+            $response->status = FALSE;
         } else if ($document->count() == 1) {
             $document = $document->first();
-        } else { // ako empty($document)
+        } else { // nema dokument
             $document = new Document();
         }
 
@@ -666,6 +723,7 @@ class ZahtevController extends Controller
 
         $label = '02-' . $osoba->zvanjeId->zvanje_grupa_id;
 
+        // trazimo skraceni delovodnik
         $registry = Registry::where('status_id', AKTIVAN)
             ->whereHas('registryDepartmentUnit', function ($q) use ($label) {
                 $q->where('label', "$label");
@@ -675,11 +733,20 @@ class ZahtevController extends Controller
             })
             ->get();
 
-        if ($registry->count() != 1) {
-//            todo: greska
+
+        if (empty($registry)) {
+            // nema
+            $response->message = "Nije pronadjen delovodnik prilikom kreiranja zahteva broj $zahtev->id";
+            $response->status = FALSE;
+        } else if ($registry->count() > 1) {
+            // ima vise od 1
+            $response->message = "Postoji {$registry->count()} pronadjenih delovodnika prilikom kreiranja zahteva broj $zahtev->id";
+            $response->status = FALSE;
         } else {
+            // ima tacno 1
             $registry = $registry->first();
         }
+
         if (empty($document->registry_number)) {
             $registry->counter++;
             $document->registry_id = $registry->id;
@@ -687,6 +754,7 @@ class ZahtevController extends Controller
         }
         $document->user_id = backpack_user()->id;
         $document->valid_from = $zahtev->prijem;
+
 
         if ($document->save()) {
 //            dd($document);
@@ -709,10 +777,10 @@ class ZahtevController extends Controller
         if ($zahtev->isDirty()) {
             $zahtev->save();
             $response->message = "Ažuriran zahtev: $zahtev->id, status: $zahtev->id";
-            $response->status = true;
+            $response->status = TRUE;
         } else {
             $response->message = "Nema promena";
-            $response->status = true;
+            $response->status = TRUE;
         }
         $response->zahtev = $zahtev;
         return $response;
@@ -743,12 +811,12 @@ class ZahtevController extends Controller
         $licenca = Licenca::find($broj_licence);
         if (!is_null($licenca)) {
 //                IMA JEDAN ZAHTEV
-            $response->status = true;
+            $response->status = TRUE;
             $response->message = "Pronadjena licenca";
             $response->licenca = $licenca;
         } else {
 //                NEMA LICENCE
-            $response->status = false;
+            $response->status = FALSE;
             $response->message = "Nije Pronadjena licenca";
             $response->licenca = NULL;
 //            dd($response);
@@ -786,7 +854,7 @@ class ZahtevController extends Controller
         $licenca->save();
         $response->licenca = $licenca;
         $response->message = "Ažurirana licenca: $licenca->id($licenca->status, $licenca->osoba->id), status: $licenca->status, ažuriran status zahteva $zahtev->id: $zahtev->status";
-        $response->status = true;
+        $response->status = TRUE;
         return $response;
     }
 
@@ -828,11 +896,11 @@ class ZahtevController extends Controller
             $validated = $request->validate([
                 'prijave' => [
                     function ($attribute, $values, $fail) {
-                        $error = false;
+                        $error = FALSE;
                         foreach ($values as $value) {
                             $zahtev = PrijavaClanstvo::find($value['broj']);
                             if (is_null($zahtev)) {
-                                $error = true;
+                                $error = TRUE;
                                 $fail('Prijava: ' . $value['broj'] . ' ne postoji u bazi, proverite unos.');
                             }
                         }
@@ -876,12 +944,12 @@ class ZahtevController extends Controller
 
         if ($prijava_clan->status_id === PRIJAVA_CLAN_KREIRANA) {
             $resp->message = "Status prijave: " . $prijava['broj'] . " " . $prijava_clan->status->naziv . ", kontaktirajte SIT";
-            $resp->status = false;
+            $resp->status = FALSE;
             return $resp;
         }
         if ($prijava_clan->status_id === PRIJAVA_CLAN_PRIHVACENA) {
             $resp->message = "Prijava je već obrađena";
-            $resp->status = false;
+            $resp->status = FALSE;
             return $resp;
         }
         // TODO napraviti elektronsko zavodjenje
@@ -912,10 +980,10 @@ class ZahtevController extends Controller
             $osoba->clan = 1;
             $osoba->save();
             $resp->message = "Članstvo prema prijavi broj $prijava_clan->id za osobu $osoba->ime_prezime_jmbg je odobreno";
-            $resp->status = true;
+            $resp->status = TRUE;
         } else {
             $resp->message = "Osoba koja želi da postane član Komore nema ni jednu licencu upisanu u Registar . Unesite licence prema Rešenjima u bazu . ";
-            $resp->status = false;
+            $resp->status = FALSE;
         }
         return $resp;
     }
@@ -933,14 +1001,14 @@ class ZahtevController extends Controller
         $licTip4 = strtoupper(substr(trim($request->input('licence.*.broj')[0]), 0, 4));
         $licencaTip = LicencaTip::where("id", $licTip4)->pluck('naziv', 'id')->toArray();
         if ($licencaTip) {
-            return json_encode(true);
+            return json_encode(TRUE);
         } else {
             $licTip3 = strtoupper(substr($request->input('licence.*.broj')[0], 0, 3));
             $licencaTip = LicencaTip::where("id", $licTip3)->pluck('naziv', 'id')->toArray();
             if ($licencaTip) {
-                return json_encode(true);
+                return json_encode(TRUE);
             } else {
-                return json_encode(false);
+                return json_encode(FALSE);
             }
         }
     }
@@ -962,7 +1030,7 @@ class ZahtevController extends Controller
     {
 //        dd($licenca . $jmbg);
 
-        return json_encode(true);
+        return json_encode(TRUE);
     }
 
 //    TODO dodati ovo u helper ili LOG klasu
@@ -1185,6 +1253,7 @@ class ZahtevController extends Controller
         echo '<li><a href="/admin/clanstvo/nevazeceLicence">nevazeceLicence</a></li>';
         echo '<li><a href="/admin/clanstvo/addZvanjeIdToZahtevLicenca">addZvanjeIdToZahtevLicenca</a></li>';
         echo '<li><a href="/admin/clanstvo/insertDatumRodjenjaFromJmbg">insertDatumRodjenjaFromJmbg</a></li>';
+        echo '<li><a href="/admin/clanstvo/updateMirovanjaFromExcel">updateMirovanjaFromExcel</a></li>';
         echo '<li><a href="tel:38163247700">zovi Bojana</a></li>';
 
         echo '</ol>';
@@ -1259,6 +1328,9 @@ class ZahtevController extends Controller
             case 'insertDatumRodjenjaFromJmbg':
                 $this->insertDatumRodjenjaFromJmbg();
                 break;
+            case 'updateMirovanjaFromExcel':
+                $this->updateMirovanjaFromExcel();
+                break;
             default:
 //                $this->count();
                 break;
@@ -1270,7 +1342,7 @@ class ZahtevController extends Controller
     {
         $result = '';
         $result .= "<table style='box-sizing: border-box' cellspacing=0>";
-        $header = true;
+        $header = TRUE;
         foreach ($array as $row) {
             if ($header) {
                 $result .= "<tr>";
@@ -1284,7 +1356,7 @@ class ZahtevController extends Controller
                 $result .= "<td style='border:  solid 1px gray; margin: 0; padding: 3px;'>$col</td>";
             }
             $result .= "</tr>";
-            $header = false;
+            $header = FALSE;
         }
         $result .= "</table>";
         return $result;
@@ -1346,7 +1418,7 @@ class ZahtevController extends Controller
 
     private function preziveli($save = '')
     {
-        $osobaOK = false;
+        $osobaOK = FALSE;
         $print = [];
 
         echo "<h1>PREŽIVELI ($save)</h1>";
@@ -1400,7 +1472,7 @@ class ZahtevController extends Controller
 //                    if (isset($osobeBrisanje[$osoba->id])) {
 //                        $osobaExcel = $osobeBrisanje[$osoba->id];
 //                    } else {
-                    $osobaExcel = false;
+                    $osobaExcel = FALSE;
 //                    }
 //                    $clanarine = $osoba->poslednjeDveClanarine->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
                     $clanarine = $osoba->poslednjeDveClanarine->toArray();
@@ -1439,7 +1511,7 @@ class ZahtevController extends Controller
 
                     if ($save == 'save') {
                         if ($osoba->save()) {
-                            $osobaOK = true;
+                            $osobaOK = TRUE;
                         }
                         $printRow['Osoba SAVED'] = $osobaOK;
                     }
@@ -1538,13 +1610,13 @@ class ZahtevController extends Controller
                         $membership->started_at = $clanarina['rokzanaplatu'];
                         $membership->created_at = $membership->updated_at = $newupdated_at;
                         if ($membership->save()) {
-                            $membershipOK = true;
+                            $membershipOK = TRUE;
                             echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
                         }
 
                         $request->created_at = $request->updated_at = $newupdated_at;
                         if ($request->save()) {
-                            $requestOK = true;
+                            $requestOK = TRUE;
                             echo "<BR>Model Request $request->id " . (($request->wasRecentlyCreated) ? " created" : " updated");
                         }
 
@@ -1554,16 +1626,16 @@ class ZahtevController extends Controller
                         $document->metadata = $newdocmetadata;
 
                         if ($document->save()) {
-                            $documentOK = true;
+                            $documentOK = TRUE;
                             echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
                         }
 
                         if ($membershipOK && $requestOK && $documentOK) {
                             DB::commit();
-                            $created = true;
+                            $created = TRUE;
                         } else {
                             DB::rollBack();
-                            $created = false;
+                            $created = FALSE;
                         }
                     } catch (\Exception $e) {
                         DB::rollBack();
@@ -1674,14 +1746,14 @@ class ZahtevController extends Controller
                     if ($licence->isNotEmpty() and $licence->count() > 0) {
 //                        dd($licence->toArray());
                         $licstr = '';
-                        $cond = true;
+                        $cond = TRUE;
                         foreach ($licence as $licenca) {
                             if ($licenca->status == 'D') {
 
-                                $cond &= true;
+                                $cond &= TRUE;
                             } else {
                                 //                                break;
-                                $cond &= false;
+                                $cond &= FALSE;
                             }
 
                             $licstr .= " $licenca->id ($licenca->status) | ";
@@ -1754,15 +1826,15 @@ class ZahtevController extends Controller
 //                    $req = $osoba->requests->where('request_category_id',2)->first();
                     if ($licence->isNotEmpty() and $licence->count() > 0) {
 //                        dd($licence->toArray());
-                        $cond = true;
+                        $cond = TRUE;
                         $licstr = '';
                         foreach ($licence as $licenca) {
                             if ($licenca->status == 'D') {
 
-                                $cond &= true;
+                                $cond &= TRUE;
                             } else {
 //                                break;
-                                $cond &= false;
+                                $cond &= FALSE;
                             }
 
                             $licstr .= " $licenca->id ($licenca->status) | ";
@@ -1919,7 +1991,7 @@ class ZahtevController extends Controller
          *
          * 4. da li ima zalbi koje su odbijene
          */
-        $naslov = true;
+        $naslov = TRUE;
         $print = [];
         $query = \App\Models\Request::where('request_category_id', 2)
 //POJEDINACNO
@@ -1944,7 +2016,7 @@ class ZahtevController extends Controller
                     $osoba = $request->osoba;
                     if ($naslov) {
                         echo "<h2>OSOBE ČLAN $osoba->clan, REQ STATUS: {$request->status->naziv}</h2>";
-                        $naslov = false;
+                        $naslov = FALSE;
                     }
                     $clanarine = $osoba->poslednjeDveClanarine->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
                     $clanarinPlacena = $osoba->poslednjaPlacenaClanarina->pluck('iznoszanaplatu', 'rokzanaplatu')->toArray();
@@ -1989,7 +2061,7 @@ class ZahtevController extends Controller
     private function getExcel($path = 'public/clanstvo_brisanje.xlsx')
     {
         $filename = str_replace("public/", "", $path);
-        $file = new UploadedFile(base_path($path), $filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', NULL, true);
+        $file = new UploadedFile(base_path($path), $filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', NULL, TRUE);
         if (!is_null($file)) {
 //            UNOS LICENCI IZ EXCEL DATOTEKE
             $import = new ExcelImport();
@@ -2009,7 +2081,7 @@ class ZahtevController extends Controller
 
     private function osobaUpisiNapomenuBrisanje($save = '')
     {
-        $osobaOK = false;
+        $osobaOK = FALSE;
         $print = [];
         $osobeImport = $this->getExcel('public/clanstvo_brisanje_2021.xlsx');
 //        $osobeImport = $this->getExcel();
@@ -2110,7 +2182,7 @@ class ZahtevController extends Controller
 
                         if ($save == 'save') {
                             if ($osoba->save()) {
-                                $osobaOK = true;
+                                $osobaOK = TRUE;
                             }
                             $printRow['Osoba SAVED'] = $osobaOK;
                         }
@@ -2137,7 +2209,7 @@ class ZahtevController extends Controller
     {
         $print = [];
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $query = Osoba::where('clan', 1)
             ->whereNotIn('id', ['0909946710340']) // podneo je zahtev za prestanak clanstva, pa ga izbacujem da mu ne bismo poslali obavestenje
@@ -2156,7 +2228,7 @@ class ZahtevController extends Controller
             ->chunkById(1000, function ($osobe) use (&$print) {
                 $ids = '';
                 foreach ($osobe as $osoba) {
-                    $condition = true;
+                    $condition = TRUE;
 
 //                    NISU PREUZELI NI JEDNU LICENCU
 //                    start
@@ -2193,16 +2265,16 @@ class ZahtevController extends Controller
 
                 }
                 echo "$ids<br><br>";
-                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(true)) . "<br>";
+                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(TRUE)) . "<br>";
 
 //                dd('stop');
             });
 
         echo $this->outputHtmlTable($print);
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd($query);
     }
 
@@ -2211,7 +2283,7 @@ class ZahtevController extends Controller
     {
         $errorStr = '';
         echo "<h2>prekiniClanstvo ($save)</h2>";
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $query = \App\Models\Request::where('request_category_id', 2)
             ->where('note', 'Neizmirena clanarina 2021')
@@ -2295,7 +2367,7 @@ class ZahtevController extends Controller
                         $errorStr .= "'$osoba->id',";
                     }
                 }
-                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(false));
+                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(FALSE));
                 echo "<br>Kreirano: $this->ok od $this->counter";
                 echo "<br>Nije kreirano: $this->error od $this->counter<br>";
             })
@@ -2303,7 +2375,7 @@ class ZahtevController extends Controller
 //            ->pluck('osoba')->toArray()
 //            ->get()
         ;
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
         echo "<br><br>Greska, nisu azurirani: $errorStr<br>";
 //        dd($query->count());
@@ -2428,13 +2500,13 @@ class ZahtevController extends Controller
                             $remember[$item] = $color;
                         }
                     }
-                    if ($like[$i]['keys'] !== false) {
+                    if ($like[$i]['keys'] !== FALSE) {
                         echo "<td bgcolor='$color'>$columnsOne[$i]</td>";
                     } else {
                         echo "<td>$columnsOne[$i]</td>";
                     }
                 } else {
-                    $like[$i]['keys'] = false;
+                    $like[$i]['keys'] = FALSE;
                     $like[$i]['color'] = '#FFFFFF';
                     echo "<td>$columnsOne[$i]</td>";
                 }
@@ -2496,11 +2568,11 @@ class ZahtevController extends Controller
 
         DB::beginTransaction();
 
-        $created = false;
+        $created = FALSE;
 
-        $membershipOK = false;
-        $requestOK = false;
-        $documentOK = false;
+        $membershipOK = FALSE;
+        $requestOK = FALSE;
+        $documentOK = FALSE;
 
         $membershipData = []; //reset array
 
@@ -2729,10 +2801,10 @@ class ZahtevController extends Controller
             if ($membershipOK && $requestOK) {
 //            if ($membershipOK && $requestOK && $documentOK) {
                 DB::commit();
-                $created = true;
+                $created = TRUE;
             } else {
                 DB::rollBack();
-                $created = false;
+                $created = FALSE;
             }
 
         } catch (\Exception $e) {
@@ -2752,7 +2824,7 @@ class ZahtevController extends Controller
         //2. create documents
         DB::beginTransaction();
 
-        $created = $zahtevLicencaOK = $documentOK = $registryOK = false;
+        $created = $zahtevLicencaOK = $documentOK = $registryOK = FALSE;
 
         $zahtevLicencaMap = [
 //  ZahtevLicenca => $data
@@ -2896,26 +2968,26 @@ class ZahtevController extends Controller
             $document->barcode = $zahtevLicenca->barcode;
 
             if ($zahtevLicenca->save()) {
-                $zahtevLicencaOK = true;
+                $zahtevLicencaOK = TRUE;
             }
             $document->save();
-            $documentOK = true;
+            $documentOK = TRUE;
             echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
         }
 
         $registry = Registry::find(104);
         $registry->counter++;
         if ($registry->save()) {
-            $registryOK = true;
+            $registryOK = TRUE;
         }
 
         if ($zahtevLicencaOK && $documentOK && $registryOK) {
             DB::commit();
-            $created = true;
+            $created = TRUE;
         } else {
             DB::rollBack();
             echo "DB ROLLBACK";
-            $created = false;
+            $created = FALSE;
         }
 
         /*} catch (\Exception $e) {
@@ -2937,12 +3009,12 @@ class ZahtevController extends Controller
 
         DB::beginTransaction();
 
-        $created = false;
+        $created = FALSE;
 
-        $membershipOK = false;
-        $requestOK = false;
-        $documentOK = false;
-        $osobaOK = false;
+        $membershipOK = FALSE;
+        $requestOK = FALSE;
+        $documentOK = FALSE;
+        $osobaOK = FALSE;
 
         $membershipData = []; //reset array
 
@@ -3005,7 +3077,7 @@ class ZahtevController extends Controller
             if ($request->save()) {
                 $request->requestable()->associate($membership);
                 $request->save();
-                $requestOK = true;
+                $requestOK = TRUE;
                 echo "<BR>Model Request $request->id " . (($request->wasRecentlyCreated) ? " created" : " updated");
             }
 
@@ -3144,7 +3216,7 @@ class ZahtevController extends Controller
                 if ($document->save()) {
                     $document->documentable()->associate($request);
                     $document->save();
-                    $documentOK = true;
+                    $documentOK = TRUE;
                     echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
                 }
             }
@@ -3169,7 +3241,7 @@ class ZahtevController extends Controller
 
             $membership->fill($membershipData);
             if ($membership->save()) {
-                $membershipOK = true;
+                $membershipOK = TRUE;
                 echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
             }
 
@@ -3183,17 +3255,17 @@ class ZahtevController extends Controller
 
 
             if ($osoba->save()) {
-                $osobaOK = true;
+                $osobaOK = TRUE;
                 echo "<BR>Model Osoba $osoba->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
             }
 
             if ($membershipOK && $requestOK && $documentOK && $osobaOK) {
                 DB::commit();
-                $created = true;
+                $created = TRUE;
             } else {
                 DB::rollBack();
                 echo "DB ROLLBACK";
-                $created = false;
+                $created = FALSE;
             }
 
         } catch (\Exception $e) {
@@ -3210,9 +3282,9 @@ class ZahtevController extends Controller
     private function createD(array $data): array
     {
 
-        $to_create = false;
-        $to_register = false;
-        $to_associate = false;
+        $to_create = FALSE;
+        $to_register = FALSE;
+        $to_associate = FALSE;
         $result = [];
 
         $request = \App\Models\Request::where('id', $data['zahtev'])->where('request_category_id', 4)->first(); // request_category_id = 4 Zahtevi za mirovanje clanstva
@@ -3237,17 +3309,17 @@ class ZahtevController extends Controller
                 // azurirati dokument
                 if (empty($document->registry_number) or empty($document->registry_date) or empty($document->valid_from)) {
                     // zavedi
-                    $to_register = true;
+                    $to_register = TRUE;
                 }
                 if (empty($document->documentable_id)) {
                     // asociraj
-                    $to_associate = true;
+                    $to_associate = TRUE;
                 }
             }
         } else {
             // kreiraj novi dokument
-            $to_create = true;
-            $to_associate = true;
+            $to_create = TRUE;
+            $to_associate = TRUE;
         }
 //        dd($result);
 //        dd($data);
@@ -3333,11 +3405,11 @@ class ZahtevController extends Controller
 //        DB::transaction(function () use ($modelFrom){
         DB::beginTransaction();
 
-        $created = false;
+        $created = FALSE;
 
-        $membershipOK = false;
-        $requestOK = false;
-        $documentOK = false;
+        $membershipOK = FALSE;
+        $requestOK = FALSE;
+        $documentOK = FALSE;
 
         $membershipData = []; //reset array
 
@@ -3389,7 +3461,7 @@ class ZahtevController extends Controller
 
             $membership = Membership::firstOrNew($membershipData);
             if ($membership->save()) {
-                $membershipOK = true;
+                $membershipOK = TRUE;
                 echo "<BR>Model Membership $membership->id " . (($membership->wasRecentlyCreated) ? " created" : " updated");
             }
 
@@ -3415,7 +3487,7 @@ class ZahtevController extends Controller
             if ($request->save()) {
                 $request->requestable()->associate($membership);
                 $request->save();
-                $requestOK = true;
+                $requestOK = TRUE;
                 echo "<BR>Model Request $request->id " . (($request->wasRecentlyCreated) ? " created" : " updated");
             }
 
@@ -3506,16 +3578,16 @@ class ZahtevController extends Controller
             if ($document->save()) {
                 $document->documentable()->associate($request);
                 $document->save();
-                $documentOK = true;
+                $documentOK = TRUE;
                 echo "<BR>Model Document $document->id " . (($document->wasRecentlyCreated) ? " created" : " updated");
             }
 
             if ($membershipOK && $requestOK && $documentOK) {
                 DB::commit();
-                $created = true;
+                $created = TRUE;
             } else {
                 DB::rollBack();
-                $created = false;
+                $created = FALSE;
             }
 
         } catch (\Exception $e) {
@@ -3634,9 +3706,9 @@ class ZahtevController extends Controller
             $membership->save();
             if ($membership->wasRecentlyCreated) {
                 echo "Model Membership $membership->id  created";
-                $created = true;
+                $created = TRUE;
             } else {
-                $created = false;
+                $created = FALSE;
                 echo "Model Membership $membership->id updated";
             }
             $newData = []; //reset array
@@ -3670,9 +3742,9 @@ class ZahtevController extends Controller
         $request->save();
         if ($request->wasRecentlyCreated) {
             echo "Model Request id $request->id  created";
-            $created = true;
+            $created = TRUE;
         } else {
-            $created = false;
+            $created = FALSE;
             echo "Model Request id $request->id updated";
         }
         $newId = []; //reset array
@@ -3728,9 +3800,9 @@ class ZahtevController extends Controller
                 $document->save();
                 if ($document->wasRecentlyCreated) {
                     echo "Model Document id $document->id  created";
-                    $created = true;
+                    $created = TRUE;
                 } else {
-                    $created = false;
+                    $created = FALSE;
                     echo "Model Document id $document->id updated";
                 }
                 $newData = []; //reset array
@@ -3806,9 +3878,9 @@ class ZahtevController extends Controller
         $modelTo->save();
         if ($modelTo->wasRecentlyCreated) {
 //            echo "<br>Model $modelTo->id  created";
-            $created = true;
+            $created = TRUE;
         } else {
-            $created = false;
+            $created = FALSE;
 //            echo "<br>Model $modelTo->id not created";
         }
         return $created;
@@ -3957,7 +4029,7 @@ class ZahtevController extends Controller
             }
         }
         if (!isset($keys) or count($keys) == 0)
-            $keys = false;
+            $keys = FALSE;
         return $keys;
     }
 
@@ -4033,7 +4105,7 @@ class ZahtevController extends Controller
         $result = [];
         $zahtevi = '';
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $mirovanjaImport = $this->getExcel('public/20220407_mirovanja.xlsx');
         foreach ($mirovanjaImport->toArray() as $key => $value) {
@@ -4051,10 +4123,10 @@ class ZahtevController extends Controller
             $this->counter++;
         }
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Ukupno obradjeno: " . $this->counter;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop;
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         echo "<br>Zahtevi: $zahtevi<br><br>";
 
         echo "<pre>";
@@ -4066,7 +4138,7 @@ class ZahtevController extends Controller
     {
         $print = [];
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $query = SiPrijava::whereNotNull('datum_prijema')
 //            ->where('status', 19)    // Zastareo
@@ -4152,16 +4224,16 @@ class ZahtevController extends Controller
 
                 }
 //                echo "$ids<br><br>";
-                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(true)) . "<br>";
+                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(TRUE)) . "<br>";
 
 //                dd('stop');
             })//            ->count()
         ;
 
         echo $this->outputHtmlTable($print);
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd($query);
     }
 
@@ -4170,7 +4242,7 @@ class ZahtevController extends Controller
     {
         $print = [];
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $query = Osoba::whereHas('licence', function ($q) {
             $q
@@ -4180,7 +4252,7 @@ class ZahtevController extends Controller
             ->chunkById(1000, function ($osobe) use (&$print) {
                 $ids = '';
                 foreach ($osobe as $osoba) {
-                    $condition = true;
+                    $condition = TRUE;
 
 //                    NISU PREUZELI NI JEDNU LICENCU
 //                    start
@@ -4203,16 +4275,16 @@ class ZahtevController extends Controller
 
                 }
                 echo "$ids<br><br>";
-                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(true)) . "<br>";
+                echo "<br>Chunk: $this->counter, " . $this->convert(memory_get_usage(TRUE)) . "<br>";
 
 //                dd('stop');
             });
 
         echo $this->outputHtmlTable($print);
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd($query);
     }
 
@@ -4220,7 +4292,7 @@ class ZahtevController extends Controller
     {
         $print = [];
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
         $query = Osoba::whereHas('licence', function ($q) {
             $q->where('status', '<>', 'D');
@@ -4266,9 +4338,9 @@ class ZahtevController extends Controller
         dd($print);
         echo $this->outputHtmlTable($print);
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd($query);
     }
 
@@ -4276,8 +4348,8 @@ class ZahtevController extends Controller
     {
         $print = [];
         $this->counter = 1;
-        $osobaSave = false;
-        $start = microtime(true);
+        $osobaSave = FALSE;
+        $start = microtime(TRUE);
 //        dd(JMBG::for('9999999999999')->isValid());
         $query = Osoba::whereNull('datumrodjenja')
 //            ->whereIn('id', ['0202952710364', '0202951780032'])
@@ -4304,7 +4376,7 @@ class ZahtevController extends Controller
                             $print[$osoba->id]['napomena'] = '02 | ';
                             if (date('L', strtotime($datum_rodjenja)) and preg_match("/^[0-9]{4}-(02)-(0[1-9]|1[0-9]|2[0-9])$/", $datum_rodjenja)) {
 //                            prestupna
-                                $osobaSave = true;
+                                $osobaSave = TRUE;
                                 $osoba->datumrodjenja = $datum_rodjenja;
                                 $print[$osoba->id]['jmbg_correct'] = 'true';
                                 $print[$osoba->id]['year'] = 'Leap';
@@ -4313,7 +4385,7 @@ class ZahtevController extends Controller
                                 $print[$osoba->id]['osobaSave'] = $osobaSave;
                             } else if (!date('L', strtotime($datum_rodjenja)) and preg_match("/^[0-9]{4}-(02)-(0[1-9]|1[0-9]|2[0-8])$/", $datum_rodjenja)) {
 //                            nije prestupna
-                                $osobaSave = true;
+                                $osobaSave = TRUE;
                                 $osoba->datumrodjenja = $datum_rodjenja;
                                 $print[$osoba->id]['jmbg_correct'] = 'true';
                                 $print[$osoba->id]['year'] = 'Not leap';
@@ -4329,7 +4401,7 @@ class ZahtevController extends Controller
 //                            nije februar
                             $print[$osoba->id]['napomena'] = '!02 | ';
                             if (preg_match("/^[0-9]{4}-(0[13456789]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $datum_rodjenja)) {
-                                $osobaSave = true;
+                                $osobaSave = TRUE;
                                 $print[$osoba->id]['jmbg_correct'] = 'true';
                                 $osoba->datumrodjenja = $datum_rodjenja;
                                 $print[$osoba->id]['datum_rodjenja'] = $osoba->datumrodjenja;
@@ -4343,7 +4415,7 @@ class ZahtevController extends Controller
                             }
                         }
                     } else { // is not valid jmbg by the definition of isValid method from class JMBG
-                        $osobaSave = false;
+                        $osobaSave = FALSE;
                         $print[$osoba->id]['jmbg_correct'] = 'false';
                         $print[$osoba->id]['napomena'] = '!isValid';
                         $print[$osoba->id]['osobaSave'] = $osobaSave;
@@ -4368,9 +4440,9 @@ class ZahtevController extends Controller
         echo $this->outputHtmlTable($output);
 //        dd('stop');
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd('the end');
     }
 
@@ -4379,7 +4451,7 @@ class ZahtevController extends Controller
         $print = [];
         $problem = '';
         $this->counter = 1;
-        $start = microtime(true);
+        $start = microtime(TRUE);
 
 
         $query = ZahtevLicenca::whereNull('zvanje_id')
@@ -4406,10 +4478,158 @@ class ZahtevController extends Controller
 
 //        echo $this->outputHtmlTable($print);
 
-        $stop = microtime(true) - $start;
+        $stop = microtime(TRUE) - $start;
         echo "<br>Vreme izvrsavanja (sec): " . (int)$stop . "<BR>";
-        echo "<br>Total memory: " . $this->convert(memory_get_usage(false)) . "<br>";
+        echo "<br>Total memory: " . $this->convert(memory_get_usage(FALSE)) . "<br>";
         dd('kraj');
+    }
+
+    public function updateMirovanjaFromExcel()
+    {
+        $info = [];
+        $import = new ExcelImport();
+
+        $collection = ($import->toCollection(public_path() . '/mirovanja.xlsx'));
+        $mirovanja = $collection[0]->toArray();
+
+        foreach ($mirovanja as $mirovanje_excel) {
+
+            try {
+                DB::beginTransaction();
+
+                // check if osoba exist
+                if (!$this->checkOsoba($mirovanje_excel['osoba_id'])) throw new \Exception("Osoba {$mirovanje_excel['osoba_id']} nije pronadjena u bazi.");
+
+
+                // reformat date fields
+                foreach ($mirovanje_excel as $key => $item) {
+                    if (
+                        $key == 'datum_prijema_zahteva' or
+                        $key == 'pocetak' or
+                        $key == 'zavrsetak' or
+                        $key == 'datum_sednice' or
+                        $key == 'datum_odluke'
+                    ) $mirovanje_excel[$key] = $this->carbonizeDateDB($item);
+                }
+
+                // getting mirovanje by osoba_id and datumpocetka
+                $mirovanje = $this->getMirovanjeByExcel($mirovanje_excel);
+
+                if ($mirovanje->isEmpty()) throw new \Exception("Nema mirovanja u bazi, a ima u excelu");
+                if ($mirovanje->count() > 1) throw new \Exception("Ima vise od 1 mirovanja u bazi");
+
+                if ($mirovanje->count() == 1) $mirovanje = $mirovanje->first();
+
+                // update mirovanje model
+                $mirovanje->datumkraja = $mirovanje_excel['zavrsetak'];
+                $mirovanje->brresenja = $mirovanje_excel['odluka_broj'];
+                $mirovanje->razlog_mirovanja_usled = $mirovanje_excel['razlog_mirovanja'];
+                $mirovanje->prilozio_dokumentaciju = $mirovanje_excel['dokumentacija'];
+                if (!empty($mirovanje_excel['napomena'])) $mirovanje->mirovanje_do = $mirovanje_excel['napomena'];
+
+                if (!$mirovanje->save()) throw new \Exception("Greska prilikom snimanja mirovanja");
+
+                // associate mirovanje with request
+                $request = $this->getRequestFromExcel($mirovanje_excel['zahtev']);
+                $request->requestable()->associate($mirovanje);
+
+                if (!$request->save()) throw new \Exception("Greska prilikom asociranja mirovanja sa zahtevom");
+
+                // getting registry
+                $registry = $this->getRegistry($request, 16); // resenje o mirovanju
+                if ($registry->isEmpty()) throw new \Exception("Nije pronadjen delovodnik");
+                if ($registry->count() > 1) throw new \Exception("Pronadjeno je vise od 1 delovodnika");
+                if ($registry->count() == 1) $registry = $registry->first();
+
+                // document
+                if ($request->documents->where('document_category_id', 16)->isNotEmpty()) throw new \Exception("Vec postoji dokument");
+
+                $document = new Document();
+                $document->document_category_id = 16; // Rešenje o mirovanju
+                $document->registry_id = $registry->id;
+                $document->registry_number = $mirovanje_excel['odluka_broj'];
+                $document->registry_date = $mirovanje_excel['pocetak'];
+                $document->status_id = 57; // Zaveden
+//                $document->path = null;
+//                $document->location = null;
+                $document->location = null;
+                $document->user_id = backpack_user()->id;
+                $document->metadata = json_encode([
+                    'title' => "Rešenje o mirovanju članstva",
+                    'author' => "Inženjerska komora Srbije",
+                    'author_id' => "",
+                    'description' => "Za osobu: {$request->osoba->ime_roditelj_prezime}, id: {$request->osoba->lib}",
+                    'category' => "Mirovanje članstva",
+                    'created_at' => $mirovanje_excel['pocetak'],
+                ], JSON_UNESCAPED_UNICODE);
+                $document->note = "Automatski kreiran na osnovu podataka iz excela.";
+                $document->valid_from = $mirovanje_excel['pocetak'];
+                $document->document_type_id = 4; // AUTOMATSKI GENERISAN VIRTUAL
+
+                $document->documentable()->associate($request);
+
+                if (!$document->save()) throw new \Exception("Greska prilikom snimanja dokumenta");
+
+                $registry->counter++;
+
+                if (!$registry->save()) throw new \Exception("Greska prilikom snimanja delovodnika");
+
+                $document->barcode = "$request->id#$document->id#$mirovanje->datumpocetka";
+                $document->save();
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $info[$mirovanje_excel['zahtev']] = $e->getMessage();
+            }
+        }
+        dd($info, 'kraj');
+    }
+
+    /**
+     * @param array $mirovanje_excel
+     * @return mixed
+     */
+    private function getMirovanjeByExcel(array $mirovanje_excel)
+    {
+        return EvidencijaMirovanja::where('osoba', $mirovanje_excel['osoba_id'])
+            ->where('datumpocetka', $mirovanje_excel['pocetak'])
+            ->get();
+    }
+
+    private function getRequestFromExcel(int $request_id)
+    {
+        return \App\Models\Request::find($request_id);
+    }
+
+    private function getRegistry(\App\Models\Request $request, int $document_category_id) // todo: omoguciti opstu implementaciju (metod treba da nadje registry za bilo koji zahtev i kategoriju dokumenta)
+    {
+        $zg = $request->osoba->zvanjeId->zvanje_grupa_id;
+        $request_category_id = $request->request_category_id;
+
+        return Registry::where('status_id', AKTIVAN)
+            ->whereHas('registryDepartmentUnit', function ($q) use ($zg) {
+                $q->where('label', "02-$zg");
+            })
+            ->whereHas('requestCategories', function ($q) use ($request, $request_category_id, $document_category_id) {
+                $q->where('registry_request_category.request_category_id', $request_category_id) // prijem u clanstvo, mirovanje clanstva, etc...
+                ->where('registry_request_category.document_category_id', $document_category_id); // odluka, resenje, zahtev, etc...
+            })
+            ->get();
+
+//        if ($registry->isEmpty()) return new \Exception("Error, there is no registry found..");
+//        if ($registry->count() == 1) return $registry->first();
+//        if ($registry->count() > 1) return new \Exception("Error, there is more than 1 registry found for this params.");
+    }
+
+    /**
+     * @param string $date
+     * @return string
+     * Set date format to Y-m-d, prepare for db
+     */
+    private function carbonizeDateDB(string $date): string
+    {
+        return Carbon::parse($date)->format('Y-m-d');
     }
 
     /**
@@ -4426,14 +4646,14 @@ class ZahtevController extends Controller
      * @param bool $start
      * @return int
      */
-    public function measureTime($start = false)
+    public function measureTime($start = FALSE)
     {
-        if ($start === false) {
+        if ($start === FALSE) {
             //start
-            return (int)microtime(true);
+            return (int)microtime(TRUE);
         } else {
             //stop
-            return (int)microtime(true) - (int)$start;
+            return (int)microtime(TRUE) - (int)$start;
         }
     }
 

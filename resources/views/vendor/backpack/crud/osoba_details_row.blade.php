@@ -25,43 +25,78 @@
                             target="_blank">
                             <i class="nav-icon fas fa-book"></i> Pogledaj podatke upisane u Registar</a>
                     @endif
-                @else
-                    Nije dodeljen lib
+                @else Nije dodeljen lib
                 @endif
             </p>
-            @role('admin')
+
+            <h5>Članstvo:</h5>
             @if($entry->memberships->isNotEmpty())
-                <h5>Članstvo:</h5>
                 <table class="table table-sm table-striped">
                     <thead>
                     <tr>
                         <th>id</th>
-                        <th>started_at</th>
-                        <th>ended_at</th>
-                        <th>status</th>
-                        {{--                        <th>note</th>--}}
-                        <th>created_at</th>
-                        <th>updated_at</th>
+                        <th>Početak</th>
+                        <th>Završetak</th>
+                        <th>Status</th>
+                        {{--<th>note</th>--}}
+                        {{--<th>created_at</th>--}}
+                        {{--<th>updated_at</th>--}}
                     </tr>
                     </thead>
-                    @foreach($entry->memberships as $membership)
+                    @foreach($entry->memberships->sortByDesc('id') as $membership)
                         <tr>
                             <td>{{$membership->id}}</td>
                             <td>{{!empty($membership->started_at) ? \Carbon\Carbon::parse($membership->started_at)->format('d.m.Y.') : '-'}}</td>
                             <td>{{!empty($membership->ended_at) ? \Carbon\Carbon::parse($membership->ended_at)->format('d.m.Y.') : '-'}}</td>
-                            <td>{{$membership->status_id}}</td>
-                            {{--                            <td>{{$membership->note}}</td>--}}
-                            <td>{{!empty($membership->created_at) ? \Carbon\Carbon::parse($membership->created_at)->format('d.m.Y.') : '-'}}</td>
-                            <td>{{!empty($membership->updated_at) ? \Carbon\Carbon::parse($membership->updated_at)->format('d.m.Y.') : '-'}}</td>
+                            <td>
+                                @switch((int)$membership->status_id)
+                                    @case(10) Aktivno @break
+                                    @case(11) Neaktivno @break
+                                    @case(12) U mirovanju @break
+                                @endswitch
+                            </td>
+                            {{--<td>{{$membership->note}}</td>--}}
+                            {{--<td>{{!empty($membership->created_at) ? \Carbon\Carbon::parse($membership->created_at)->format('d.m.Y.') : '-'}}</td>--}}
+                            {{--<td>{{!empty($membership->updated_at) ? \Carbon\Carbon::parse($membership->updated_at)->format('d.m.Y.') : '-'}}</td>--}}
                         </tr>
                     @endforeach
                 </table>
-            @else No data has been found
+            @else Nema podataka o članstvu
             @endif
-            @endrole
 
+            {{-- Mirovanje --}}
+            <h5>Mirovanje:</h5>
+            @if($entry->evidencijeMirovanja->isNotEmpty())
+                <table class="table table-sm table-striped">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Početak</th>
+                        <th>Trajanje</th>
+                        <th>Datum prestanka</th>
+                        <th>brresenja</th>
+                        <th>brresenjaprestanka</th>
+                        {{--<th>created_date</th>--}}
+                    </tr>
+                    </thead>
+                    @foreach($entry->evidencijeMirovanja->sortByDesc('id') as $mirovanje)
+                        <tr>
+                            <td>{{$mirovanje->id}}</td>
+                            <td>{{!empty($mirovanje->datumpocetka) ? \Carbon\Carbon::parse($mirovanje->datumpocetka)->format('d.m.Y.') : '-'}}</td>
+                            <td>{!! !empty($mirovanje->datumkraja) ? ($mirovanje->datumkraja == '2999-12-31' ? '<em>na neodređeno vreme</em>' : \Carbon\Carbon::parse($mirovanje->datumkraja)->format('d.m.Y.')) : '-'!!}</td>
+                            <td>{{!empty($mirovanje->datumprestanka) ? \Carbon\Carbon::parse($mirovanje->datumprestanka)->format('d.m.Y.') : '-'}}</td>
+                            <td>{{$mirovanje->brresenja}}</td>
+                            <td>{{$mirovanje->brresenjaprestanka}}</td>
+                            {{--<td>{{$mirovanje->created_date}}</td>--}}
+                        </tr>
+                    @endforeach
+                </table>
+            @else Nema podataka o mirovanju članstva
+            @endif
+
+            {{-- Licence --}}
+            <h5>Licence:</h5>
             @if($entry->licence->isNotEmpty())
-                <h5>Licence:</h5>
                 <table class="table table-sm table-striped">
                     <thead>
                     <tr>
@@ -80,7 +115,7 @@
                         <tr>
                             <td>{{$licenca->id}}</td>
                             <td>{{$licenca->licencatip}}</td>
-                            <td>{{$licenca->tipLicence->oznaka}}</td>
+                            <td>{{$licenca->tipLicence->oznaka ?? '-'}}</td>
                             <td>{{!empty($licenca->datumuo) ? \Carbon\Carbon::parse($licenca->datumuo)->format('d.m.Y.') : '-'}}</td>
                             <td>{{$licenca->preuzeta === 1 ? 'Preuzeta': 'Nije preuzeta'}}</td>
                             <td>{{$licenca->status}}</td>
@@ -95,27 +130,6 @@
 
             <br><br>
 
-            <p><b>Zahtevi za licence:</b><br>
-                @if($entry->zahteviLicence->isNotEmpty())
-                    @foreach($entry->zahteviLicence as $item)
-                        <strong>{{$item->id}}</strong> ({{$item->statusId->naziv ?? 'nema status'}}),
-                        <strong>tip:</strong> {{$item->licencatip}} - {{$item->tipLicence->naziv}} ({{$item->tipLicence->idn}}),
-                        <b>status:</b> {{$item->statusId->naziv ?? 'nema status'}},
-                        <b>datum prijema:</b> {{!empty($item->prijem) ? \Carbon\Carbon::parse($item->prijem)->format('d.m.Y.') : '-'}}<br>
-                    @endforeach
-                @else Nema podataka o zahtevima za izdavanje licence
-                @endif
-            </p>
-            <p><b>Stručni ispit:</b><br>
-                @if($entry->siPrijave->isNotEmpty())
-                    @foreach($entry->siPrijave as $item)
-                        <strong>{{$item->id}}</strong> ({{$item->status->naziv ?? 'nema status'}}),
-                        vrsta posla:<strong> {{$item->vrstaPosla->naziv}}</strong>,
-                        zahtev: {{$item->regOblast->naziv}}, {{$item->regPodOblast->naziv}}, {{!empty($item->datum_prijema) ? \Carbon\Carbon::parse($item->datum_prijema)->format('d.m.Y.') : ''}}, {{$item->zavodni_broj ?? ''}}<br>
-                    @endforeach
-                @else Nema podataka o stručnom ispitu
-                @endif
-            </p>
             @if(!empty($entry->clanarine->count()))
                 <h5>Članarina:</h5>
                 <table class="table table-sm table-striped">
@@ -136,7 +150,6 @@
                     </tr>
                     </thead>
                     @foreach($entry->clanarine as $unos)
-                        {{--                        @dd($unos->appKorisnik)--}}
                         <tr>
                             <td>{{\Carbon\Carbon::parse($unos->rokzanaplatu)->format('d.m.Y.')}}</td>
                             <td>{{$unos->iznoszanaplatu}}</td>

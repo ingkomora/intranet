@@ -36,7 +36,6 @@ use Illuminate\Support\Str;
  * @property Status $status
  * @property RequestCategory $requestCategory
  */
-
 class SiPrijava extends Model
 {
     use CrudTrait;
@@ -60,7 +59,7 @@ class SiPrijava extends Model
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +67,8 @@ class SiPrijava extends Model
     |--------------------------------------------------------------------------
     */
 
-    public static function sendWelcomeEmail($user) {
+    public static function sendWelcomeEmail($user)
+    {
         // Generate a new reset password token
         $token = app('auth.password.broker')->createToken($user);
 
@@ -83,6 +83,7 @@ class SiPrijava extends Model
     {
         $statusi = Status::where('id', '<>', NEAKTIVAN)
             ->whereHas('siPrijave')
+            ->orderBy('id')
             ->pluck('naziv', 'id')
             ->toArray();
 
@@ -147,8 +148,7 @@ class SiPrijava extends Model
      */
     public function zahtevLicenca()
     {
-        return $this->hasOne('App\Models\ZahtevLicenca', 'strucniispit');
-        // TODO da vrati samo one zahteve koji nemaju status zavrsen
+        return $this->hasOne('App\Models\ZahtevLicenca', 'si_prijava_id');
     }
 
     /**
@@ -176,7 +176,8 @@ class SiPrijava extends Model
         return $this->belongsTo('App\Models\User', 'app_korisnik_id');
     }
 
-    public static function generatePassword() {
+    public static function generatePassword()
+    {
         // Generate random string and encrypt it.
         return bcrypt(Str::random(35));
     }
@@ -192,7 +193,8 @@ class SiPrijava extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function reference() {
+    public function reference()
+    {
         return $this->belongsToMany('App\Models\Referenca', 'referenca_si_prijava', 'si_prijava_id', 'referenca_id')
             ->using('App\Models\ReferencaSiPrijava')
             ->withPivot([
@@ -228,7 +230,29 @@ class SiPrijava extends Model
     | ACCESSORS
     |--------------------------------------------------------------------------
     */
+    public function getZahtevLicencaStatusAttribute(): string
+    {
+        if ($this->zahtevLicenca) {
+            $result = "{$this->zahtevLicenca->id} | {$this->zahtevLicenca->statusId->naziv}";
+        } else {
+            $result = '<i class="las la-exclamation-triangle"></i>';
+        }
+        return $result;
+    }
 
+    // todo: basic si prijava document info
+    public function getDataDocumentsToArrayAttribute(): array
+    {
+        $documents = Document::where('documentable_id', $this->id)
+            ->where('documentable_type', 'App\Models\SiPrijava')
+            ->get(['id', 'document_category_id', 'register_number', 'register_date', 'status_id']);
+        $document_data = [];
+        foreach ($documents as $key => $document) {
+            $document_data[$key] = $document->category_type_name_status_registry_number_registry_date;
+        }
+        dd($document_data);
+        return $document_data;
+    }
     /*
     |--------------------------------------------------------------------------
     | MUTATORS

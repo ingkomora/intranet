@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -189,6 +190,18 @@ class Document extends Model
     public function getCategoryTypeNameStatusRegistryNumberAttribute()
     {
         return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $this->registry_number)";
+    }
+
+    public function getCategoryTypeNameStatusRegistryDateAttribute(): string
+    {
+        $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
+        return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $registry_date)";
+    }
+
+    public function getCategoryTypeNameStatusRegistryNumberRegistryDateAttribute(): string
+    {
+        $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
+        return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $this->registry_number | $registry_date)";
     }
     /*
     |--------------------------------------------------------------------------

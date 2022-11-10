@@ -77,6 +77,7 @@ return [
 //php artisan krlove:generate:model LicencaClanPrijava --table-name=licenca_prijava_clan
 
 //php artisan krlove:generate:model AppKorisnik --table-name=tappkorisnik
+//php artisan krlove:generate:model Korisnik --table-name=tkorisnik
 //php artisan krlove:generate:model Clanarina --table-name=tclanarinaod2006
 
 //php artisan krlove:generate:model Log --table-name=logovi

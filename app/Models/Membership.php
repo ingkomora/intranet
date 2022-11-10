@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $updated_at
  * @property Status $status
  * @property Osoba $osoba
+ * @property Clanarina[] $clanarine
+ * @property Request[] $requests
+ * @property Request[] $zahtevZaMirovanje
+ * @property EvidencijaMirovanja $poslednjeMirovanje
+ * @property EvidencijaMirovanja[] $aktivnaMirovanja
  */
 class Membership extends Model
 {
@@ -25,6 +30,17 @@ class Membership extends Model
      */
     protected $fillable = ['osoba_id', 'status_id', 'started_at', 'ended_at', 'note', 'created_at', 'updated_at'];
 
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -48,4 +64,81 @@ class Membership extends Model
     {
         return $this->morphMany(Request::class, 'requestable');
     }
+
+    public function zahtevZaMirovanje(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Request::class, 'osoba_id', 'osoba_id')
+            ->where('request_category_id', 4);
+    }
+
+    public function poslednjeMirovanje()
+    {
+        return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba', 'osoba_id')
+            ->orderByDesc('id')->first();
+    }
+
+    public function aktivnaMirovanja(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba', 'osoba_id')
+            ->whereNull('datumprestanka')
+            ->whereRaw('datumkraja>=now()::date');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clanarine(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba', 'osoba_id')
+            ->orderBy('rokzanaplatu');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function poslednjaClanarina(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\Clanarina', 'osoba', 'osoba_id')
+            ->orderBy('rokzanaplatu', 'desc')->limit(1);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * Scope a query to only include active memberships.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeActive($query)
+    {
+        $query->where('status_id', 10);
+    }
+
+    public function scopeActiveAndMirovanje($query)
+    {
+        $query->whereIn('status_id', [10, 12]);
+    }
+
+    public function scopeClan($query)
+    {
+        $query->whereHas('osoba', function ($q) {
+            $q->whereIn('clan', [1, 10, 100]);
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATORS
+    |--------------------------------------------------------------------------
+    */
 }
