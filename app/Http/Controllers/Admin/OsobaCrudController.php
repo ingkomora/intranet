@@ -858,6 +858,19 @@ class OsobaCrudController extends CrudController
                         '
         ]);
 //        firma
+        $this->crud->modifyColumn('firma_sep', [
+            'type' => 'custom_html',
+            'value' => '<div id="firmaseparator"></div>
+                        <script>
+                            var row = document.getElementById("firmaseparator").parentNode.parentNode.parentNode.children[0];
+                            var col = document.getElementById("firmaseparator").parentNode.parentNode;
+                            col.remove();
+                            row.setAttribute("colspan", 2);
+                            row.setAttribute("class", "text-center");
+                            row.style.cssText = "background-color: rgba(124,105,239,0.3)";
+                        </script>
+                        '
+        ]);
 //        start
         $this->crud->modifyColumn('firma_staro', [
             'type' => 'custom_html',
