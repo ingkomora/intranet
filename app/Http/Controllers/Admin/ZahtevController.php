@@ -416,6 +416,10 @@ class ZahtevController extends Controller
             }
 
 
+//            UNET JE JMBG PROVERITI DA LI POSTOJI U BAZI
+            if (!empty($licenca['jmbg'])) {
+                dd('alo');
+            }
 //            PRONADJI JMBG NA OSNOVU BROJA ZAHTEVA ILI BROJA PRIJAVE
             if (!empty($licenca['broj_zahteva'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_zahteva'], 'zahtev');
@@ -536,6 +540,16 @@ class ZahtevController extends Controller
             return false;
         }
 
+    }
+
+    public function getOsoba($jmbg)
+    {
+        $osoba = Osoba::find($jmbg);
+        if (!is_null($osoba)) {
+            return $osoba->full_name;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -934,13 +948,12 @@ class ZahtevController extends Controller
     /*
      * funkcija koja se poziva iz bladea AJAX
      */
-    public function getLicencaTip($id)
+    public function getLicencaTip($tip)
     {
-        $id = substr($id, 0, 3);
-        $licencaTip = LicencaTip::where("id", 'LIKE', $id . '%')->get()->pluck('tip_naziv', 'id')->toArray();
+        $tip = substr($tip, 0, 3);
+        $licencaTip = LicencaTip::where("id", 'LIKE', $tip . '%')->get()->pluck('tip_naziv', 'id')->toArray();
         return json_encode($licencaTip);
     }
-
 
     /*
      * funkcija koja se poziva iz bladea AJAX
@@ -980,11 +993,14 @@ class ZahtevController extends Controller
         $jmbgs = [
             '0104986782826', '0110974715090', '0301983330061', '0303988715223', '0405983727816', '0407988710035', '0408992793413', '0412991710120', '0504986715086', '0504991789314', '0507991715212', '0511990183753', '0612965910048', '0612988795092', '0612994800030', '0806979754110', '0806986895021', '0809984170045', '0906987733526', '1006967170021', '1009982380007', '1105989170015', '1105993710229', '1108983710211', '1112972710020', '1302986715193', '1304976742012', '1305974757523', '1305983775011', '1305991773664', '1410974724119', '1603984715021', '1608977731331', '1701992810639', '1806992735013', '1809980820014', '1903985740015', '1908985383923', '1910990785031', '2004964722229', '2009991730030', '2103965744119', '2105979850097', '2106992715030', '2106993755028', '2107985770030', '2204965734416', '2211984382128', '2212987100049', '2302993100009', '2309983122149', '2312988787832', '2403987787834', '2501990715110', '2602966710117', '2604993710342', '2609980710043', '2610994715186', '2804973720022', '2807984793934', '2905969710358', '2909986730058', '3007985150023'
         ];
-        $osobe = Osoba::whereIn('id', $jmbgs)
+        $osobe = Osoba::
+//        whereIn('id', $jmbgs)
 //        $requests = \App\Models\Request::where('request_category_id', 3)
 //            ->where('note', 'SFL_20211130')
 //            ->where('status_id', KREIRAN)
+            whereNotNull('ulica')
             ->get();
+        dd($osobe);
 //        foreach ($requests as $request) {
         foreach ($osobe as $osoba) {
 //            $osoba = $request->osoba;
@@ -996,6 +1012,7 @@ class ZahtevController extends Controller
                 $osoba->broj = (!empty($m[2])) ? $m[2] : NULL;
                 $osoba->podbroj = (!empty($m[3])) ? $m[3] : NULL;
                 $osoba->stan = (!empty($m[4])) ? $m[4] : ((!empty($m[8])) ? $m[8] : NULL);
+
             } else {
                 $osoba->ulica = $original;
                 $osoba->broj = NULL;
@@ -1003,6 +1020,9 @@ class ZahtevController extends Controller
                 $osoba->stan = NULL;
 //                echo "<br>!!!!!!$original";
             }
+            $osoba->posta_opstina_id = $osoba->prebivalisteopstinaid;
+            $osoba->posta_pb = $osoba->prebivalistebroj;
+            $osoba->posta_drzava = $osoba->prebivalistedrzava;
             if (!empty($osoba->lib)) {
                 $osoba->save();
             }
@@ -2018,7 +2038,7 @@ class ZahtevController extends Controller
         where('request_category_id', 2)
 
 //            ->distinct('osoba_id')
-            ->whereNotIn('status_id', [ZALBA,REQUEST_BOARD])
+            ->whereNotIn('status_id', [ZALBA, REQUEST_BOARD])
 //            ->whereIn('id', $odustaliOdZalbe) //ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
 //            ->where('status_id','<>', 41)   // ODUSTALI OD ZALBE SA STATUSOM ZALBA_ODUSTAO
             ->whereHas('osoba', function ($q) use ($osobeDuplicate, $osobeBrisanjeIds) {
@@ -2207,20 +2227,20 @@ class ZahtevController extends Controller
             })*/
 //SVI
 //            ->whereIn('status_id', [PONISTEN])
-            ->whereIn('status_id', [ZALBA,REQUEST_BOARD,PONISTEN])
+            ->whereIn('status_id', [ZALBA, REQUEST_BOARD, PONISTEN])
 //            ->where('note', 'ilike', '%platio%')
 //            ->whereDate('updated_at', '<', '2022-03-16 00:00:00')
-/*            ->whereHas('osoba', function ($q) {
-                $q->where('clan', 10);
-//                $q->whereIn('id', [
-//                    '1306976370010'
-//                ]);
-            })*/
+            /*            ->whereHas('osoba', function ($q) {
+                            $q->where('clan', 10);
+            //                $q->whereIn('id', [
+            //                    '1306976370010'
+            //                ]);
+                        })*/
             ->orderBy('id')
             ->chunkById(1000, function ($requests) use ($save, &$errorStr) {
                 foreach ($requests as $request) {
                     $osoba = $request->osoba;
-                    $memberships = implode(',', $osoba->memberships->pluck('status_id','id')->toArray());
+                    $memberships = implode(',', $osoba->memberships->pluck('status_id', 'id')->toArray());
 //                    $requests = $osoba->requests;
                     $document = [];
                     $docreqStr = '';
@@ -4426,9 +4446,9 @@ class ZahtevController extends Controller
 
     public function modulo10($number)
     {
-        $digits = array(0,9,4,6,8,2,7,1,3,5);
+        $digits = array(0, 9, 4, 6, 8, 2, 7, 1, 3, 5);
         $next = 0;
-        for ($i = 0; $i < strlen($number); $i++){
+        for ($i = 0; $i < strlen($number); $i++) {
             $next = $digits[($next + substr($number, $i, 1)) % 10];
         }
         dd((10 - $next) % 10);
