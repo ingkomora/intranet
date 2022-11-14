@@ -366,8 +366,7 @@ class Osoba extends Model
                 'created_at',
                 'updated_at',
             ])
-            ->orderByDesc('polisa_datum_pocetka')
-            ;
+            ->orderByDesc('polisa_datum_pocetka');
     }
 
     public function aktivnaOsiguranja()
@@ -390,6 +389,12 @@ class Osoba extends Model
         return $this->hasMany('App\Models\Request', 'osoba_id');
     }
 
+    public function zahtevZaMirovanje(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\Request', 'osoba_id')
+            ->where('request_category_id', 4);
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
@@ -405,6 +410,18 @@ class Osoba extends Model
     {
         return $this->hasMany('App\Models\Membership', 'osoba_id');
     }
+
+    public function activeMembership()
+    {
+        return $this->hasMany('App\Models\Membership', 'osoba_id')->where('status_id', MEMBERSHIP_STARTED);
+    }
+
+    public function suspendedMembership()
+    {
+        return $this->hasMany('App\Models\Membership', 'osoba_id')->orderByDesc('started_at')->where('status_id', MEMBERSHIP_SUSPENDED);
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
