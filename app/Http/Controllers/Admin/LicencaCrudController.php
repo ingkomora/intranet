@@ -17,6 +17,7 @@ class LicencaCrudController extends CrudController
 
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
 
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
@@ -63,6 +64,18 @@ class LicencaCrudController extends CrudController
     protected function setupListOperation()
     {
         CRUD::column('id');
+        $this->crud->setColumnDetails('id', [
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                if (strstr($searchTerm, ",")) {
+                    $searchTerm = trim($searchTerm, " ,.;");
+                    $searchTerm = explode(",", $searchTerm);
+                    $searchTermArray = array_map('trim', $searchTerm);
+//                    dd($column);
+                    $query->whereIn('id', $searchTermArray)->orderBy('id');
+                }
+            }
+        ]);
+
 
         $this->crud->setColumnDetails('osoba', [
             'name' => 'osoba',
@@ -76,8 +89,7 @@ class LicencaCrudController extends CrudController
                     $searchTerm = explode(" ", $searchTerm);
                     $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
                         $q->where('ime', 'ilike', $searchTerm[0] . '%')
-                            ->where('prezime', 'ilike', $searchTerm[1] . '%')
-                        ;
+                            ->where('prezime', 'ilike', $searchTerm[1] . '%');
                     });
                 } else {
                     $query->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
