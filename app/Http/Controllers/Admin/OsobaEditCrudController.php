@@ -178,7 +178,7 @@ class OsobaEditCrudController extends CrudController
             $query->where('request_category_id', 2);
         });*/
 
-        $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
+//        $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
         $this->crud->addClause('orderBy', 'ime');
 
         if (!backpack_user()->hasRole(['admin'])) {
@@ -237,54 +237,54 @@ class OsobaEditCrudController extends CrudController
         ]);*/
 
 
-        // simple filter
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'platili',
-            'label' => 'Platili članarinu'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
-                    $query->where('rokzanaplatu', '>=', 'now()');
-                }); // apply the "active" eloquent scope
-            });
-
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'nisuplatili',
-            'label' => 'Nisu platili članarinu'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
-                    $query->where('rokzanaplatu', '<', 'now()')->whereRaw('iznoszanaplatu > iznosuplate + pretplata');
-                }); // apply the "active" eloquent scope
-            });
-
-        // simple filter
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'nemaAdresu',
-            'label' => 'Nema adresu'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('where', 'prebivalisteadresa', '=', '/');
-//                $this->crud->addClause('orWhere','prebivalistebroj', '=', '/');
-            });
-
-
-        // simple filter
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'nemalib',
-            'label' => 'Nema LIB'
-        ],
-            FALSE,
-            function () { // if the filter is active
-                $this->crud->addClause('whereNull', 'lib');
-            });
+//        // simple filter
+//        $this->crud->addFilter([
+//            'type' => 'simple',
+//            'name' => 'platili',
+//            'label' => 'Platili članarinu'
+//        ],
+//            FALSE,
+//            function () { // if the filter is active
+//                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+//                    $query->where('rokzanaplatu', '>=', 'now()');
+//                }); // apply the "active" eloquent scope
+//            });
+//
+//        $this->crud->addFilter([
+//            'type' => 'simple',
+//            'name' => 'nisuplatili',
+//            'label' => 'Nisu platili članarinu'
+//        ],
+//            FALSE,
+//            function () { // if the filter is active
+//                $this->crud->addClause('whereHas', 'clanarine', function ($query) {
+//                    $query->where('rokzanaplatu', '<', 'now()')->whereRaw('iznoszanaplatu > iznosuplate + pretplata');
+//                }); // apply the "active" eloquent scope
+//            });
+//
+//        // simple filter
+//        $this->crud->addFilter([
+//            'type' => 'simple',
+//            'name' => 'nemaAdresu',
+//            'label' => 'Nema adresu'
+//        ],
+//            FALSE,
+//            function () { // if the filter is active
+//                $this->crud->addClause('where', 'prebivalisteadresa', '=', '/');
+////                $this->crud->addClause('orWhere','prebivalistebroj', '=', '/');
+//            });
+//
+//
+//        // simple filter
+//        $this->crud->addFilter([
+//            'type' => 'simple',
+//            'name' => 'nemalib',
+//            'label' => 'Nema LIB'
+//        ],
+//            FALSE,
+//            function () { // if the filter is active
+//                $this->crud->addClause('whereNull', 'lib');
+//            });
 
         // dropdown filter
         /*        $this->crud->addFilter([
@@ -319,6 +319,99 @@ class OsobaEditCrudController extends CrudController
                             $q->whereIn('note', json_decode($values));
                         });
                     });*/
+
+        // simple filter
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'active',
+            'label' => 'Aktivna članstva'
+        ],
+            FALSE,
+            function () { // if the filter is active
+//                $this->crud->addClause('active'); // apply the "active" eloquent scope
+                $this->crud->addClause('whereHas', 'memberships', function ($q) {
+                    $q->active();
+                });
+            });
+
+//        $this->crud->addFilter([
+//            'type' => 'simple',
+//            'name' => 'mirovanje',
+//            'label' => 'U mirovanju'
+//        ],
+//            FALSE,
+//            function () { // if the filter is active
+////                $this->crud->addClause('where', 'status_id', 12); // apply the "active" eloquent scope
+//                $this->crud->addClause('whereHas', 'suspendedMembership');
+//            });
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'imazahtevzamirovanje',
+            'label' => 'Bez zahteva za mirovanje'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('whereDoesntHave', 'zahtevZaMirovanje', function ($q) {
+                    $q->where('status_id', REQUEST_IN_PROGRESS);
+                });
+
+            });
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'bezfunkcionera',
+            'label' => 'Bez funkcionera'
+        ],
+            FALSE,
+            function () { // if the filter is active
+                $this->crud->addClause('whereDoesntHave', 'aktivniClanoviVeca'); // apply the "active" eloquent scope
+            });
+
+        // daterange filter
+        $this->crud->addFilter([
+            'type' => 'date_range',
+            'name' => 'from_to',
+            'label' => 'Duguje'
+        ],
+            FALSE,
+            function ($value) { // if the filter is active, apply these constraints
+                $dates = json_decode($value);
+//            dd($dates);
+                $this->crud->addClause('whereExists', function ($query) use ($dates) {
+                    $query
+                        ->select('c1.rokzanaplatu')
+                        ->from('tclanarinaod2006 as c1')
+                        ->where('c1.rokzanaplatu', function ($query) {
+                            $query
+                                ->select('c2.rokzanaplatu')
+                                ->from('tclanarinaod2006 as c2')
+                                ->whereColumn('c1.osoba', 'c2.osoba')
+                                ->orderByDesc('c2.rokzanaplatu')
+                                ->limit(1);
+                        })
+                        ->where('c1.rokzanaplatu', '>=', $dates->from)
+                        ->whereColumn('c1.osoba', 'tosoba.id');
+                });
+
+                $this->crud->addClause('whereExists', function ($query) use ($dates) {
+                    $query
+                        ->select('c1.rokzanaplatu')
+                        ->from('tclanarinaod2006 as c1')
+                        ->where('c1.rokzanaplatu', function ($query) {
+                            $query
+                                ->select('c2.rokzanaplatu')
+                                ->from('tclanarinaod2006 as c2')
+                                ->whereColumn('c1.osoba', 'c2.osoba')
+                                ->orderByDesc('c2.rokzanaplatu')
+                                ->limit(1);
+                        })
+                        ->where('c1.rokzanaplatu', '<=', $dates->to)
+                        ->whereColumn('c1.osoba', 'tosoba.id');
+                });
+
+            });
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
