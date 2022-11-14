@@ -421,11 +421,17 @@ class ZahtevController extends Controller
                 continue;
             }
 
-
 //            UNET JE JMBG PROVERITI DA LI POSTOJI U BAZI
             if (!empty($licenca['jmbg'])) {
-                dd('alo');
+                $is_osoba = $this->getOsoba($licenca['jmbg']);
+
+                if ($is_osoba == FALSE) {
+                    $messageLicencaNOK .= ', Za uneti jmbg ne postoji osoba u bazi';
+                    $countNOK++;
+                    continue;
+                }
             }
+
 //            PRONADJI JMBG NA OSNOVU BROJA ZAHTEVA ILI BROJA PRIJAVE
             if (!empty($licenca['broj_zahteva'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_zahteva'], 'zahtev');
@@ -560,7 +566,7 @@ class ZahtevController extends Controller
         if (!is_null($osoba)) {
             return $osoba->full_name;
         } else {
-            return false;
+            return FALSE;
         }
     }
 
@@ -1066,7 +1072,7 @@ class ZahtevController extends Controller
 //        $requests = \App\Models\Request::where('request_category_id', 3)
 //            ->where('note', 'SFL_20211130')
 //            ->where('status_id', KREIRAN)
-            whereNotNull('ulica')
+        whereNotNull('ulica')
             ->get();
         dd($osobe);
 //        foreach ($requests as $request) {
