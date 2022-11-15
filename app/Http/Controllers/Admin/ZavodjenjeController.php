@@ -29,7 +29,7 @@ class ZavodjenjeController extends Controller
         // document_category_id' => [<document_category_id> => <request_category_id>, ...]
         'si' => ['document_category_id' => [10 => 6, 26 => 6], 'registry_type' => 'oblastsi', 'url' => 'si', 'statusRel' => 'status', 'statusCol' => 'status_prijave', 'model' => 'SiPrijava', 'title' => 'Zavođenje prijava za polaganje stručnog ispita'],
         'licence' => ['document_category_id' => [5, 25], 'registry_type' => 'oblast', 'url' => 'licence', 'statusRel' => 'statusId', 'statusCol' => 'status', 'model' => 'ZahtevLicenca', 'title' => 'Zavođenje zahteva za izdavanje licenci'],
-        'clanstvo' => ['document_category_id' => [1 => 1, 2 => 2, 27 => 1, 28 => 2], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
+        'clanstvo' => ['document_category_id' => [1 => 1, 27 => 1, 2 => 2, 28 => 2, 37 => 12, 39 => 12, 38 => 13, 40 => 13], 'registry_type' => 'sekcija', 'url' => 'clanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za članstvo'],
         'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5, 29 => 4, 30 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
         'sfl' => ['document_category_id' => 6, 'registry_type' => '02', 'url' => 'sfl', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje svečane forme licence'],
         'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
@@ -171,7 +171,7 @@ class ZavodjenjeController extends Controller
         foreach ($requests as $request) {
             try {
                 $existingDocuments = $request->documents;
-                if (in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
+                if (in_array($request->{$requestStatusColumnName}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
                     // da moze da se zavede
                 } else if ($request->{$requestStatusColumnName} < REQUEST_SUBMITED) {
                     $result['ERROR'][1] = "Greška 2! Zahtev $request->id ima status " . $request->{$requestStatusRelationName}->naziv . ", Zavođenje je moguće samo za zahteve koji su podneti!";
@@ -200,7 +200,7 @@ class ZavodjenjeController extends Controller
                     });
                     $document_category_id = reset($temp);
                 } else if (isset($data['prilog'])) {
-                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) OR !in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
+                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) or !in_array($request->{$requestStatusColumnName}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
                         $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
@@ -255,7 +255,7 @@ class ZavodjenjeController extends Controller
                         $documents[] = $document;
                     }
                 } else {
-                    if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS OR in_array($request->{$requestStatusColumnName},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
+                    if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS or in_array($request->{$requestStatusColumnName}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
                         $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
                         return $result;
                     } else {
@@ -325,7 +325,7 @@ class ZavodjenjeController extends Controller
         } else {
             $osoba = $request->osoba;
         }
-        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_IN_PROGRESS  OR in_array($request->{$this->zavodjenje[$type]['statusCol']},[REQUEST_BOARD,ZALBA,PONISTEN,ZALBA_ODUSTAO,ZALBA_MGSI])) {
+        if ($request->{$this->zavodjenje[$type]['statusCol']} == REQUEST_IN_PROGRESS or in_array($request->{$this->zavodjenje[$type]['statusCol']}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
             if ($document->documentCategory->document_category_type_id == 11 and isset($prilog['text'])) {
                 $registerDocument = TRUE;
             }
@@ -434,7 +434,7 @@ class ZavodjenjeController extends Controller
         $filename = date("Ymd") . "_test";
 //        dd($data);
 //        $pdf = PDF::loadView('nalepniceRamipa89x43', $data);
-        $customPaper = array(0,0,143,284.2); // 10cm x 5cm rolna
+        $customPaper = array(0, 0, 143, 284.2); // 10cm x 5cm rolna
         $pdf = PDF::loadView('citizen100x50', $data)->setPaper($customPaper, 'landscape');
 //        return $pdf->stream("$filename.pdf");
 //        return $pdf->download("$filename.pdf");
