@@ -576,7 +576,7 @@ class OsobaCrudController extends CrudController
             'kontakttel',
             'mobilnitel',
             'kontaktfax',
-            'kontaktemail',
+//            'kontaktemail',
             'pol',
 
 //        rodjenje
