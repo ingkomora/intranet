@@ -182,7 +182,8 @@ class ProveraLibrary {
      */
     public function getJmbgFromLicenca($licenca) {
         $this->setLicenca($licenca);
-        $this->jmbg = Licenca::find($licenca)->osoba;
+//        $this->jmbg = Licenca::find($licenca)->osoba;
+        $this->jmbg = Licenca::where('id', $licenca)->first()->osoba;
         return $this->jmbg;
     }
 

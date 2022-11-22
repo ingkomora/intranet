@@ -143,7 +143,8 @@ class ZahtevController extends Controller
 
 //dd($licenca);
             $status_grupa = LICENCE;
-            $licencaO = Licenca::find($licenca);
+//            $licencaO = Licenca::find($licenca);
+            $licencaO = Licenca::where('id', $licenca)->first();
 //dd($licencaO->tipLicence->vrstaLicence->naziv);
             if (!is_null($licencaO)) {
                 $osoba = $licencaO->osobaId;
@@ -463,7 +464,8 @@ class ZahtevController extends Controller
             }
 
             // da li postoji licenca
-            $licenca_exist = Licenca::find($licenca['broj']);
+//            $licenca_exist = Licenca::find($licenca['broj']);
+            $licenca_exist = Licenca::where('id', $licenca['broj'])->first();
             if (!empty($licenca_exist)) {
                 $messageLicencaNOK .= ' Licenca broj ' . $licenca['broj'] . ' se vec nalazi u Registru!';
                 $countNOK++;
@@ -814,7 +816,8 @@ class ZahtevController extends Controller
     private function getLicenca($broj_licence)
     {
         $response = new \stdClass();
-        $licenca = Licenca::find($broj_licence);
+//        $licenca = Licenca::find($broj_licence);
+        $licenca = Licenca::where('id', $broj_licence)->first();
         if (!is_null($licenca)) {
 //                IMA JEDAN ZAHTEV
             $response->status = TRUE;
@@ -1067,14 +1070,15 @@ class ZahtevController extends Controller
         $jmbgs = [
             '0104986782826', '0110974715090', '0301983330061', '0303988715223', '0405983727816', '0407988710035', '0408992793413', '0412991710120', '0504986715086', '0504991789314', '0507991715212', '0511990183753', '0612965910048', '0612988795092', '0612994800030', '0806979754110', '0806986895021', '0809984170045', '0906987733526', '1006967170021', '1009982380007', '1105989170015', '1105993710229', '1108983710211', '1112972710020', '1302986715193', '1304976742012', '1305974757523', '1305983775011', '1305991773664', '1410974724119', '1603984715021', '1608977731331', '1701992810639', '1806992735013', '1809980820014', '1903985740015', '1908985383923', '1910990785031', '2004964722229', '2009991730030', '2103965744119', '2105979850097', '2106992715030', '2106993755028', '2107985770030', '2204965734416', '2211984382128', '2212987100049', '2302993100009', '2309983122149', '2312988787832', '2403987787834', '2501990715110', '2602966710117', '2604993710342', '2609980710043', '2610994715186', '2804973720022', '2807984793934', '2905969710358', '2909986730058', '3007985150023'
         ];
+//        dd('alo');
         $osobe = Osoba::
 //        whereIn('id', $jmbgs)
 //        $requests = \App\Models\Request::where('request_category_id', 3)
 //            ->where('note', 'SFL_20211130')
 //            ->where('status_id', KREIRAN)
-        whereNotNull('ulica')
+        whereNull('ulica')
             ->get();
-        dd($osobe);
+//        dd($osobe->pluck('id')->toArray());
 //        foreach ($requests as $request) {
         foreach ($osobe as $osoba) {
 //            $osoba = $request->osoba;
