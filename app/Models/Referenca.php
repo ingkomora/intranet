@@ -108,7 +108,8 @@ class Referenca extends Model
 
     public function getDataReferenceToArrayAttribute(): string
     {
-        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id);
+//        $odgovorno_lice = Licenca::find($this->odgovorno_lice_licenca_id);
+        $odgovorno_lice = Licenca::where('id',$this->odgovorno_lice_licenca_id)->first();
         // todo: dodati jos informacija ako treba
         return !is_null($odgovorno_lice) ? $odgovorno_lice->osobaId->ime_prezime_licence : '-';
     }
