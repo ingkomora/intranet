@@ -47,13 +47,13 @@ class Request extends Model
     |--------------------------------------------------------------------------
     */
 
-    public static function existingStatuses(int $type = NULL) : array
+    public static function existingStatuses(int $type = NULL): array
     {
         if (!is_null($type)) {
             $statusi = Status::where('id', '<>', NEAKTIVAN)
                 ->whereHas('requests', function ($query) use ($type) {
-                $query->where('request_category_id', $type);
-            })
+                    $query->where('request_category_id', $type);
+                })
                 ->orderBy('id')
                 ->pluck('naziv', 'id')
                 ->toArray();
@@ -126,6 +126,11 @@ class Request extends Model
     public function requestable()
     {
         return $this->morphTo();
+    }
+
+    public function licenca()
+    {
+        return $this->belongsTo('App\Models\Licenca', 'requestable_id', 'idn');
     }
 
     /*
