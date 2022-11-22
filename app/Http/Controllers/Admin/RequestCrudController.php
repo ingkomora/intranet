@@ -98,6 +98,11 @@ class RequestCrudController extends CrudController
     {
         $this->crud->addColumns([
             'id',
+            'status_id' => [
+                'name' => 'status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
             'osoba_id',
             'osoba' => [
                 'name' => 'osoba',
@@ -109,11 +114,6 @@ class RequestCrudController extends CrudController
                 'name' => 'requestCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
-            ],
-            'status_id' => [
-                'name' => 'status',
-                'type' => 'relationship',
-                'attribute' => 'naziv',
             ],
             'requestable' => [
                 'name' => 'requestable',
@@ -385,7 +385,19 @@ class RequestCrudController extends CrudController
                     return backpack_url('status/' . $related_key . '/show');
                 },
                 'target' => '_blank',
-                'class' => 'btn btn-sm btn-outline-info',
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->modifyColumn('status', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($entry->status_id) {
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info mr-1';
+                        default:
+                    }
+                }
             ]
         ]);
 

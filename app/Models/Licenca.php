@@ -30,15 +30,15 @@ class Licenca extends Model
     use CrudTrait;
 
     protected $table = 'tlicenca';
-//    protected $primaryKey = 'idn';
-    protected $keyType = 'string';
+    protected $primaryKey = 'idn';
+//    protected $keyType = 'string';
 
     /**
      * Indicates if the IDs are auto-incrementing.
      *
      * @var bool
      */
-    public $incrementing = FALSE;
+//    public $incrementing = FALSE;
 
     /**
      * @var array
@@ -52,7 +52,7 @@ class Licenca extends Model
      */
     public $timestamps = TRUE;
 
-    public $identifiableAttribute = 'id';
+    public $identifiableAttribute = 'idn';
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -86,6 +86,12 @@ class Licenca extends Model
     public function clanarineOld()
     {
         return $this->hasMany('App\Models\ClanarinaOld', 'brlicence');
+    }
+
+    public function requestable()
+    {
+        return $this->morphMany(Request::class, 'requestable');
+
     }
 
 

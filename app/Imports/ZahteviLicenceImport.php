@@ -35,7 +35,8 @@ class ZahteviLicenceImport implements ToModel, WithHeadingRow, WithValidation, S
 
         $osoba = Osoba::find($row['jmbg']);
         $zahtev = ZahtevLicenca::find($row['jmbg']);
-        $licenca = Licenca::find($row['licenca']);
+//        $licenca = Licenca::find($row['licenca']);
+        $licenca = Licenca::where('id', $row['licenca'])->first();
         if (!is_null($licenca) AND !is_null($osoba) ) {
 
 //        dd($licenca->osoba);

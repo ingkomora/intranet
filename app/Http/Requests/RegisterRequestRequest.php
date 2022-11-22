@@ -29,6 +29,7 @@ class RegisterRequestRequest extends FormRequest
             'osoba' => 'required',
             'requestCategory'=> 'required',
             'status'=> 'required',
+            'licenca' => 'sometimes | required'
         ];
     }
 
