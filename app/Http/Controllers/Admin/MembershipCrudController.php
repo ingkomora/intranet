@@ -22,6 +22,8 @@ class MembershipCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
 
+    use Operations\CreateRequestStopMembershipBulkOperation;
+
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
      *
@@ -36,7 +38,7 @@ class MembershipCrudController extends CrudController
         $this->crud->set('show.setFromDb', FALSE);
 
         if (!backpack_user()->hasRole('admin')) {
-            $this->crud->denyAccess(['create', 'delete', 'update']);
+            $this->crud->denyAccess(['create', 'delete', 'update', 'createrequeststopmembership']);
         }
 
         $this->crud->enableDetailsRow();
