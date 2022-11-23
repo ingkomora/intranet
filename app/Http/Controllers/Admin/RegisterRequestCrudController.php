@@ -474,7 +474,7 @@ class RegisterRequestCrudController extends CrudController
 
         $response = $this->traitStore();
 
-        $licenca = Licenca::where('id', $this->crud->getRequest()->input('licenca'))->first();
+        $licenca = Licenca::find($this->crud->getRequest()->input('licenca'));
         $request = Request::find($this->crud->entry->id);
         $request->requestable_id = $licenca->idn;
 

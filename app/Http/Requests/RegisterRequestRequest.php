@@ -27,9 +27,9 @@ class RegisterRequestRequest extends FormRequest
     {
         return [
             'osoba' => 'required',
-            'requestCategory'=> 'required',
-            'status'=> 'required',
-            'licenca' => 'sometimes | required'
+            'requestCategory' => 'required',
+            'status' => 'required',
+            'licenca' => 'required_if:requestCategory,3'
         ];
     }
 
@@ -41,7 +41,8 @@ class RegisterRequestRequest extends FormRequest
     public function attributes()
     {
         return [
-            //
+            'osoba' => 'Ime i prezime',
+            'requestCategory' => 'Kategorija zahteva',
         ];
     }
 
@@ -53,7 +54,7 @@ class RegisterRequestRequest extends FormRequest
     public function messages()
     {
         return [
-            //
+            'licenca.required_if' => 'Polje licenca je potrebno kada polje Kategorija zahteva ima vrednost "Svečana forma licence".'
         ];
     }
 }
