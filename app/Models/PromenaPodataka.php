@@ -86,7 +86,7 @@ class PromenaPodataka extends Model
      */
     public function licenca()
     {
-        return $this->belongsTo('App\Models\Licenca', 'brlic');
+        return $this->belongsTo('App\Models\Licenca', 'brlic', 'id');
     }
 
     /**
