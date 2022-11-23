@@ -471,17 +471,22 @@ class RegisterRequestCrudController extends CrudController
     public function store()
     {
         DB::beginTransaction();
-
         $response = $this->traitStore();
 
-        $licenca = Licenca::find($this->crud->getRequest()->input('licenca'));
+        $licenca_idn = $this->crud->getRequest()->input('licenca');
         $request = Request::find($this->crud->entry->id);
-        $request->requestable_id = $licenca->idn;
+//
+        if (!is_null($licenca_idn)) {
+            $licenca = Licenca::find($licenca_idn);
+            $request->requestable()->associate($licenca);
 
-        if ($request->save()) {
-            DB::commit();
+            if ($request->save()) {
+                DB::commit();
+            } else {
+                DB::rollBack();
+            }
         } else {
-            DB::rollBack();
+            DB::commit();
         }
 
         return $response;
