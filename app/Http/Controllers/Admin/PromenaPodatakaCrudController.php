@@ -184,11 +184,10 @@ class PromenaPodatakaCrudController extends CrudController
              ],*/
         'brlic' =>
             [
-                'name' => 'brlic',
+                'name' => 'licenca.osobaRel',
                 'type' => 'relationship',
                 'label' => 'Broj licence',
-                'attribute' => 'osobaId.licence_array',
-                'entity' => 'licenca',
+                'attribute' => 'licence_array',
                 'attributes' => ['disabled' => 'disabled'],
                 'ajax' => TRUE,
             ],
@@ -299,7 +298,7 @@ class PromenaPodatakaCrudController extends CrudController
 //        'osoba',
         'ime',
         'prezime',
-//        'brlic',
+//        'licenca.osobaRel',
         'adresa',
         'mesto',
         'pbroj',
@@ -363,7 +362,7 @@ class PromenaPodatakaCrudController extends CrudController
 //        'osoba',
             'ime',
             'prezime',
-//            'brlic',
+//            'licenca.osobaRel',
             'adresa',
             'mesto',
             'pbroj',
@@ -407,18 +406,18 @@ class PromenaPodatakaCrudController extends CrudController
         ]);
 
 
-        $this->crud->setColumnDetails('brlic', [
+        $this->crud->setColumnDetails('licenca.osobaRel', [
             'searchLogic' => function ($query, $column, $searchTerm) {
                 if (strstr($searchTerm, " ")) {
                     $searchTerm = explode(" ", $searchTerm);
-                    $query->orWhereHas('licenca.osobaId', function ($q) use ($column, $searchTerm) {
+                    $query->orWhereHas('licenca.osobaRel', function ($q) use ($column, $searchTerm) {
                         $q->where('ime', 'ilike', $searchTerm[0] . '%')
                             ->where('prezime', 'ilike', $searchTerm[1] . '%');
                     });
                 } else {
                     $query->orWhereHas('licenca', function ($q) use ($column, $searchTerm) {
                         $q->where('id', 'ilike', $searchTerm . '%')
-                            ->orWhereHas('osobaId', function ($q) use ($column, $searchTerm) {
+                            ->orWhereHas('osobaRel', function ($q) use ($column, $searchTerm) {
                                 $q
                                     ->where('id', 'ilike', $searchTerm . '%')
                                     ->orWhere('ime', 'ilike', $searchTerm . '%')
@@ -534,6 +533,7 @@ class PromenaPodatakaCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(PromenaPodatakaEmailRequest::class);
+
         $this->crud->addFields($this->fields_definition_array);
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -628,7 +628,7 @@ class PromenaPodatakaCrudController extends CrudController
             'name' => 'brlic',
             'label' => 'Licence',
             'type' => 'select',
-            'entity' => 'licenca.osobaId',
+            'entity' => 'licenca.osobaRel',
             'attribute' => 'licence_array',
             'model' => 'App\Models\Licenca',
         ]);

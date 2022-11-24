@@ -63,6 +63,11 @@ class Licenca extends Model
         return $this->belongsTo('App\Models\Osoba', 'osoba');
     }
 
+    public function osobaRel() // isto sto i osobaId, zbog nestovanih relacija kod definisanja kolone (PromenaPodatakaCrudController)
+    {
+        return $this->belongsTo('App\Models\Osoba', 'osoba');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      *
