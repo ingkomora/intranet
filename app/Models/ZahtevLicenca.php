@@ -41,11 +41,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property RequestCategory $requestCategory
  * @property Zvanje $zvanje
  * @property Document[] $documents
-
  */
 class ZahtevLicenca extends Model
 {
     use CrudTrait;
+
     /**
      * The table associated with the model.
      *
@@ -63,7 +63,7 @@ class ZahtevLicenca extends Model
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = TRUE;
 
     public $identifiableAttribute = 'id';
 
@@ -107,7 +107,7 @@ class ZahtevLicenca extends Model
      */
     public function licencaOsoba()
     {
-        return $this->hasOne('App\Models\Licenca', 'osoba','osoba');
+        return $this->hasOne('App\Models\Licenca', 'osoba', 'osoba');
     }
 
     /**
@@ -118,6 +118,11 @@ class ZahtevLicenca extends Model
         return $this->belongsTo('App\Models\ClanPrijava', 'prijava_clan_id');
     }
 
+    public function siPrijava()
+    {
+        return $this->belongsTo('App\Models\SiPrijava', 'si_prijava_id');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\morphOne
      */
@@ -125,6 +130,7 @@ class ZahtevLicenca extends Model
     {
         return $this->morphOne('App\Models\Log', 'loggable');
     }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -157,8 +163,21 @@ class ZahtevLicenca extends Model
     /**
      * Get all of the licence's requests.
      */
-        public function requests()
-        {
-            return $this->morphMany(Request::class, 'requestable');
-        }
+    public function requests()
+    {
+        return $this->morphMany(Request::class, 'requestable');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function reference()
+    {
+        return $this->belongsToMany('App\Models\Referenca', 'referenca_licenca_zahtev', 'licenca_zahtev_id', 'referenca_id')
+            ->using('App\Models\ReferencaLicencaZahtev')
+            ->withPivot([
+                'created_at',
+                'updated_at',
+            ]);
+    }
 }

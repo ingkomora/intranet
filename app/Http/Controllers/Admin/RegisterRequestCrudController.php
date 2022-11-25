@@ -3,15 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RegisterRequestRequest;
-use App\Http\Requests\RequestRequest;
-use App\Http\Requests\TagRequest;
-use App\Models\Document;
-use App\Models\DocumentCategoryType;
-use App\Models\DocumentCategory;
 use App\Models\Licenca;
 use App\Models\Request;
 use App\Models\RequestCategory;
-use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\DB;
@@ -177,7 +171,7 @@ class RegisterRequestCrudController extends CrudController
             'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
-                'attribute' => 'category_type_name_status_registry_number',
+                'attribute' => 'category_type_name_status_registry_date',
             ],
             'request_category_id' => [
                 'name' => 'requestCategory',
@@ -211,6 +205,10 @@ class RegisterRequestCrudController extends CrudController
                     switch ($entry->{$this->status_col_name}) {
                         case REQUEST_IN_PROGRESS:
                             return 'btn btn-sm btn-outline-info mr-1';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case REQUEST_CANCELED:
+                            return 'btn btn-sm btn-outline-danger mr-1';
                         default:
                     }
                 }
@@ -364,6 +362,10 @@ class RegisterRequestCrudController extends CrudController
                     switch ($entry->status_id) {
                         case REQUEST_IN_PROGRESS:
                             return 'btn btn-sm btn-outline-info mr-1';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case REQUEST_CANCELED:
+                            return 'btn btn-sm btn-outline-danger mr-1';
                         default:
                     }
                 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ZahtevLicencaRequest;
+use App\Models\Document;
 use App\Models\LicencaTip;
 use App\Models\RegOblast;
 use App\Models\RegPodoblast;
@@ -20,13 +21,15 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class ZahtevLicencaCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
+
+//    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use Operations\RegisterRequestBulkOperation;
 
-    protected $allowRegister = FALSE;
+    protected $allow_register = FALSE;
+    protected $segment;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -37,33 +40,29 @@ class ZahtevLicencaCrudController extends CrudController
     {
         CRUD::setModel(ZahtevLicenca::class);
 
-        $segment = \Request::segment(2);
+        $this->segment = \Request::segment(2);
 
-        switch ($segment) {
+        switch ($this->segment) {
             case 'zahtevlicenca':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
-//                CRUD::addClause('where', 'request_category_id', 7);
-//                $this->requestCategoryType = 1;
-//                $this->requestCategory = [10];
                 break;
             case 'registerrequestlicence':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
-//                CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
-//                $this->requestCategoryType = 1;
-//                $this->requestCategory = [1, 2];
-                $this->allowRegister = TRUE;
+                $this->allow_register = TRUE;
                 break;
         }
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
-// NE RADI KAD JE ADMIN
-        if ((backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) and $this->allowRegister) {
-            $this->crud->allowAccess(['registerrequestbulk']);
+
+        if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
+            $this->crud->allowAccess(['create']);
         }
+
+        CRUD::enableDetailsRow();
         CRUD::enableExportButtons();
 
         $this->crud->set('show.setFromDb', FALSE);
@@ -78,17 +77,24 @@ class ZahtevLicencaCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        if ($this->segment == 'zahtevlicenca') {
+            $this->crud->denyAccess(['registerrequestbulk']);
+            $this->crud->disableBulkActions();
+        }
+
         CRUD::column('id');
-        CRUD::column('osobaId')->label('Osoba')->attribute('ime_prezime_jmbg');
+        CRUD::column('statusId')->attribute('naziv')->label('Status');
+        CRUD::column('osoba')->label('jmbg');
+        CRUD::column('osobaId')->label('Ime i prezime')->attribute('full_name');
         CRUD::column('tipLicence')->label('Oznaka (tip)')->attribute('oznaka_tip');
+        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_date');
 //        CRUD::column('strucniispit');
 //        CRUD::column('referenca1');
 //        CRUD::column('referenca2');
 //        CRUD::column('pecat');
-        CRUD::column('datum')->type('date')->format('DD.MM.Y.');
-        CRUD::column('statusId')->attribute('naziv')->label('Status');
+//        CRUD::column('datum')->type('date')->format('DD.MM.Y.');
 //        CRUD::column('razlog');
-        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
+//        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
 //        CRUD::column('preporuka2');
 //        CRUD::column('preporuka1');
 //        CRUD::column('mestopreuzimanja');
@@ -98,7 +104,6 @@ class ZahtevLicencaCrudController extends CrudController
 //        CRUD::column('licenca_broj');
 //        CRUD::column('licenca_broj_resenja');
 //        CRUD::column('licenca_datum_resenja')->type('date')->format('DD.MM.Y.');
-        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
 
         $this->crud->modifyColumn('id', [
             'name' => 'id',
@@ -142,15 +147,33 @@ class ZahtevLicencaCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
 
         $this->crud->modifyColumn('statusId', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    if ($entry->status == REQUEST_SUBMITED) {
-                        return 'text-success';
+                    switch ($entry->status) {
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info mr-1';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case REQUEST_CANCELED:
+                            return 'btn btn-sm btn-outline-danger mr-1';
+                        default:
                     }
                 }
             ]
@@ -208,7 +231,7 @@ class ZahtevLicencaCrudController extends CrudController
             }
         );
 
-        if ($this->allowRegister) {
+        if ($this->allow_register) {
             $this->crud->addFilter([
                 'type' => 'simple',
                 'name' => 'active',
@@ -233,24 +256,25 @@ class ZahtevLicencaCrudController extends CrudController
 
         CRUD::column('id');
         CRUD::column('osobaId')->label('Osoba')->attribute('ime_prezime_jmbg');
-        CRUD::column('tipLicence')->label('Licenca')->attribute('tip_naziv_oznaka_gen')->limit(500);
-        CRUD::column('licenca');
+        CRUD::column('tipLicence')->label('Tip licence')->attribute('tip_naziv_oznaka_gen')->limit(500);
+        CRUD::column('licenca')->attribute('id');
         CRUD::column('licenca_broj_resenja');
         CRUD::column('licenca_datum_resenja')->type('date')->format('DD.MM.Y.');
-        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number');
+        CRUD::column('siPrijava')->attribute('id')->label('Stručni ispit');
+        CRUD::column('documents')->type('relationship')->attribute('category_type_name_status_registry_number_registry_date')->limit(500);
         CRUD::column('datum')->type('date')->format('DD.MM.Y.');
-        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
+//        CRUD::column('prijem')->type('date')->format('DD.MM.Y.');
         CRUD::column('statusId')->attribute('naziv')->label('Status');
 //        CRUD::column('prijava_clan_id');
-        CRUD::column('razlog');
-        CRUD::column('strucniispit');
+//        CRUD::column('razlog');
+//        CRUD::column('strucniispit');
 //        CRUD::column('preporuka2');
 //        CRUD::column('preporuka1');
 //        CRUD::column('mestopreuzimanja');
 //        CRUD::column('status_pregleda');
 //        CRUD::column('datum_statusa_pregleda');
-        CRUD::column('referenca1');
-        CRUD::column('referenca2');
+        CRUD::column('reference')->attribute('data_reference_to_array');
+//        CRUD::column('referenca2');
 //        CRUD::column('pecat');
 
         $this->crud->setColumnDetails('documents', [
@@ -258,6 +282,15 @@ class ZahtevLicencaCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
+                'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->setColumnDetails('reference', [
+            'wrapper' => [
+//                'href' => function ($crud, $column, $entry, $related_key) {
+//                    return backpack_url('document/' . $related_key . '/show');
+//                },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
             ]
         ]);
@@ -281,12 +314,36 @@ class ZahtevLicencaCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setColumnDetails('siPrijava', [
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('siprijava/' . $related_key . '/show');
+                },
+                'class' => 'btn btn-sm btn-outline-info',
+                'target' => '_blank',
+            ]
+        ]);
+
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
                 'class' => 'btn btn-sm btn-outline-info mr-1',
+            ]
+        ]);
+
+        $this->crud->modifyColumn('statusId', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($entry->status) {
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info mr-1';
+                        case REQUEST_CANCELED:
+                            return 'btn btn-sm btn-outline-danger mr-1';
+                        default:
+                    }
+                }
             ]
         ]);
 
@@ -303,50 +360,52 @@ class ZahtevLicencaCrudController extends CrudController
     {
         CRUD::setValidation(ZahtevLicencaRequest::class);
 
-        CRUD::field('osobaId')->ajax(TRUE)->attribute('ime_prezime_jmbg');
-        CRUD::field('licencatip')->attribute('gen_tip_naziv');
-        CRUD::field('licenca_broj');
-        CRUD::field('licenca_broj_resenja');
-        CRUD::field('licenca_datum_resenja')->type('date_picker')
+        CRUD::field('osobaId')->label('Ime prezime')->size(6)->ajax(TRUE)
+            ->hint('Osobu možete tražiti po imenu i/ili prezimenu, jmbg ili broju licence')
+            ->attribute('ime_prezime_jmbg');
+        CRUD::field('statusId')->label('Status')->size(6)->attribute('naziv');
+        CRUD::field('tipLicence')->label('Tip licence')->size(3)->attribute('gen_tip');
+        CRUD::field('licenca_broj')->size(3);
+        CRUD::field('licenca_broj_resenja')->label('Licenca broj rešenja')->size(3);
+        CRUD::field('licenca_datum_resenja')->label('Licenca datum rešenja')->size(3)->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',
                 'format' => 'dd.mm.yyyy.',
                 'language' => 'sr_latin',
             ]);
-/*        CRUD::field('documents')
-            ->type('relationship')
-            ->ajax(TRUE)
-            ->attribute('category_type_name_status_registry_number')
-        ;*/
-        CRUD::field('datum')->type('date_picker')
+//        CRUD::field('documents')
+//            ->type('relationship')
+//            ->ajax(TRUE)
+//            ->attribute('category_type_name_status_registry_number')
+//            ->attributes(['disabled' => 'disabled']);
+//        CRUD::field('prijem')
+//            ->type('date_picker')
+//            ->date_picker_options([
+//                'todayBtn' => 'linked',
+//                'format' => 'dd.mm.yyyy.',
+//                'language' => 'sr_latin',
+//            ]);
+//        CRUD::field('strucniispit');
+        CRUD::field('referenca1')->size(3);
+        CRUD::field('referenca2')->size(3);
+        CRUD::field('preporuka1')->size(3);
+        CRUD::field('preporuka2')->size(3);
+        CRUD::field('datum')->label('Datum kreiranja zahteva')->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',
                 'format' => 'dd.mm.yyyy.',
                 'language' => 'sr_latin',
             ]);
-        CRUD::field('statusId')->attribute('naziv');
-        CRUD::field('prijem')->type('date_picker')
-            ->date_picker_options([
-                'todayBtn' => 'linked',
-                'format' => 'dd.mm.yyyy.',
-                'language' => 'sr_latin',
-            ]);
-        CRUD::field('strucniispit');
-        CRUD::field('referenca1');
-        CRUD::field('referenca2');
-        CRUD::field('pecat');
-
-        CRUD::field('razlog');
-        CRUD::field('preporuka2');
-        CRUD::field('preporuka1');
-        CRUD::field('mestopreuzimanja');
-        CRUD::field('status_pregleda');
-        CRUD::field('datum_statusa_pregleda')->type('date_picker')
-            ->date_picker_options([
-                'todayBtn' => 'linked',
-                'format' => 'dd.mm.yyyy.',
-                'language' => 'sr_latin',
-            ]);
+//        CRUD::field('pecat');
+//        CRUD::field('razlog');
+//        CRUD::field('mestopreuzimanja');
+//        CRUD::field('status_pregleda');
+//        CRUD::field('datum_statusa_pregleda')->type('date_picker')
+//            ->date_picker_options([
+//                'todayBtn' => 'linked',
+//                'format' => 'dd.mm.yyyy.',
+//                'language' => 'sr_latin',
+//            ]);
 
 
         /**
@@ -370,5 +429,13 @@ class ZahtevLicencaCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+    }
+
+    protected function showDetailsRow($id)
+    {
+        $this->data['entry'] = $this->crud->getEntry($id)->osobaId;
+        $this->data['crud'] = $this->crud;
+        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
+        return view('crud::osoba_clanarina_details_row', $this->data);
     }
 }
