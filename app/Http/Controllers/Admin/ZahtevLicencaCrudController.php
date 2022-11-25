@@ -58,7 +58,7 @@ class ZahtevLicencaCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
+        if (backpack_user()->hasPermissionTo('zavedi') and $this->allow_register) {
             $this->crud->allowAccess(['create']);
         }
 
