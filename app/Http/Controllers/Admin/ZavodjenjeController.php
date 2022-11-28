@@ -200,7 +200,9 @@ class ZavodjenjeController extends Controller
                     });
                     $document_category_id = reset($temp);
                 } else if (isset($data['prilog'])) {
-                    if (!($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS) or !in_array($request->{$requestStatusColumnName}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
+                    if (!in_array($request->{$requestStatusColumnName}, [REQUEST_IN_PROGRESS, REQUEST_FINISHED, REQUEST_CANCELED, REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])
+                    ) {
+
                         $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
                     }
