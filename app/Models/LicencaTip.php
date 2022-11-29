@@ -128,6 +128,10 @@ class LicencaTip extends Model
         return "{$this->id} [Generacija: {$this->generacija}]";
     }
 
+    public function getGenTipOznakaAttribute() {
+        return "{$this->id} - {$this->oznaka} [Generacija: {$this->generacija}]";
+    }
+
     public function getOznakaTipAttribute() {
         return "{$this->oznaka} ({$this->id})";
     }
