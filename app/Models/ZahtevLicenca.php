@@ -180,4 +180,28 @@ class ZahtevLicenca extends Model
                 'updated_at',
             ]);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function vrstaPosla()
+    {
+        return $this->belongsTo('App\Models\VrstaPosla', 'vrsta_posla_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function regOblast()
+    {
+        return $this->belongsTo('App\Models\RegOblast', 'reg_oblast_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function regPodoblast()
+    {
+        return $this->belongsTo('App\Models\RegPodoblast', 'reg_pod_oblast_id');
+    }
 }

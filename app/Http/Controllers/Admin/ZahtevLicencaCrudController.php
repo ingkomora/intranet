@@ -373,6 +373,9 @@ class ZahtevLicencaCrudController extends CrudController
                 'format' => 'dd.mm.yyyy.',
                 'language' => 'sr_latin',
             ]);
+        CRUD::field('vrstaPosla')->attribute('naziv')->size(4);
+        CRUD::field('regOblast')->attribute('naziv')->size(4);
+        CRUD::field('regPodoblast')->attribute('naziv')->size(4);
 //        CRUD::field('documents')
 //            ->type('relationship')
 //            ->ajax(TRUE)
@@ -386,10 +389,11 @@ class ZahtevLicencaCrudController extends CrudController
 //                'language' => 'sr_latin',
 //            ]);
 //        CRUD::field('strucniispit');
-        CRUD::field('referenca1')->size(3);
-        CRUD::field('referenca2')->size(3);
-        CRUD::field('preporuka1')->size(3);
-        CRUD::field('preporuka2')->size(3);
+//        CRUD::field('referenca1')->size(3);
+//        CRUD::field('referenca2')->size(3);
+//        CRUD::field('reference')->size(3);
+//        CRUD::field('preporuka1')->size(3);
+//        CRUD::field('preporuka2')->size(3);
         CRUD::field('datum')->label('Datum kreiranja zahteva')->type('date_picker')
             ->date_picker_options([
                 'todayBtn' => 'linked',
