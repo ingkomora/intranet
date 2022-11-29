@@ -4542,6 +4542,7 @@ class ZahtevController extends Controller
                 // associate mirovanje with request
                 $request = $this->getRequestFromExcel($mirovanje_excel['zahtev']);
                 $request->requestable()->associate($mirovanje);
+                $request->status_id = REQUEST_FINISHED;
 
                 if (!$request->save()) throw new \Exception("Greska prilikom asociranja mirovanja sa zahtevom");
 
