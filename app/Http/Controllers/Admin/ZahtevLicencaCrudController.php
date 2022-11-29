@@ -364,7 +364,7 @@ class ZahtevLicencaCrudController extends CrudController
             ->hint('Osobu možete tražiti po imenu i/ili prezimenu, jmbg ili broju licence')
             ->attribute('ime_prezime_jmbg');
         CRUD::field('statusId')->label('Status')->size(6)->attribute('naziv');
-        CRUD::field('tipLicence')->label('Tip licence')->size(3)->attribute('gen_tip');
+        CRUD::field('tipLicence')->label('Tip licence')->size(3)->attribute('gen_tip_oznaka');
         CRUD::field('licenca_broj')->size(3);
         CRUD::field('licenca_broj_resenja')->label('Licenca broj rešenja')->size(3);
         CRUD::field('licenca_datum_resenja')->label('Licenca datum rešenja')->size(3)->type('date_picker')
