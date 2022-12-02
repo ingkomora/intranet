@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <td></td>
-                <td class="potpis">Томислав Момировић</td>
+                <td class="potpis">Горан Весић</td>
             </tr>
             <tr style="height: 50px;padding-top: 0;">
                 <td class="datum" style="width: 60%;">У Београду,<br>{{ $datumStampe }} године</td>
