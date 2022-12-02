@@ -161,6 +161,17 @@ class Osoba extends Model
         return $result;
     }
 
+    public function getDatumRodjenja(): string
+    {
+        return !empty($this->datumrodjenja) ? Carbon::parse($this->datumrodjenja)->format('d.m.Y') : '-';
+    }
+
+    public function getPersonsLatestEduDegreeData(): string
+    {
+        return !is_null($this->mrfakultet) ? "{$this->mrfakultet}, {$this->mrmesto}" : "{$this->diplfakultet}, {$this->diplmesto}";
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -574,11 +585,6 @@ class Osoba extends Model
             $result = "$this->rodjenjedan.$this->rodjenjemesec.$this->rodjenjegodina";
         }
         return $result;
-    }
-
-    public function getDatumRodjenja()
-    {
-        return !empty($this->datumrodjenja) ? Carbon::parse($this->datumrodjenja)->format('d.m.Y') : '-';
     }
 
 
