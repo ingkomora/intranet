@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\FileUploadOperation;
 use App\Http\Controllers\Admin\Operations\UnlockMembershipFeeRegistrationOperation;
 use App\Http\Controllers\Admin\Operations\UpdateLicencaStatusOperation;
 use App\Http\Requests\OsobaRequest;
@@ -24,13 +25,15 @@ class OsobaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use UpdateLicencaStatusOperation;
     use UnlockMembershipFeeRegistrationOperation;
+    use FileUploadOperation;
 
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
-    protected $columns_definition_array = [
+    protected $action;
+    protected $osoba_columns_definition_array = [
         'idn',
 
 //        licni
@@ -536,24 +539,97 @@ class OsobaCrudController extends CrudController
             'format' => 'DD.MM.Y HH:mm:ss'
         ],
     ];
+    protected $registar_columns_definition_array = [
+        'idn',
+        'id' => [
+            'name' => 'id',
+            'label' => 'jmbg',
+        ],
+        'osoba' => [
+            'name' => 'osoba',
+            'type' => 'model_function',
+            'label' => 'Ime (roditelj) prezime',
+            'function_name' => 'getImeRoditeljPrezimeAttribute',
+        ],
+        'zvanje' => [
+            'name' => 'zvanjeId',
+            'type' => 'relationship',
+            'label' => 'Zvanje',
+            'limit' => 200,
+        ],
+        'lib',
+
+        'obrazovanje' => [
+            'name' => 'obrazovanje',
+            'type' => 'model_function',
+            'function_name' => 'getPersonsLatestEduDegreeData',
+        ],
+
+
+        'osiguranja' => [
+            'name' => 'osiguranja',
+            'label' => 'Osiguranja',
+            'attribute' => 'osiguranje_ugovarac_polisa_datum_zavrsetka',
+            'limit' => 500,
+        ],
+
+        'licence_array' => [
+            'name' => 'licence_array',
+            'label' => 'Licence',
+            'type' => 'model_function',
+            'function_name' => 'getLicenceArrayAttribute',
+            'limit' => 500,
+        ],
+
+
+    ];
 
     public function setup()
     {
+
         $this->crud->setModel('App\Models\Osoba');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
-        $this->crud->setEntityNameStrings('osoba', 'osobe');
 
-//        prikazuje samo osobe sa maticnim brojem od 13 karaktera
+        $this->crud->denyAccess(['create', 'update', 'delete', 'fileUpload']);
 
-        $this->crud->denyAccess(['create', 'update', 'delete']);
+        $this->action = \request()->segment(2);
+        switch ($this->action) {
 
+            case 'osoba':
+                $this->crud->setRoute(config('backpack.base.route_prefix') . '/osoba');
+                $this->crud->setEntityNameStrings('osoba', 'osobe');
+
+
+                $this->crud->addColumns($this->osoba_columns_definition_array);
+
+                break;
+
+            case 'registar':
+                $this->crud->setRoute(config('backpack.base.route_prefix') . '/registar');
+                $this->crud->setEntityNameStrings('registar', 'registar');
+
+                $this->crud->addClause('whereHas', "licence", function ($q) {
+                    $q->where('status', '<>', 'D');
+                });
+                $this->crud->addClause('whereNotNull', 'lib');
+
+                if (backpack_user()->hasPermissionTo('file-upload'))
+                    $this->crud->allowAccess(['fileUpload']);
+
+                $this->crud->addColumns($this->registar_columns_definition_array);
+
+                break;
+        }
+
+
+        // prikazuje samo osobe sa maticnim brojem od 13 karaktera
         if (!backpack_user()->hasRole(['admin'])) {
             $this->crud->addClause('whereRaw', "length(id) = 13");
         }
+
+
         if (backpack_user()->hasPermissionTo('azuriraj osobu')) {
             $this->crud->allowAccess(['update']);
         }
-
         $this->crud->set('show.setFromDb', FALSE);
 
         $this->crud->enableDetailsRow();
@@ -562,159 +638,160 @@ class OsobaCrudController extends CrudController
 
     protected function setupListOperation()
     {
-        $this->crud->addColumns($this->columns_definition_array);
-        $this->crud->removeColumns([
+        if ($this->action == 'osoba') {
+            $this->crud->removeColumns([
 //            separatori
 //            start
-            'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma_sep', 'firma_staro', 'firma_novo', 'obrazovanje', 'dipl', 'mr', 'osiguranjasection', 'funkcije', 'portal', 'razno',
+                'licni_podaci', 'rodjenje', 'adrese', 'prebivaliste', 'posta', 'firma_sep', 'firma_staro', 'firma_novo', 'obrazovanje', 'dipl', 'mr', 'osiguranjasection', 'funkcije', 'portal', 'razno',
 //            end
 
-            'devojackoprezime',
-            'prezime_staro',
+                'devojackoprezime',
+                'prezime_staro',
 //            'zvanje',
-            'titula',
-            'kontakttel',
-            'mobilnitel',
-            'kontaktfax',
+                'titula',
+                'kontakttel',
+                'mobilnitel',
+                'kontaktfax',
 //            'kontaktemail',
-            'pol',
+                'pol',
 
 //        rodjenje
-            'rodjenjemesto',
-            'rodjenjeopstina',
-            'rodjenjedrzava',
-            'rodjenjedan',
-            'rodjenjemesec',
-            'rodjenjegodina',
-            'rodjenjeopstinaid',
-            'rodjenjeinodrzava',
-            'rodjenjeinomesto',
-            'datumrodjenja',
-            'datum_rodjenja',
-            'spojen_datum_rodjenja',
+                'rodjenjemesto',
+                'rodjenjeopstina',
+                'rodjenjedrzava',
+                'rodjenjedan',
+                'rodjenjemesec',
+                'rodjenjegodina',
+                'rodjenjeopstinaid',
+                'rodjenjeinodrzava',
+                'rodjenjeinomesto',
+                'datumrodjenja',
+                'datum_rodjenja',
+                'spojen_datum_rodjenja',
 
 //        adrese
 //        prebivaliste
-            'prebivalisteopstinaid',
-            'prebivalistebroj',
-            'prebivalistemesto',
-            'prebivalisteopstina',
-            'prebivalisteadresa',
-            'prebivalistedrzava',
-            'opstinaId',
+                'prebivalisteopstinaid',
+                'prebivalistebroj',
+                'prebivalistemesto',
+                'prebivalisteopstina',
+                'prebivalisteadresa',
+                'prebivalistedrzava',
+                'opstinaId',
 //        posta
-            'ulica',
-            'broj',
-            'podbroj',
-            'sprat',
-            'stan',
-            'posta_pb',
-            'posta_drzava',
-            'postaOpstinaId',
+                'ulica',
+                'broj',
+                'podbroj',
+                'sprat',
+                'stan',
+                'posta_pb',
+                'posta_drzava',
+                'postaOpstinaId',
 
 //        firma
-            'firmanaziv',
-            'firmamesto',
-            'firmaopstina',
-            'firmaweb',
-            'firmatel',
-            'firmaemail',
-            'firmaopstinaid',
-            'firmafax',
-            'firma_mb',
-            'firma',
+                'firmanaziv',
+                'firmamesto',
+                'firmaopstina',
+                'firmaweb',
+                'firmatel',
+                'firmaemail',
+                'firmaopstinaid',
+                'firmafax',
+                'firma_mb',
+                'firma',
 
-            'osiguranja_data',
+                'osiguranja_data',
 
 //        obrazovanje
 //        dipl
-            'diplfakultet',
-            'diplmesto',
-            'dipldrzava',
-            'diplodsek',
-            'diplsmer',
-            'diplgodina',
-            'diplbroj',
-            'diplfakultetid',
-            'diplsmerid',
-            'diplunetfakultet',
-            'diplunetsmer',
+                'diplfakultet',
+                'diplmesto',
+                'dipldrzava',
+                'diplodsek',
+                'diplsmer',
+                'diplgodina',
+                'diplbroj',
+                'diplfakultetid',
+                'diplsmerid',
+                'diplunetfakultet',
+                'diplunetsmer',
 
 //        mr
-            'mrfakultet',
-            'mrmesto',
-            'mrdrzava',
-            'mrodsek',
-            'mrsmer',
-            'mrgodina',
-            'mrbroj',
+                'mrfakultet',
+                'mrmesto',
+                'mrdrzava',
+                'mrodsek',
+                'mrsmer',
+                'mrgodina',
+                'mrbroj',
 
 //        dr
-            'drfakultet',
-            'drmesto',
-            'drdrzava',
-            'drodsek',
-            'drsmer',
-            'drgodina',
-            'drbroj',
+                'drfakultet',
+                'drmesto',
+                'drdrzava',
+                'drodsek',
+                'drsmer',
+                'drgodina',
+                'drbroj',
 
 //        spec
-            'specfakultetid',
-            'specunetfakultet',
-            'specsmerid',
-            'specunetsmer',
-            'specgodina',
+                'specfakultetid',
+                'specunetfakultet',
+                'specsmerid',
+                'specunetsmer',
+                'specgodina',
 
 //        mag
-            'magfakultetid',
-            'magunetfakultet',
-            'magsmerid',
-            'magunetsmer',
+                'magfakultetid',
+                'magunetfakultet',
+                'magsmerid',
+                'magunetsmer',
 
 //        doc
-            'docfakultetid',
-            'docunetfakultet',
-            'docsmerid',
-            'docunetsmer',
+                'docfakultetid',
+                'docunetfakultet',
+                'docsmerid',
+                'docunetsmer',
 
 //        osiguranje
-            'osiguranjetip',
+                'osiguranjetip',
 
 //        funkcija
-            'funkcija_id',
-            'clanskupstine',
-            'clan',
+                'funkcija_id',
+                'clanskupstine',
+                'clan',
 
 //        portal
-            'korisnik',
-            'lozinka',
-            'biografija',
-            'licniweb',
-            'adresaprikazi',
-            'telefonprikazi',
-            'mobilniprikazi',
-            'faxprikazi',
-            'mailprikazi',
-            'prikazisliku',
-            'dozvolareklamnimail',
-            'imalp',
-            'zaposlen',
-            'godine_radnog_iskustva',
-            'temp_dms_password',
-            'primary_serial',
+                'korisnik',
+                'lozinka',
+                'biografija',
+                'licniweb',
+                'adresaprikazi',
+                'telefonprikazi',
+                'mobilniprikazi',
+                'faxprikazi',
+                'mailprikazi',
+                'prikazisliku',
+                'dozvolareklamnimail',
+                'imalp',
+                'zaposlen',
+                'godine_radnog_iskustva',
+                'temp_dms_password',
+                'primary_serial',
 
 //        razno
-            'napomena',
-            'vrsta_poslova',
-            'bolonja',
-            'st_drzavljanstvoscg',
-            'created_at',
-            'updated_at',
-        ]);
-        /*        $request = $this->crud->getRequest();
-                if (!$request->has('order')) {
-                    $request->merge(['order' => ['column' => 'id', 'dir' => 'asc']]);
-                }*/
+                'napomena',
+                'vrsta_poslova',
+                'bolonja',
+                'st_drzavljanstvoscg',
+                'created_at',
+                'updated_at',
+            ]);
+        }
+
+        if ($this->action == 'registar') {
+            $this->crud->addColumns($this->registar_columns_definition_array);
+        }
 
         $this->crud->setColumnDetails('id', [
             'searchLogic' => function ($query, $column, $searchTerm) {
@@ -747,32 +824,38 @@ class OsobaCrudController extends CrudController
             'attribute' => 'skrnaziv'
         ]);
 
+        if ($this->action == 'osoba') {
 
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'licences',
-            'label' => 'Licencirani'
-        ],
-            FALSE,
-            function () {
-                $this->crud->addClause('whereHas', 'licence');
-            }
-        );
+            $this->crud->addFilter([
+                'type' => 'select2',
+                'name' => 'clan',
+                'label' => 'Članstvo'
+            ], function () {
+                return [
+                    1 => 'Član je',
+                    0 => 'Nije član',
+                    100 => 'Članstvo na čekanju',
+                    10 => 'Priprema se brisanje iz članstva',
+                ];
+            }, function ($value) {
+                $this->crud->addClause('where', 'clan', $value);
+            });
+        }
+        if ($this->action == 'registar') {
 
-        $this->crud->addFilter([
-            'type' => 'select2',
-            'name' => 'clan',
-            'label' => 'Članstvo'
-        ], function () {
-            return [
-                1 => 'Član je',
-                0 => 'Nije član',
-                100 => 'Članstvo na čekanju',
-                10 => 'Priprema se brisanje iz članstva',
-            ];
-        }, function ($value) {
-            $this->crud->addClause('where', 'clan', $value);
-        });
+            $this->crud->addFilter([
+                'type' => 'select2',
+                'name' => 'clan',
+                'label' => 'Članstvo u IKS'
+            ], function () {
+                return [
+                    1 => 'Član IKS',
+                    0 => 'Nije član IKS',
+                ];
+            }, function ($value) {
+                $this->crud->addClause('where', 'clan', $value);
+            });
+        }
 
         $this->crud->addFilter([
             'type' => 'select2',
@@ -786,36 +869,50 @@ class OsobaCrudController extends CrudController
             });
         });
 
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'firma_mb',
-            'label' => 'MB firme'
-        ],
-            FALSE,
-            function () {
-                $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
-                $this->crud->addClause('where', 'firma_mb', '<>', 0);
-            }
-        );
+        if ($this->action == 'osoba') {
 
-        $this->crud->addFilter([
-            'type' => 'simple',
-            'name' => 'lib',
-            'label' => 'Nema LIB'
-        ],
-            FALSE,
-            function () {
-                $this->crud->addClause('where', 'lib', NULL);
-            }
-        );
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'licences',
+                'label' => 'Licencirani'
+            ],
+                FALSE,
+                function () {
+                    $this->crud->addClause('whereHas', 'licence');
+                }
+            );
+
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'firma_mb',
+                'label' => 'MB firme'
+            ],
+                FALSE,
+                function () {
+                    $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
+                    $this->crud->addClause('where', 'firma_mb', '<>', 0);
+                }
+            );
+
+            $this->crud->addFilter([
+                'type' => 'simple',
+                'name' => 'lib',
+                'label' => 'Nema LIB'
+            ],
+                FALSE,
+                function () {
+                    $this->crud->addClause('where', 'lib', NULL);
+                }
+            );
+        }
+
 
     }
 
     protected function setupShowOperation()
     {
-        $this->crud->addColumns($this->columns_definition_array);
         $this->crud->removeColumns([
-            //        dr
+//        dr
             'drfakultet',
             'drmesto',
             'drdrzava',

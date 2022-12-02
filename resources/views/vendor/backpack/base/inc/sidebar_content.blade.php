@@ -24,6 +24,9 @@
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('firma') }}'> Firme</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regoblast') }}'> Stručne oblasti</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('regpodoblast') }}'> Uže stručne oblasti</a></li>
+            @can('file-upload')
+                <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registar') }}'> Registar</a></li>
+            @endcan
         </ul>
     </li>
 
@@ -91,8 +94,8 @@
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestclanstvo') }}'> Zahtevi članstvo</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestmirovanjeclanstva') }}'> Zahtevi mirovanje</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
-{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydataupdate') }}'> Zahtevi za promenu podataka iz Registra</a></li>--}}
-{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistryuverenje') }}'> Zahtevi za izdavanje uverenja iz Registra</a></li>--}}
+            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydataupdate') }}'> Zahtevi za promenu podataka iz Registra</a></li>--}}
+            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistryuverenje') }}'> Zahtevi za izdavanje uverenja iz Registra</a></li>--}}
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydatadelete') }}'> Zahtevi za brisanje podataka iz Registra</a></li>
             <li class="divider">
             <li class="nav-title">Delovodnici</li>

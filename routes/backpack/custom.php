@@ -16,6 +16,7 @@ Route::group([
     'namespace' => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
     Route::crud('osoba', 'OsobaCrudController');
+    Route::crud('registar', 'OsobaCrudController');
     Route::crud('osiguranje', 'OsiguranjeCrudController');
     Route::crud('firma', 'FirmaCrudController');
     Route::crud('siprijava', 'SiPrijavaCrudController');
