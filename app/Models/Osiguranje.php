@@ -171,4 +171,25 @@ class Osiguranje extends Model
             return "{$this->osobaUgovarac->full_name} [ $this->polisa_broj ($this->status_polise_id) od $this->polisa_datum_pocetka do $this->polisa_datum_zavrsetka ]";
         }
     }
+
+    public function getOsiguranjeUgovaracPolisaDatumZavrsetkaAttribute(): string
+    {
+
+        $this->polisa_datum_zavrsetka = !empty($this->polisa_datum_zavrsetka) ? Carbon::parse($this->polisa_datum_zavrsetka)->format('d.m.Y') : '-';
+
+        if (!empty($this->firmaUgovarac)) {
+            if ($this->status_polise_id === 1)
+                return "{$this->firmaUgovarac->naziv} [$this->polisa_datum_zavrsetka ]";
+            else
+                return '-';
+        }
+        if (!empty($this->ugovarac_osiguranja_osoba_id)) {
+            if ($this->status_polise_id === 1)
+                return "{$this->osobaUgovarac->full_name} [ $this->polisa_broj ($this->status_polise_id) od $this->polisa_datum_pocetka do $this->polisa_datum_zavrsetka ]";
+            else
+                return '-';
+        }
+    }
+
+
 }
