@@ -105,9 +105,9 @@ class RegisterRequestCrudController extends CrudController
             case 'registerrequestregistrydatadelete':
                 CRUD::setEntityNameStrings('zahtev', 'Zahtevi za brisanje podataka upisanih u Registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydatadelete');
-                CRUD::addClause('whereIn', 'request_category_id', [11]);
+                CRUD::addClause('whereIn', 'request_category_id', [11, 14]);
                 $this->request_category_type = 2;
-                $this->request_category = [11];
+                $this->request_category = [11, 14];
                 $this->requestable_model = '\App\Models\Request';
                 break;
             case 'registerrequestregistrydataupdate':
