@@ -105,4 +105,22 @@ class PromenaPodataka extends Model
         return $this->belongsTo('App\Models\Firma', 'mb');
 
     }
+
+    public function prebivaliste(): string
+    {
+        return "{$this->adresa}, {$posta_opstina->ime}<br>{$this->pbroj} {$this->mesto}";
+    }
+
+    public function postaParseJson(): string
+    {
+        $posta = json_decode($this->posta);
+
+        $posta_opstina = Opstina::find($posta->opstina_id);
+
+        $posta->broj = !empty($posta->podbroj) ? $posta->broj . "/" . $posta->podbroj : '';
+
+        $string = "{$posta->ulica} {$posta->broj}, {$posta_opstina->ime}<br>{$posta->pb} {$posta->mesto}";
+
+        return $string;
+    }
 }

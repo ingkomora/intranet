@@ -69,6 +69,13 @@ class PromenaPodatakaCrudController extends CrudController
             'ajax' => TRUE,
             'label' => 'Opština',
         ],
+        'posta'=> [
+            'name' => 'posta',
+            'type' => 'model_function',
+            'function_name' => 'postaParseJson',
+            'limit' => 500,
+        ],
+
         'tel' => [
             'name' => 'tel',
             'label' => 'Telefon'
@@ -388,7 +395,8 @@ class PromenaPodatakaCrudController extends CrudController
             'adresafirm',
 //        'napomena',
 //        'created_at',
-//        'updated_at'
+//        'updated_at',
+        'posta',
         ]);
 
         $this->crud->modifyColumn('id', [
