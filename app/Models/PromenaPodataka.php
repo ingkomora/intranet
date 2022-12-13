@@ -113,6 +113,9 @@ class PromenaPodataka extends Model
 
     public function postaParseJson(): string
     {
+        if (empty($this->posta))
+            return "-";
+
         $posta = json_decode($this->posta);
 
         $posta_opstina = Opstina::find($posta->opstina_id);
