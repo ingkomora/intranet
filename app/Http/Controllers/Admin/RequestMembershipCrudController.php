@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RegisterRequestRequest;
+use App\Models\Document;
 use App\Models\RequestCategory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -27,6 +28,11 @@ class RequestMembershipCrudController extends CrudController
     protected
         $columns_definition_array = [
         'id',
+        'status_id' => [
+            'name' => 'status',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+        ],
         'osoba_id' => [
             'name' => 'osoba',
             'type' => 'relationship',
@@ -38,16 +44,11 @@ class RequestMembershipCrudController extends CrudController
             'type' => 'relationship',
             'label' => 'Kategorija zahteva',
         ],
-        'status_id' => [
-            'name' => 'status',
-            'type' => 'relationship',
-            'attribute' => 'naziv',
-        ],
         'documents' => [
             'name' => 'documents',
             'type' => 'relationship',
             'label' => 'Dokumenta',
-            'attribute' => 'category_type_name_status_registry_number',
+            'attribute' => 'category_type_name_status_registry_date',
         ],
     ],
         $fields_definition_array = [
@@ -201,15 +202,25 @@ class RequestMembershipCrudController extends CrudController
         ]);
 
 
-        $this->crud->modifyColumn('status', [
+        $this->crud->setColumnDetails('status', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status_id) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-outline-success px-2 py-0 rounded';
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
                         default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
                     }
-                }
+                },
             ]
         ]);
 
@@ -218,9 +229,20 @@ class RequestMembershipCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
                 'target' => '_blank',
-            ]
+            ],
         ]);
 
         $this->crud->addFilter([
@@ -273,14 +295,7 @@ class RequestMembershipCrudController extends CrudController
         $this->crud->addColumns([
             'requestable' => [
                 'name' => 'requestable',
-//                'label' => 'Broj iz modela',
                 'type' => 'relationship',
-            ],
-            'documents' => [
-                'name' => 'documents',
-                'type' => 'relationship',
-                'label' => 'Dokumenta',
-                'attribute' => 'category_type_name_status_registry_number',
             ],
 
         ]);
@@ -294,27 +309,52 @@ class RequestMembershipCrudController extends CrudController
             ]
         ]);
 
-        $this->crud->modifyColumn('status', [
+        $this->crud->setColumnDetails('status', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status_id) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-outline-success px-2 py-0 rounded';
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
                         default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
                     }
-                }
+                },
             ]
         ]);
 
         $this->crud->setColumnDetails('documents', [
+            'attribute' => 'category_type_name_status_registry_number_registry_date',
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
                 'target' => '_blank',
-            ]
+            ],
+            'limit' => 500,
         ]);
+
+        $this->crud->setColumnDetails('requestCategory', ['limit' => 500]);
 
     }
 

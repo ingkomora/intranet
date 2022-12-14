@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Operations\UpdateZalbaStatusOperation;
 use App\Http\Requests\RequestRequest;
+use App\Models\Document;
 use App\Models\Request;
 use App\Models\RequestCategory;
 use App\Models\Status;
@@ -39,7 +40,7 @@ class RequestCrudController extends CrudController
             'ajax' => TRUE,
             'label' => 'Ime prezime (jmbg)',
             'attribute' => 'ime_prezime_jmbg',
-            'attributes' => ['readonly' => 'readonly','disabled' => 'disabled'],
+            'attributes' => ['readonly' => 'readonly', 'disabled' => 'disabled'],
         ],
         'status' => [
             'name' => 'status_id',
@@ -123,7 +124,7 @@ class RequestCrudController extends CrudController
             'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
-                'attribute' => 'category_type_name_status_registry_number',
+                'attribute' => 'category_type_name_status_registry_date',
             ],
             'note' => [
                 'name' => 'note',
@@ -147,15 +148,25 @@ class RequestCrudController extends CrudController
         ]);
 
 
-        $this->crud->modifyColumn('status', [
+        $this->crud->setColumnDetails('status', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status_id) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-sm btn-outline-info mr-1';
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
                         default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
                     }
-                }
+                },
             ]
         ]);
 
@@ -164,8 +175,20 @@ class RequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
 
         $this->crud->setColumnDetails('osoba', [
@@ -346,6 +369,7 @@ class RequestCrudController extends CrudController
                 'name' => 'requestCategory',
                 'type' => 'relationship',
                 'label' => 'Kategorija zahteva',
+                'limit' => 500,
             ],
             'status_id' => [
                 'name' => 'status',
@@ -360,7 +384,8 @@ class RequestCrudController extends CrudController
             'documents' => [
                 'name' => 'documents',
                 'type' => 'relationship',
-                'attribute' => 'category_type_name_status_registry_number',
+                'attribute' => 'category_type_name_status_registry_number_registry_date',
+                'limit' => 500,
             ],
             'note' => [
                 'name' => 'note',
@@ -381,23 +406,23 @@ class RequestCrudController extends CrudController
 
         $this->crud->setColumnDetails('status', [
             'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('status/' . $related_key . '/show');
-                },
-                'target' => '_blank',
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
-        ]);
-
-        $this->crud->modifyColumn('status', [
-            'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status_id) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-sm btn-outline-info mr-1';
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
                         default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
                     }
-                }
+                },
             ]
         ]);
 
@@ -406,9 +431,20 @@ class RequestCrudController extends CrudController
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
                 'target' => '_blank',
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+            ],
         ]);
     }
 
@@ -452,7 +488,6 @@ class RequestCrudController extends CrudController
         ]);
 
 
-
     }
 
     /**
@@ -492,7 +527,7 @@ class RequestCrudController extends CrudController
         ]);
 
         //      TODO ako zahtev ima status koji samo neko sme da menja onda je disabled (univerzalno a ne samo pravnici)
-        if (!in_array($this->crud->getCurrentEntry()->status_id,[ZALBA, ZALBA_MGSI, PONISTEN])) {
+        if (!in_array($this->crud->getCurrentEntry()->status_id, [ZALBA, ZALBA_MGSI, PONISTEN])) {
             $this->crud->modifyField('status', [
                 'options' => (function ($query) {
                     return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
@@ -503,9 +538,9 @@ class RequestCrudController extends CrudController
                 /*'options' => (function ($query) {
                     return $query->orderBy('id')->where('log_status_grupa_id', REQUESTS)->get(); // samo grupa statusa "Zahtevi"
                 }),*/
-                'type'=>'relationship',
+                'type' => 'relationship',
 //                'attribute'=>'naziv',
-                'attributes'=> ['disabled' => 'disabled']
+                'attributes' => ['disabled' => 'disabled']
             ]);
         }
     }
