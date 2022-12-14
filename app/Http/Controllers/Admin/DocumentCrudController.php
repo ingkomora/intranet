@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DocumentRequest;
+use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\DocumentCategoryType;
 use App\Models\Status;
@@ -66,12 +67,28 @@ class DocumentCrudController extends CrudController
                 'type' => 'text',
                 'label' => 'Broj zahteva'
             ],
+            'status_id' => [
+                'name' => 'status',
+                'label' => 'Status',
+                'type' => 'relationship',
+                'attribute' => 'naziv',
+            ],
             'osoba' => [
                 'name' => 'osoba',
                 'type' => 'model_function',
                 'label' => 'Ime prezime (jmbg)',
                 'function_name' => 'getOsobaImePrezimeJmbg', // the method in your Model
 
+            ],
+            'registry_number' => [
+                'name' => 'registry_number',
+                'label' => 'Zavodni broj'
+            ],
+            'registry_date' => [
+                'name' => 'registry_date',
+                'label' => 'Zavedeno',
+                'type' => 'date',
+                'format' => 'DD.MM.Y.'
             ],
             'document_category_id' => [
                 'name' => 'documentCategory',
@@ -84,33 +101,24 @@ class DocumentCrudController extends CrudController
                             'type' => 'relationship',
                             'attribute' => 'name',
                         ],*/
-            'registry_number' => [
-                'name' => 'registry_number',
-                'label' => 'Zavodni broj'
-            ],
-            'registry_date' => [
-                'name' => 'registry_date',
-                'label' => 'Zavedeno',
-                'type' => 'date',
-                'format' => 'DD.MM.Y.'
-            ],
-            'status_id' => [
-                'name' => 'status',
-                'label' => 'Status',
-                'type' => 'relationship',
-                'attribute' => 'naziv',
-            ],
         ]);
 
-        $this->crud->modifyColumn('status', [
+        $this->crud->setColumnDetails('status', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
-                    if ($entry->status_id == DOCUMENT_REGISTERED) {
-                        return 'text-success';
+                    switch ($related_key) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
                     }
-                }
+                },
             ]
         ]);
+
 
         $this->crud->setColumnDetails('osoba', [
             'searchLogic' => function ($query, $column, $searchTerm) {
@@ -227,7 +235,17 @@ class DocumentCrudController extends CrudController
                         return backpack_url('status/' . $related_key . '/show');
                     },
                     'target' => '_blank',
-                    'class' => 'btn btn-sm btn-outline-info mr-1',
+                    'class' =>  function ($crud, $column, $entry, $related_key) {
+                        switch ($related_key) {
+                            case DOCUMENT_CREATED:
+                            default:
+                                return 'btn btn-sm btn-outline-secondary text-dark';
+                            case DOCUMENT_REGISTERED:
+                                return 'btn btn-sm btn-outline-success text-dark';
+                            case DOCUMENT_CANCELED:
+                                return 'btn btn-sm btn-outline-danger text-dark';
+                        }
+                    }
                 ],
             ],
             'user_id' => [

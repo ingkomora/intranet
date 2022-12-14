@@ -142,6 +142,28 @@ class ZahtevLicencaCrudController extends CrudController
             }
         ]);
 
+        $this->crud->setColumnDetails('statusId', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
+                    }
+                },
+            ]
+        ]);
+
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
@@ -161,22 +183,6 @@ class ZahtevLicencaCrudController extends CrudController
                 },
                 'target' => '_blank',
             ],
-        ]);
-
-        $this->crud->modifyColumn('statusId', [
-            'wrapper' => [
-                'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-sm btn-outline-info mr-1';
-                        case REQUEST_FINISHED:
-                            return 'btn btn-sm btn-outline-success text-dark';
-                        case REQUEST_CANCELED:
-                            return 'btn btn-sm btn-outline-danger mr-1';
-                        default:
-                    }
-                }
-            ]
         ]);
 
         CRUD::addFilter([
@@ -277,15 +283,6 @@ class ZahtevLicencaCrudController extends CrudController
 //        CRUD::column('referenca2');
 //        CRUD::column('pecat');
 
-        $this->crud->setColumnDetails('documents', [
-            'wrapper' => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('document/' . $related_key . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
-        ]);
-
         $this->crud->setColumnDetails('reference', [
             'wrapper' => [
 //                'href' => function ($crud, $column, $entry, $related_key) {
@@ -324,28 +321,49 @@ class ZahtevLicencaCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setColumnDetails('statusId', [
+            'wrapper' => [
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($related_key) {
+                        case REQUEST_CREATED:
+                        case REQUEST_SUBMITED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary';
+                        case REQUEST_IN_PROGRESS:
+                            return 'btn btn-sm btn-outline-info';
+                        case REQUEST_FINISHED:
+                            return 'btn btn-sm btn-outline-success';
+                        case REQUEST_CANCELED:
+                        case REQUEST_PROBLEM:
+                            return 'btn btn-sm btn-outline-danger';
+                        case PRIJAVA_OTKLJUCANA:
+                            return 'btn btn-sm btn-outline-warning';
+                    }
+                },
+            ]
+        ]);
+
         $this->crud->setColumnDetails('documents', [
             'wrapper' => [
                 'href' => function ($crud, $column, $entry, $related_key) {
                     return backpack_url('document/' . $related_key . '/show');
                 },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-            ]
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    $document = Document::find($related_key);
+                    switch ($document->status_id) {
+                        case DOCUMENT_CREATED:
+                        default:
+                            return 'btn btn-sm btn-outline-secondary text-dark';
+                        case DOCUMENT_REGISTERED:
+                            return 'btn btn-sm btn-outline-success text-dark';
+                        case DOCUMENT_CANCELED:
+                            return 'btn btn-sm btn-outline-danger text-dark';
+                    }
+                },
+                'target' => '_blank',
+            ],
         ]);
 
-        $this->crud->modifyColumn('statusId', [
-            'wrapper' => [
-                'class' => function ($crud, $column, $entry, $related_key) {
-                    switch ($entry->status) {
-                        case REQUEST_IN_PROGRESS:
-                            return 'btn btn-sm btn-outline-info mr-1';
-                        case REQUEST_CANCELED:
-                            return 'btn btn-sm btn-outline-danger mr-1';
-                        default:
-                    }
-                }
-            ]
-        ]);
 
     }
 
