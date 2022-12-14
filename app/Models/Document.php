@@ -194,7 +194,7 @@ class Document extends Model
 
     public function getCategoryTypeNameStatusRegistryDateAttribute(): string
     {
-        if (!empty($registry_date))
+        if (!empty($this->registry_date))
             $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
         else
             $registry_date = '';
@@ -204,7 +204,7 @@ class Document extends Model
 
     public function getCategoryTypeNameStatusRegistryNumberRegistryDateAttribute(): string
     {
-        if (!empty($registry_date))
+        if (!empty($this->registry_date))
             $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
         else
             $registry_date = '';
