@@ -194,12 +194,18 @@ class Document extends Model
 
     public function getCategoryTypeNameStatusRegistryDateAttribute(): string
     {
+        if (empty($registry_date))
+            return '';
+
         $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
         return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $registry_date)";
     }
 
     public function getCategoryTypeNameStatusRegistryNumberRegistryDateAttribute(): string
     {
+        if (empty($registry_date))
+            return '';
+
         $registry_date = Carbon::parse($this->registry_date)->format('d.m.Y');
         return "{$this->documentCategory->documentCategoryType->name} ({$this->status->naziv} | $this->registry_number | $registry_date)";
     }
