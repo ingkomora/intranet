@@ -106,6 +106,7 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::setEntityNameStrings('zahtev', 'Zahtevi za brisanje podataka upisanih u Registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydatadelete');
                 CRUD::addClause('whereIn', 'request_category_id', [11, 14]);
+                $allowCreate = TRUE;
                 $this->request_category_type = 2;
                 $this->request_category = [11, 14];
                 $this->requestable_model = '\App\Models\Request';
@@ -114,6 +115,7 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::setEntityNameStrings('zahtev', 'Zahtevi za promenu podataka upisanih u Registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydataupdate');
                 CRUD::addClause('whereIn', 'request_category_id', [9]);
+                $allowCreate = TRUE;
                 $this->request_category_type = 2;
                 $this->request_category = [9];
                 $this->requestable_model = '\App\Models\Request';
@@ -122,6 +124,7 @@ class RegisterRequestCrudController extends CrudController
                 CRUD::setEntityNameStrings('zahtev', 'Zahtevi za izdavanje uverenja o podacima upisanim u Registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistryuverenje');
                 CRUD::addClause('whereIn', 'request_category_id', [8]);
+                $allowCreate = TRUE;
                 $this->request_category_type = 2;
                 $this->request_category = [8];
                 $this->requestable_model = '\App\Models\Request';
