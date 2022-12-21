@@ -35,7 +35,7 @@ class ZavodjenjeController extends Controller
         'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
         'registrydataupdate' => ['document_category_id' => [7 => 9], 'registry_type' => '01', 'url' => 'registrydataupdate', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za promenu podataka upisanih u Registar'],
         'registryuverenje' => ['document_category_id' => [9 => 8], 'registry_type' => '01', 'url' => 'registryuverenje', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje uverenja o podacima upisanim u Registar'],
-        'registrydatadelete' => ['document_category_id' => [36 => 11, 41 => 14], 'registry_type' => '01', 'url' => 'registrydatadelete', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje uverenja o podacima upisanim u Registar'],
+        'registrydatadelete' => ['document_category_id' => [36 => 11, 43 => 11, 41 => 14, 44 => 14], 'registry_type' => '01', 'url' => 'registrydatadelete', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za brisanje podataka upisanih u Registar'],
     ];
 
     public function show($type)
