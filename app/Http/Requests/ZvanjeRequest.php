@@ -26,7 +26,12 @@ class ZvanjeRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'name' => 'required|min:5|max:255'
+             'naziv' => 'required',
+             'skrnaziv' => 'required',
+             'sekcija' => 'required',
+             'regSekcija' => 'required',
+             'oblast' => 'required',
+             'status' => 'required',
         ];
     }
 
