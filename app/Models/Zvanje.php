@@ -123,6 +123,16 @@ class Zvanje extends Model
         return $this->hasMany('App\Models\TizboriskupstinaArhivaBirackiSpisak', 'zvanje');
     }
 
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    public function oblast()
+    {
+        return $this->belongsTo(RegOblast::class, 'reg_oblast_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
