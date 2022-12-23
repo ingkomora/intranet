@@ -378,10 +378,11 @@ class ZahtevLicencaCrudController extends CrudController
     {
         CRUD::setValidation(ZahtevLicencaRequest::class);
 
-        CRUD::field('osobaId')->label('Ime prezime')->size(6)->ajax(TRUE)
+        CRUD::field('osobaId')->label('Ime prezime')->size(4)->ajax(TRUE)
             ->hint('Osobu možete tražiti po imenu i/ili prezimenu, jmbg ili broju licence')
             ->attribute('ime_prezime_jmbg');
-        CRUD::field('statusId')->label('Status')->size(6)->attribute('naziv');
+        CRUD::field('zvanje')->size(4)->attribute('naziv');
+        CRUD::field('statusId')->label('Status')->size(4)->attribute('naziv');
         CRUD::field('tipLicence')->label('Tip licence')->size(3)->attribute('gen_tip_oznaka');
         CRUD::field('licenca_broj')->size(3);
         CRUD::field('licenca_broj_resenja')->label('Licenca broj rešenja')->size(3);
