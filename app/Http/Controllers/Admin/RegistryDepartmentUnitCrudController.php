@@ -21,19 +21,31 @@ class RegistryDepartmentUnitCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
         CRUD::setModel(\App\Models\RegistryDepartmentUnit::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/registry-department-unit');
-        CRUD::setEntityNameStrings('registry department unit', 'registry department units');
+        CRUD::setEntityNameStrings('organizaciona jedinica', 'organizacione jedinice');
+
+
+        $this->crud->set('show.setFromDb', FALSE);
+
+
+        if (!backpack_user()->hasRole('admin')) {
+            $this->crud->denyAccess(['create', 'delete', 'update']);
+        }
+
+        if (backpack_user()->hasPermissionTo('zavedi')) {
+            $this->crud->allowAccess(['create']);
+        }
     }
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -42,20 +54,36 @@ class RegistryDepartmentUnitCrudController extends CrudController
         CRUD::column('id');
         CRUD::column('label');
         CRUD::column('name');
-        CRUD::column('parent_id');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+        CRUD::column('parent_id')->label('Roditeljska OJ')->limit(500);
+//        CRUD::column('created_at');
+//        CRUD::column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
+         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
+         */
+    }
+
+    protected function setupShowOperation()
+    {
+        CRUD::column('id');
+        CRUD::column('label');
+        CRUD::column('name');
+        CRUD::column('parent_id')->label('Roditeljska OJ')->limit(500);
+        CRUD::column('created_at')->type('datetime')->format('DD.MM.Y HH:m:s');
+        CRUD::column('updated_at')->type('datetime')->format('DD.MM.Y HH:m:s');
+
+        /**
+         * Columns can be defined using the fluent syntax or array syntax:
+         * - CRUD::column('price')->type('number');
+         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -67,19 +95,19 @@ class RegistryDepartmentUnitCrudController extends CrudController
         CRUD::field('label');
         CRUD::field('name');
         CRUD::field('parent_id');
-        CRUD::field('created_at');
-        CRUD::field('updated_at');
+//        CRUD::field('created_at');
+//        CRUD::field('updated_at');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
+         * - CRUD::addField(['name' => 'price', 'type' => 'number']));
          */
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
