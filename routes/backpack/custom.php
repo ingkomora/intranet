@@ -92,13 +92,12 @@ Route::group([
     Route::post('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@zavedi');
 
     Route::crud('registerrequestpromenapodataka', 'RegisterRequestCrudController');
+//    Route::crud('registerrequestiksmobnet', 'RegisterRequestCrudController');
     Route::crud('registerrequestclanstvo', 'RegisterRequestCrudController');
     Route::crud('registerrequestmirovanjeclanstva', 'RegisterRequestCrudController');
     Route::crud('registerrequestlicence', 'ZahtevLicencaCrudController');
     Route::crud('registerrequestsi', 'SiPrijavaCrudController');
-    Route::crud('registerrequestregistar', 'RegisterRequestCrudController');
     Route::crud('registerrequestsfl', 'RegisterRequestCrudController');
-    Route::crud('registerrequestresenjeclanstvo', 'RegisterRequestCrudController');
     Route::crud('registerrequestregistrydatadelete', 'RegisterRequestCrudController');
     Route::crud('registerrequestregistrydataupdate', 'RegisterRequestCrudController');
     Route::crud('registerrequestregistryuverenje', 'RegisterRequestCrudController');
