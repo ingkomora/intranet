@@ -87,26 +87,41 @@
 
     <li class="nav-item nav-dropdown">
         <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
+
         <ul class="nav-dropdown-items">
-            {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>--}}
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestlicence') }}'> Zahtevi za licence</a></li>
+            {{--            <li class="nav-title">Ostalo</li>--}}
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsi') }}'> Prijave SI</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestlicence') }}'> Zahtevi za licence</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
+            {{--        <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('zavodjenje/zavedi/si') }}'> Prijave za stručni ispit</a></li>--}}
+
+        </ul>
+        <ul class="nav-dropdown-items">
+            <li class="nav-title">Članstvo</li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestclanstvo') }}'> Zahtevi članstvo</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestmirovanjeclanstva') }}'> Zahtevi mirovanje</a></li>
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsfl') }}'> Zahtevi za izdavanje svečane forme</a></li>
-            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydataupdate') }}'> Zahtevi za promenu podataka iz Registra</a></li>--}}
-            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistryuverenje') }}'> Zahtevi za izdavanje uverenja iz Registra</a></li>--}}
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydatadelete') }}'> Zahtevi za brisanje podataka iz Registra</a></li>
-            <li class="divider">
-            <li class="nav-title">Delovodnici</li>
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document') }}'> Delovodnici</a></li>
-            <li class="divider">
-                @role('admin')
-            <li class="nav-title">Admin</li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestpromenapodataka') }}'> Zahtevi za promenu podataka</a></li>
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestresenjeclanstvo') }}'> Rešenja članstvo</a></li>
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistar') }}'> Registar</a></li>
-            @endrole
+{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestiksmobnet') }}'> Zahtevi za IKS Mobnet</a></li>--}}
+
+
+        </ul>
+        <ul class="nav-dropdown-items">
+            <li class="nav-title">Registar</li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydataupdate') }}'> Promena podataka u Registru</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistrydatadelete') }}'> Brisanje podataka iz Registra</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestregistryuverenje') }}'> Izdavanje uverenja iz Registra</a></li>
+        </ul>
+
+        <ul class="nav-dropdown-items">
+            <li class="divider">
+            <li class="nav-title">PISARNICA</li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document') }}'> Dokumenta</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Delovodnici</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Organizacione jedinice</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Kategorije dokumenata</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category-type') }}'>Tipovi kategorija dokumenata</a></li>
+{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>--}}
+            <li class="divider">
         </ul>
     </li>
 
@@ -145,14 +160,10 @@
     {{--<li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sikandidat') }}'> SiKandidati</a></li>--}}
     <!-- Users, Roles, Permissions -->
 
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Document categories</a></li>
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category-type') }}'>Document category types</a></li>
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry') }}'> Registries</a></li>
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Registry Department Units</a></li>
+
     <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanarina') }}'> Članarine</a></li>
     <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('clanarina-old') }}'> Članarine Old</a></li>
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> RegReqCat</a></li>
-    <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>
+
     @endrole
 
 @endif

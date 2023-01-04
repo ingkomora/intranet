@@ -49,7 +49,7 @@ class RegisterRequestCrudController extends CrudController
         switch ($type) {
             case 'registerrequestpromenapodataka':
                 //ZA SADA SE ZAHTEVI NE ZAVODE DOK SE NE PREPRAVI APLIKACIJA ZA PROMENU PODATAKA
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za promenu podataka');
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za promenu ličnih podataka');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestpromenapodataka');
                 CRUD::addClause('where', 'request_category_id', 10);
                 $this->request_category_type = 1;
@@ -58,7 +58,7 @@ class RegisterRequestCrudController extends CrudController
                 $this->status_col_name = 'obradjen';
                 break;
             case 'registerrequestclanstvo':
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za prijem i prekid članstva');
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za prijem i prekid članstva');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestclanstvo');
                 CRUD::addClause('whereIn', 'request_category_id', [1, 2, 12, 13]);
                 $this->request_category_type = 1;
@@ -67,7 +67,7 @@ class RegisterRequestCrudController extends CrudController
                 $allowCreate = TRUE;
                 break;
             case 'registerrequestmirovanjeclanstva':
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za mirovanje');
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za mirovanje');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestmirovanjeclanstva');
                 CRUD::addClause('whereIn', 'request_category_id', [4, 5]);
                 $this->request_category_type = 1;
@@ -75,17 +75,8 @@ class RegisterRequestCrudController extends CrudController
                 $this->requestable_model = '\App\Models\Request';
                 $allowCreate = TRUE;
                 break;
-            case 'registerrequestregistar':
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje uverenja o upisu u registar');
-                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistar');
-                CRUD::addClause('whereIn', 'request_category_id', [8, 9]);
-                $this->request_category_type = 2;
-                $this->request_category = [8, 9];
-                $this->requestable_model = '\App\Models\Request';
-                $allowCreate = TRUE;
-                break;
             case 'registerrequestsfl':
-                CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje svečane forme licence');
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za izdavanje svečane forme licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestsfl');
                 CRUD::addClause('where', 'request_category_id', 3);
                 $this->request_category_type = 2;
@@ -93,15 +84,6 @@ class RegisterRequestCrudController extends CrudController
                 $allowCreate = TRUE;
                 $this->requestable_model = '\App\Models\ZahtevLicenca';
                 break;
-//            case 'registerrequestresenjeclanstvo':
-//                CRUD::setEntityNameStrings('zahtev', 'Rešenja o prestanku i brisanju iz članstva');
-//                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestresenjeclanstvo');
-//                CRUD::addClause('whereIn', 'request_category_id', [1, 2]);//todo document_category_id
-////                CRUD::addClause('whereHas', 'documents');
-//                $this->request_category_type = 1;
-//                $this->request_category = [1, 2];
-//                $this->requestable_model = '\App\Models\Request';
-//                break;
             case 'registerrequestregistrydatadelete':
                 CRUD::setEntityNameStrings('zahtev', 'Zahtevi za brisanje podataka upisanih u Registar');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestregistrydatadelete');
@@ -129,6 +111,15 @@ class RegisterRequestCrudController extends CrudController
                 $this->request_category = [8];
                 $this->requestable_model = '\App\Models\Request';
                 break;
+/*            case 'registerrequestiksmobnet':
+                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za IKS Mobnet usluge');
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestiksmobnet');
+                CRUD::addClause('whereIn', 'request_category_id', [15]);
+                $allowCreate = TRUE;
+                $this->request_category_type = 2;
+                $this->request_category = [15];
+                $this->requestable_model = '\App\Models\Request';
+                break;*/
         }
 
         $this->crud->set('show.setFromDb', FALSE);
