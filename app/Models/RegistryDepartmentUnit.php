@@ -44,6 +44,12 @@ class RegistryDepartmentUnit extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+
+    public function parent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(RegistryDepartmentUnit::class, 'parent_id');
+    }
+
     // return one level of child items
     public function childrenRegistryDepartmentUnits()
     {
