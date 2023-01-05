@@ -198,6 +198,13 @@ trait PromenaPodatakaObradaBulkOperation
                     $zahtev->obradjen = 1;
                     $zahtev->save();
 
+                    // zbog starih zahteva, pre nego sto je povezana prijava za requestom
+                    $request = $zahtev->request;
+                    if (!empty($request)) {
+                        $request->status_id = REQUEST_FINISHED;
+                        $request->save();
+                    }
+
                     $mail_data->zahtev = $zahtev;
                     $mail_data->osoba = $osoba;
 
