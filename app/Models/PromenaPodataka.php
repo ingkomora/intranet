@@ -80,7 +80,33 @@ class PromenaPodataka extends Model
         'wwwfirm' => 'web',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
 
+    public function postaParseJson(): string
+    {
+        if (empty($this->posta))
+            return "-";
+
+        $posta = json_decode($this->posta);
+
+        $posta_opstina = Opstina::find($posta->opstina_id);
+
+        $posta->broj = !empty($posta->podbroj) ? $posta->broj . "/" . $posta->podbroj : '';
+
+        $string = "{$posta->ulica} {$posta->broj}, {$posta_opstina->ime}<br>{$posta->pb} {$posta->mesto}";
+
+        return $string;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -106,24 +132,33 @@ class PromenaPodataka extends Model
 
     }
 
+    public function request(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(Request::class, 'requestable');
+    }
+
     public function prebivaliste(): string
     {
         return "{$this->adresa}, {$posta_opstina->ime}<br>{$this->pbroj} {$this->mesto}";
     }
 
-    public function postaParseJson(): string
-    {
-        if (empty($this->posta))
-            return "-";
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
 
-        $posta = json_decode($this->posta);
 
-        $posta_opstina = Opstina::find($posta->opstina_id);
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
 
-        $posta->broj = !empty($posta->podbroj) ? $posta->broj . "/" . $posta->podbroj : '';
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATORS
+    |--------------------------------------------------------------------------
+    */
 
-        $string = "{$posta->ulica} {$posta->broj}, {$posta_opstina->ime}<br>{$posta->pb} {$posta->mesto}";
-
-        return $string;
-    }
 }
