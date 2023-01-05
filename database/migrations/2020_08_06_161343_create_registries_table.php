@@ -37,6 +37,7 @@ class CreateRegistriesTable extends Migration
                 ->constrained('statusi')
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
+            $table->integer('year');
             $table->timestamps();
         });
     }
