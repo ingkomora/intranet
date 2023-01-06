@@ -230,7 +230,6 @@ trait FileUploadOperation
             if ($errors)
                 $body .= "\n\n==================== SUCCESS =======================\n\n";
 
-            $body .= "Success: \n\n";
             foreach ($result['success'] as $request_id => $value) {
                 $body .= "$request_id -> $value\n";
             }
