@@ -3,10 +3,11 @@
 namespace App\Imports;
 
 use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithConditionalSheets;
 
-class ExcelImport implements WithMultipleSheets
+class ExcelImport implements WithMultipleSheets, WithCalculatedFormulas
 {
     use Importable
 //        , WithConditionalSheets

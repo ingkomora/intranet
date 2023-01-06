@@ -9,9 +9,15 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class RegistarLibrary
+ * @package App\Libraries
+ *
+ * It is mandatory to set class properties in every action method.
+ */
 abstract class RegistarLibrary
 {
-    private static $fields = ['jmbg', 'zahtev', 'br_resenja', 'datum_resenja'];
+    private static $fields = [];
     private static $document_category_id;
 
 
@@ -38,7 +44,7 @@ abstract class RegistarLibrary
 
 
                 // updating licence model
-                self::deactivateLicence($filtered_row);
+                self::deactivateLicence($filtered_row['osoba_id'], $filtered_row['datum_dokumenta'], $filtered_row['broj_dokumenta']);
 
                 // getting request model
                 $request = self::getRequest($filtered_row['zahtev']);
@@ -70,14 +76,8 @@ abstract class RegistarLibrary
     }
 
     /**
-     * @param mixed $document_category_id
+     * @throws \Exception
      */
-    private static function setDocumentCategoryId($document_category_id): void
-    {
-        self::$document_category_id = $document_category_id;
-    }
-
-
     private static function getRequest(int $request_id): ?Request
     {
         $request = \App\Models\Request::where('id', $request_id)->where('status_id', REQUEST_IN_PROGRESS)->get();
@@ -92,6 +92,23 @@ abstract class RegistarLibrary
     private static function getLicence(string $jmbg): ?Collection
     {
         return \App\Models\Licenca::where('osoba', $jmbg)->where('status', '<>', 'D')->get();
+    }
+
+    /**
+     * @param mixed $document_category_id
+     */
+    private static function setDocumentCategoryId(int $document_category_id): void
+    {
+        self::$document_category_id = $document_category_id;
+    }
+
+    /**
+     * Set class property fields to suit excel column names
+     * @param array $fields
+     */
+    private static function setFields(array $fields): void
+    {
+        self::$fields = $fields;
     }
 
     private static function filterData(array $data): array
@@ -110,11 +127,14 @@ abstract class RegistarLibrary
         return $result;
     }
 
-    private static function deactivateLicence(array $filtered_row): void
+    /**
+     * @throws \Exception
+     */
+    private static function deactivateLicence(string $jmbg, string $datum_dokumenta, string $broj_dokumenta, string $uzrok = 'usled smrti'): void
     {
 
         // getting persons licences
-        $licence = self::getLicence($filtered_row['jmbg']);
+        $licence = self::getLicence($jmbg);
 
 
         if ($licence->isEmpty())
@@ -124,8 +144,8 @@ abstract class RegistarLibrary
         foreach ($licence as $licenca) {
 
             $licenca->status = 'D';
-            $licenca->datumukidanja = $filtered_row['datum_resenja'];
-            $licenca->razlogukidanja = "Licenca deaktivirana na osnovu rešenja broj {$filtered_row['br_resenja']} od " . Carbon::parse($filtered_row['datum_resenja'])->format('d.m.Y.') . " usled smrti.";
+            $licenca->datumukidanja = $datum_dokumenta;
+            $licenca->razlogukidanja = "Licenca deaktivirana na osnovu rešenja broj $broj_dokumenta od $datum_dokumenta_string godine $uzrok.";
             if (!$licenca->save())
                 throw new \Exception("Greška prilikom ažuriranja licence u bazi.");
 
