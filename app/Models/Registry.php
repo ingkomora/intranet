@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $status_id
  * @property string $created_at
  * @property string $updated_at
+ * @property int $year
  * @property RegistryDepartmentUnit $registryDepartmentUnit
  * @property RequestCategory $requestCategory
  * @property Status $status
@@ -69,7 +70,8 @@ class Registry extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function requestCategories() {
+    public function requestCategories()
+    {
         return $this->belongsToMany('App\Models\RequestCategory', 'registry_request_category', 'registry_id', 'request_category_id')
             ->using('App\Models\RegistryRequestCategory')
             ->withPivot([

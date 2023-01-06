@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin\Operations;
 
 use App\Http\Requests\FileUploadRequest;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -215,19 +214,21 @@ trait FileUploadOperation
 
         // parsing result
         $body = '';
+        $errors = isset($result['error']) and count($result['error']) > 0;
+        $success = isset($result['success']) and count($result['success']) > 0;
 
-        if (isset($result['error']) and count($result['error']) <> 0) {
+        if ($errors) {
 
-            $body .= "Errors: \n\n";
+            $body .= "==================== ERRORS =======================\n\n";
             foreach ($result['error'] as $request_id => $value) {
                 $body .= "$request_id -> $value\n";
             }
         }
 
-        if (isset($result['success']) and count($result['success']) <> 0) {
+        if ($success) {
 
-            if (count($result['error']) <> 0)
-                $body .= "\n\n============================================\n\n";
+            if ($errors)
+                $body .= "\n\n==================== SUCCESS =======================\n\n";
 
             $body .= "Success: \n\n";
             foreach ($result['success'] as $request_id => $value) {
