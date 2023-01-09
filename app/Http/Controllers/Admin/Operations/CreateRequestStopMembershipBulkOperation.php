@@ -2,17 +2,24 @@
 
 namespace App\Http\Controllers\Admin\Operations;
 
+use App\Libraries\RegistryLibrary;
 use App\Models\Membership;
 use App\Models\Request;
-use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * Trait for creating requests for stopping membership due to non-payment of membership fees
+ * Trait CreateRequestStopMembershipBulkOperation
+ * @package App\Http\Controllers\Admin\Operations
+ */
 trait CreateRequestStopMembershipBulkOperation
 {
 
-    private $request_cancelation_membership = 2;
+    private $request_cancelation_membership = 2; // Prekid članstva (usled neplaćanja članarine)
+    private $document_request_cancelation_membership = 2; // Zahtev za prekid članstva (usled neplaćanja članarine)
 
     /**
      * Define which routes are needed for this operation.
@@ -63,19 +70,23 @@ trait CreateRequestStopMembershipBulkOperation
         foreach ($memberships as $membership) {
             try {
                 DB::beginTransaction();
+
                 // only active membership
                 if ($membership->status_id != MEMBERSHIP_STARTED)
                     throw new \Exception("Zahtev nije kreiran jer članstvo nije aktivno.");
 
 
                 // check if request has been already created and not finished
-                if ($this->doesRequestExist($membership)) {
+                if ($this->doesRequestExist($membership))
                     throw new \Exception("Zahtev nije kreiran jer već postoji ili nije završen.");
-                }
 
 
-                // retrieving request
+                // retrieving request (get or create)
                 $request = $this->getRequest($membership);
+
+
+                // create document
+                $this->createDocument($request, $document_request_cancelation_membership);
 
 
                 $result['affected'][] = $membership->id;
@@ -107,25 +118,20 @@ trait CreateRequestStopMembershipBulkOperation
         return !is_null($request);
     }
 
-    private function getRequest(Model $membership): Model
+    private function getRequest(Model $membership): Request
     {
         // trying to retrieve request
-        $request = Request::where('request_category_id', $this->request_cancelation_membership) // Prekid članstva (usled neplaćanja članarine)
-        ->where('osoba_id', $membership->osoba_id)
-            ->where('requestable_type', 'App\Models\Membership')
-            ->where('requestable_id', $membership->id)
-            ->whereIn('status_id', [REQUEST_CREATED, REQUEST_SUBMITED, REQUEST_IN_PROGRESS])
-            ->first();
+        $request = $this->doesRequestExist($membership);
 
         // creating request if there is no one
         if (is_null($request))
             $request = $this->createRequest($membership);
 
-
         return $request;
     }
 
-    private function createRequest(Model $membership): Model
+
+    private function createRequest(Model $membership): Request
     {
         $request = new Request();
         $request->osoba_id = $membership->osoba_id;
@@ -135,12 +141,27 @@ trait CreateRequestStopMembershipBulkOperation
 
         // associate request with belonging membership
         $request->requestable()->associate($membership);
-
-
         $request->save();
-
 
         return $request;
 
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function createDocument(Request $request, int $document_category_id): bool
+    {
+
+        if (!RegistryLibrary::documentExists($request, $document_category_id)) {
+
+            $broj_dokumenta = RegistryLibrary::getRegistryNumber($request, $document_category_id);
+            $datum_dokumenta = Carbon::parse($request->created_at)->format('Y-m-d');
+
+            RegistryLibrary::createDocument($request, $document_category_id, $datum_dokumenta, $broj_dokumenta);
+
+        } else {
+            return FALSE;
+        }
     }
 }
