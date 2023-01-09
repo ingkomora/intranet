@@ -163,7 +163,11 @@ abstract class RegistarLibrary
 
             $licenca->status = 'D';
             $licenca->datumukidanja = $datum_dokumenta;
-            $licenca->razlogukidanja = "Licenca deaktivirana na osnovu Rešenja o brisanju podataka upisanih u Registar broj $broj_dokumenta od $datum_dokumenta_string godine $uzrok.";
+            if (empty($licenca->razlogukidanja)) {
+                $licenca->razlogukidanja = "Licenca deaktivirana na osnovu Rešenja o brisanju podataka upisanih u Registar broj $broj_dokumenta od $datum_dokumenta_string godine $uzrok.";
+            } else {
+                $licenca->razlogukidanja = "$licenca->razlogukidanja##Licenca deaktivirana na osnovu Rešenja o brisanju podataka upisanih u Registar broj $broj_dokumenta od $datum_dokumenta_string godine $uzrok.";
+            }
             if (!$licenca->save())
                 throw new \Exception("Greška prilikom ažuriranja licence u bazi.");
 
