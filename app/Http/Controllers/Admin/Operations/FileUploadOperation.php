@@ -139,6 +139,9 @@ trait FileUploadOperation
                 // excel has import column
                 $data = $collection->where('import', 1)->toArray();
 
+            if (empty($data))
+                throw new \Exception("There is no eligible data in excel to be imported.");
+
 
             $class = ucfirst($this->class_path . $library);
 
