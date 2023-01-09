@@ -1,4 +1,4 @@
-@if ($crud->hasAccess('unlockmembershipfeeregistration') AND $entry->clan == 10)
+@if ($crud->hasAccess('unlockmembershipfeeregistration') AND $entry->clan == 10 AND !empty($entry->requests->where('request_category_id',2)->where('status_id', PONISTEN)->sortByDesc('id')->first()))
     <a href="javascript:void(0)" onclick="unlockMembershipFeeRegistration(this)" data-route="{{ url($crud->route.'/'.$entry->getKey().'/unlockmembershipfeeregistration') }}" class="btn btn-sm btn-link" data-button-type="clone"><i class="la la-2x la-money" style="vertical-align:middle;"></i> Otključaj članarinu</a>
 @endif
 
