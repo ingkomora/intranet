@@ -130,8 +130,15 @@ trait FileUploadOperation
 
         try {
 
-            $collection = ($import->toCollection($file));
-            $data = $collection->first()->toArray();
+            $collection = ($import->toCollection($file))->first();
+
+            if (!$collection->first()->has('import'))
+                // excel doesnt contain import column
+                $data = $collection->toArray();
+            else
+                // excel has import column
+                $data = $collection->where('import', 1)->toArray();
+
 
             $class = ucfirst($this->class_path . $library);
 
