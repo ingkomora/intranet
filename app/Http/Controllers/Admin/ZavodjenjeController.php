@@ -35,7 +35,7 @@ class ZavodjenjeController extends Controller
         'mirovanjeclanstva' => ['document_category_id' => [3 => 4, 4 => 5, 29 => 4, 30 => 5], 'registry_type' => 'sekcija', 'url' => 'mirovanjeclanstva', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za mirovanje'],
         'promenapodataka' => ['document_category_id' => [8 => 10], 'registry_type' => '05', 'url' => 'promenapodataka', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za promenu ličnih podataka'],
         'resenjeclanstvo' => ['document_category_id' => [12 => 2, 13 => 2], 'registry_type' => 'sekcija', 'url' => 'resenjeclanstvo', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje rešenja o prestanku i brisanju iz članstva'],
-        'iksmobnet' => ['document_category_id' => [45 => 15, 46 => 15], 'registry_type' => '05', 'url' => 'iksmobnet', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za IKS Mobnet usluge'],
+        'iksmobnet' => ['document_category_id' => [45 => 15, 46 => 15], 'registry_type' => '05', 'url' => 'iksmobnet', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'RequestExternal', 'title' => 'Zavođenje zahteva za IKS Mobnet usluge'],
         // Registar
         'registrydataupdate' => ['document_category_id' => [7 => 9], 'registry_type' => '01', 'url' => 'registrydataupdate', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za promenu podataka upisanih u Registar'],
         'registryuverenje' => ['document_category_id' => [9 => 8], 'registry_type' => '01', 'url' => 'registryuverenje', 'statusRel' => 'status', 'statusCol' => 'status_id', 'model' => 'Request', 'title' => 'Zavođenje zahteva za izdavanje uverenja o podacima upisanim u Registar'],
@@ -274,7 +274,6 @@ class ZavodjenjeController extends Controller
                 DB::beginTransaction();
 //                dd($documents);
                 foreach ($documents as $document) {
-//                dd($document);
                     $resultDocument = $this->registerDocument($request, $document, $registry_date, $type, $prilog);
                     if (isset($result['ERROR'])) {
                         if ($resultDocument['ERROR'][$request->id]['status']) {
@@ -301,7 +300,8 @@ class ZavodjenjeController extends Controller
                     $result['ERROR'][$request->id] = "Greška 7! ROLLBACK: Nije snimljen";
                 }
                 $result['category'] = ucfirst($resultDocument['requestCategory']);
-                $result[$log->type][$request->id] = $resultDocument['osoba']->getImeRoditeljPrezimeAttribute();
+
+                $result[$log->type][$request->id] = !is_null($resultDocument['osoba']) ? $resultDocument['osoba']->getImeRoditeljPrezimeAttribute() : '';
             } catch
             (\Exception $e) {
                 DB::rollBack();
@@ -394,8 +394,8 @@ class ZavodjenjeController extends Controller
                 $document->documentable()->associate($request);
                 $document->metadata = json_encode([
                     "title" => "{$document->documentCategory->name} za {$request->requestCategory->name} #{$request->id}",
-                    "author" => $osoba->ime_roditelj_prezime,
-                    "author_id" => $osoba->lib,
+                    "author" => $osoba->ime_roditelj_prezime ?? '',
+                    "author_id" => $osoba->lib ?? '',
                     "description" => "",
                     "dopuna" => isset($prilog['text']) ? $prilog['text'] : '',
                     "category" => ucfirst($request->requestCategory->name),
@@ -415,7 +415,7 @@ class ZavodjenjeController extends Controller
         $dopuna = $metadata->dopuna ?? '';
         $result['data'] = array(
             'category' => $document->documentCategory->name,
-            'osoba' => $osoba->getImeRoditeljPrezimeAttribute(),
+            'osoba' => !is_null($osoba) ? $osoba->getImeRoditeljPrezimeAttribute() : '',
             'id' => $request->id,
             'registry_number' => $document->registry_number,
             'registry_date' => Carbon::parse($document->registry_date)->format('d.m.Y.'),

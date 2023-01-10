@@ -20,7 +20,7 @@
             position: relative;
             width: 98%;
             height: 100%;
-            margin: auto 5px!important;
+            margin: auto 5px !important;
             /*border: solid thin red;*/
             /*box-sizing: border-box;*/
             /*background-color: #00aced;*/
@@ -40,7 +40,11 @@
                 <span class="content">{{$item['category']}}</span>
                 <br>
                 <span class="content">Broj: <strong>{{$item['id']}}</strong></span>
-                <span class="content">Ime i prezime: <strong>{{$item['osoba']}}</strong></span>
+                @if(!empty($item['osoba']))
+                    <span class="content">Ime i prezime: <strong>{{$item['osoba']}}</strong></span>
+                @else
+                    <span class="content"> &nbsp;</span>
+                @endif
                 <span class="content">Zavodni broj: <strong>{{$item['registry_number']}}</strong></span>
                 <span class="content">Datum prijema: <strong>{{$item['registry_date']}}</strong></span>
                 <span class="content">{{$item['prilogilidopuna']}}: <strong>{{$item['prilog']}}</strong></span>

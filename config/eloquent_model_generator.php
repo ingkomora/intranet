@@ -107,9 +107,11 @@ return [
 //php artisan krlove:generate:model Referenca --table-name=treferenca
 //php artisan krlove:generate:model PodOblastVrstaPosla --table-name=pod_oblast_vrsta_posla
 
-//php artisan krlove:generate:model Request --table-name=requests
+php artisan krlove:generate:model Request --table-name=requests
 php artisan krlove:generate:model RequestCategoryType --table-name=request_category_types
 php artisan krlove:generate:model RequestCategory --table-name=request_categories
+
+php artisan krlove:generate:model RequestExternal --table-name=requests_external
 
 php artisan krlove:generate:model Document --table-name=documents
 php artisan krlove:generate:model DocumentType
@@ -123,12 +125,19 @@ php artisan krlove:generate:model RegistryRequestCategory --table-name=registry_
 php artisan krlove:generate:model RequestImport --table-name=request_imports
 
 
+php artisan krlove:generate:model PromenaPodataka --table-name=tprijavapromenapodataka
+
+php artisan krlove:generate:model IKSMobnetBroj --table-name=tiksmobnetbrojevi
+php artisan krlove:generate:model IKSMobnetLog --table-name=tiksmobnetlog
+php artisan krlove:generate:model IKSMobnetZahtev --table-name=tiksmobnetzahtev
+php artisan krlove:generate:model IKSMobnetZahtevStatus --table-name=tiksmobnetzahtevstatus
+php artisan krlove:generate:model IKSMobnetZahtevTip --table-name=tiksmobnetzahtevtip
 
 ********************************************************
    K A S N I J E
 ********************************************************
- nejasno cemu ovo sluzi
-php artisan krlove:generate:model  Strucniispit --table-name=tstrucniispit
+nejasno cemu ovo sluzi
+php artisan krlove:generate:model Strucniispit --table-name=tstrucniispit
 
 tclanarina_intervaliobracuna
 tclanarinaod2006_korekcijabackup
@@ -138,22 +147,14 @@ tclanovikomisijezapisnik
 tclanovikomisijezapisnik_mgsi
 telektronskisertifikat
 tevidencijaprekida
-tiksmobnetbrojevi
-tiksmobnetlog
-tiksmobnetzahtev
-tiksmobnetzahtevstatus
-tiksmobnetzahtevtip
 tkruzniemail
 tkruzniemailslanje
 tpotvrdalicno
-tprijavapromenapodataka
 tracunar
 tregkanc
 tregkanc_opstine_obavestenja
 ttabele
 ttasks
 tvesti
-
-
 
  */

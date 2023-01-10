@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $const
  * @property LogStatusGrupa $statusGrupa
  * @property Request[] $requests
+ * @property RequestExternal[] $requestsExternal
  */
 class Status extends Model {
 
@@ -70,6 +71,14 @@ class Status extends Model {
     public function requests()
     {
         return $this->hasMany('App\Models\Request', 'status_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function requestsExternal(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\RequestExternal', 'status_id');
     }
 
     /**

@@ -101,6 +101,8 @@ Route::group([
     Route::crud('registerrequestregistrydatadelete', 'RegisterRequestCrudController');
     Route::crud('registerrequestregistrydataupdate', 'RegisterRequestCrudController');
     Route::crud('registerrequestregistryuverenje', 'RegisterRequestCrudController');
+    Route::crud('registerrequestiksmobnet', 'RequestExternalCrudController');
+
     Route::crud('registry-request-category', 'RegistryRequestCategoryCrudController');
     Route::crud('document-category-type', 'DocumentCategoryTypeCrudController');
 }); // this should be the absolute last line of this file
