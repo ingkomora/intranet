@@ -88,6 +88,15 @@
     <li class="nav-item nav-dropdown">
         <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-book-open"></i>ZAVOĐENJE</a>
 
+        @role('admin')
+        <ul class="nav-dropdown-items">
+            <li class="divider">
+            <li class="nav-title">ADMIN</li>
+            <li class='nav-item'><a class=' py-1 pl-5' href='{{ backpack_url('registerrequestiksmobnet') }}'> IKS Mobnet</a></li>
+            <li class="divider">
+        </ul>
+        @endrole
+
         <ul class="nav-dropdown-items">
             {{--            <li class="nav-title">Ostalo</li>--}}
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestsi') }}'> Prijave SI</a></li>
@@ -101,7 +110,7 @@
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestclanstvo') }}'> Zahtevi članstvo</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestmirovanjeclanstva') }}'> Zahtevi mirovanje</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestpromenapodataka') }}'> Zahtevi za promenu podataka</a></li>
-{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestiksmobnet') }}'> Zahtevi za IKS Mobnet</a></li>--}}
+            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registerrequestiksmobnet') }}'> Zahtevi za IKS Mobnet</a></li>--}}
 
 
         </ul>
@@ -120,7 +129,7 @@
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-department-unit') }}'> Organizacione jedinice</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category') }}'> Kategorije dokumenata</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('document-category-type') }}'>Tipovi kategorija dokumenata</a></li>
-{{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>--}}
+            {{--            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('registry-request-category') }}'> Registry request categories</a></li>--}}
             <li class="divider">
         </ul>
     </li>
@@ -167,6 +176,3 @@
     @endrole
 
 @endif
-
-
-
