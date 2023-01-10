@@ -25,7 +25,7 @@ class CreateRequestsExternalTable extends Migration
 
             $table->foreign('request_category_id')
                 ->references('id')
-                ->on('request_external_categories')
+                ->on('request_categories')
                 ->onUpdate('cascade')
                 ->onDelete('restrict');
 
