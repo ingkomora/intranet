@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\RegisterRequestRequest;
-use App\Http\Requests\RequestExternalRequest;
+use App\Http\Requests\RegisterRequestExternalRequest;
 use App\Models\Document;
 use App\Models\RequestCategory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -290,7 +289,7 @@ class RequestExternalCrudController extends CrudController
     protected function setupCreateOperation()
     {
 
-        CRUD::setValidation(RegisterRequestRequest::class);
+        CRUD::setValidation(RegisterRequestExternalRequest::class);
 
         $this->crud->addFields([
 //            'id',
