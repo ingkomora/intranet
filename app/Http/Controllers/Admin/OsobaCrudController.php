@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Operations\UnlockMembershipFeeRegistrationOperati
 use App\Http\Controllers\Admin\Operations\UpdateLicencaStatusOperation;
 use App\Http\Requests\OsobaRequest;
 use App\Models\Firma;
+use App\Models\Region;
 use App\Models\Sekcija;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -868,6 +869,40 @@ class OsobaCrudController extends CrudController
                 $q->where('zvanje_grupa_id', $value);
             });
         });
+
+        $this->crud->addFilter([
+            'type' => 'select2',
+            'name' => 'region',
+            'label' => 'Region'
+        ], function () {
+            return Region::orderBy('id')->pluck('naziv', 'id')->toArray();
+        }, function ($value) {
+            $this->crud->addClause('whereHas', 'opstinaId', function ($q) use ($value) {
+                $q->where('region_id', $value);
+            });
+        });
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'active',
+            'label' => 'Aktivni'
+        ],
+            FALSE,
+            function () {
+                $this->crud->addClause('whereHas', 'active');
+            }
+        );
+
+        $this->crud->addFilter([
+            'type' => 'simple',
+            'name' => 'notactive',
+            'label' => 'Neaktivni'
+        ],
+            FALSE,
+            function () {
+                $this->crud->addClause('whereHas', 'notActive');
+            }
+        );
 
         if ($this->action == 'osoba') {
 
