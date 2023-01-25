@@ -259,6 +259,24 @@ class Osoba extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function active()
+    {
+        return $this->hasMany('App\Models\Licenca', 'osoba')
+            ->whereRaw("status='A'");
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notActive()
+    {
+        return $this->hasMany('App\Models\Licenca', 'osoba')
+            ->whereRaw("status='N'");
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function evidencijeMirovanja()
     {
         return $this->hasMany('App\Models\EvidencijaMirovanja', 'osoba');
