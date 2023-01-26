@@ -224,6 +224,10 @@ class OsobaCrudController extends CrudController
             'name' => 'posta_drzava',
             'label' => 'Država',
         ],
+        'full_address' =>[
+            'name' => 'full_address',
+            'label' => 'Puna adresa',
+        ],
 
 //        firma
         'firma_sep' => [
@@ -650,8 +654,8 @@ class OsobaCrudController extends CrudController
                 'prezime_staro',
 //            'zvanje',
                 'titula',
-                'kontakttel',
-                'mobilnitel',
+//                'kontakttel',
+//                'mobilnitel',
                 'kontaktfax',
 //            'kontaktemail',
                 'pol',
