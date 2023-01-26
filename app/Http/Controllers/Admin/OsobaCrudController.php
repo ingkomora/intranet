@@ -227,6 +227,7 @@ class OsobaCrudController extends CrudController
         'full_address' =>[
             'name' => 'full_address',
             'label' => 'Puna adresa',
+            'limit' => 500,
         ],
 
 //        firma
