@@ -133,6 +133,8 @@ php artisan krlove:generate:model IKSMobnetZahtev --table-name=tiksmobnetzahtev
 php artisan krlove:generate:model IKSMobnetZahtevStatus --table-name=tiksmobnetzahtevstatus
 php artisan krlove:generate:model IKSMobnetZahtevTip --table-name=tiksmobnetzahtevtip
 
+php artisan krlove:generate:model Uspeh --table-name=si_uspesi
+
 ********************************************************
    K A S N I J E
 ********************************************************
