@@ -390,6 +390,8 @@ class ZahtevController extends Controller
                 ]
             ]);
         }
+
+//        dd($licence);
         $messageLicencaOK = 'Licence: ';
         $messageLicencaNOK = 'Licence: ';
         $flagOK = FALSE;
@@ -432,7 +434,7 @@ class ZahtevController extends Controller
                     continue;
                 }
             }
-
+//dd($licenca);
 //            PRONADJI JMBG NA OSNOVU BROJA ZAHTEVA ILI BROJA PRIJAVE
             if (!empty($licenca['broj_zahteva'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_zahteva'], 'zahtev');
@@ -444,10 +446,7 @@ class ZahtevController extends Controller
                     $broj = $licenca['broj_zahteva'];
                     $tip = 'broj_zahteva';
                 }
-            } else if (!empty($licenca['tip'])) {
-                $broj = $licenca['tip'];
-                $tip = 'tip_licence';
-                $jmbg = $licenca['jmbg'];
+
             } else if (!empty($licenca['broj_prijave'])) {
                 $licenca['jmbg'] = $this->getJMBG($licenca['broj_prijave'], 'siprijava');
                 if (is_null($licenca['jmbg'])) {
@@ -458,6 +457,9 @@ class ZahtevController extends Controller
                     $broj = $licenca['broj_prijave'];
                     $tip = 'broj_prijave';
                 }
+            } else if (!empty($licenca['tip'])) {
+                $broj = $licenca['tip'];
+                $tip = 'tip_licence';
             } else if (!empty($licenca['jmbg'])) {
                 $broj = $licenca['broj'];
                 $tip = 'broj_licence';
@@ -472,6 +474,7 @@ class ZahtevController extends Controller
                 continue;
             }
 
+//            dd($licenca);
             if (!is_null($licenca['jmbg'])) {
                 if (!$this->checkOsoba(trim($licenca['jmbg']))) {
                     $falseJMBG[$licenca['jmbg']] = 'Osoba sa jmbg: ' . $licenca['jmbg'] . ' ne postoji u bazi!';
@@ -487,12 +490,14 @@ class ZahtevController extends Controller
                         $this->logOsoba($osoba, LICENCE, "Ažurirana osoba: $osoba->ime $osoba->prezime($osoba->id), lib: $osoba->lib, status: $osoba->clan");
                     }
                 }
-            } else {
-                continue;
             }
+//            else {
+//                dd('jmbg null', $licenca);
+//                continue;
+//            }
 
             // da li ima i koji je zahtev za licencu
-            $respZ = $this->getZahtevLicenca($broj, $tip, $jmbg);
+            $respZ = $this->getZahtevLicenca($broj, $tip, $licenca['jmbg']);
 
             if ($respZ->status) {
                 // AZURIRAJ ZAHTEV
@@ -607,7 +612,7 @@ class ZahtevController extends Controller
     {
         $response = new \stdClass();
         $response->status = FALSE;
-
+//        dd('getZahtevLicenca', $broj, $tip, $jmbg);
         switch ($tip) {
             case 'broj_zahteva':
                 $zahtevi = ZahtevLicenca::where('id', $broj)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
@@ -622,6 +627,8 @@ class ZahtevController extends Controller
                 $zahtevi = ZahtevLicenca::where('licencatip', $broj)->where('osoba', $jmbg)->whereNotIn('status', [REQUEST_FINISHED, REQUEST_CANCELED])->get();
                 break;
         }
+
+//        dd($zahtevi);
 
         if ($zahtevi->isNotEmpty()) {
 
@@ -708,7 +715,7 @@ class ZahtevController extends Controller
         $zahtev->reg_oblast_id = $tipLicence->podOblast->oblast_id;
         $zahtev->reg_pod_oblast_id = $tipLicence->pod_oblast_id;
         if (empty($zahtev->zvanje_id)) {
-            $zahtev->zvanje_id = $osoba->zvanje;
+            $zahtev->zvanje_id = $osoba->zvanjeId->id;
         }
         $zahtev->status = REQUEST_FINISHED;
         $zahtev->prijem = Carbon::parse($licenca['datum_prijema'])->format('Y-m-d');
@@ -740,6 +747,8 @@ class ZahtevController extends Controller
                 $q->where('registry_request_category.request_category_id', $zahtev->request_category_id); // zahtev za izdavanje licence
             })
             ->get();
+//            ->toSql();
+//        dd($registry);
 
 
         if (empty($registry)) {
