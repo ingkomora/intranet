@@ -35,6 +35,7 @@ use Illuminate\Support\Str;
  * @property Document $documents
  * @property Status $status
  * @property RequestCategory $requestCategory
+ * @property SiUspeh $uspeh
  */
 class SiPrijava extends Model
 {
@@ -217,6 +218,11 @@ class SiPrijava extends Model
     public function requestCategory()
     {
         return $this->belongsTo('App\Models\RequestCategory');
+    }
+
+    public function uspeh(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo('App\Models\SiUspeh', 'uspeh_id', 'id');
     }
 
     /*

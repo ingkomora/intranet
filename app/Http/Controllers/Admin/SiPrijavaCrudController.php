@@ -92,6 +92,11 @@ class SiPrijavaCrudController extends CrudController
             'type' => 'relationship',
             'attributes' => 'naziv',
         ],
+        'uspeh_id' => [
+            'name' => 'uspeh',
+            'label' => 'Uspeh',
+            'type' => 'relationship',
+        ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
             'label' => 'Stručni rad',
@@ -190,6 +195,11 @@ class SiPrijavaCrudController extends CrudController
             'type' => 'relationship',
             'attributes' => 'naziv',
         ],
+        'uspeh_id' => [
+            'name' => 'uspeh',
+            'label' => 'Uspeh',
+            'type' => 'relationship',
+        ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
             'label' => 'Stručni rad',
@@ -240,26 +250,11 @@ class SiPrijavaCrudController extends CrudController
             'name' => 'id',
             'label' => 'Broj prijave',
             'attributes' => ['readonly' => 'readonly',],
-            'wrapper' => ['class' => 'col-md-3 my-3',],
+            'wrapper' => ['class' => 'col-md-6 my-3',],
         ],
         'barcode' => [
             'name' => 'barcode',
-            'wrapper' => ['class' => 'col-md-3 my-3',],
-        ],
-        'status_prijave' => [
-            'name' => 'status_prijave',
-            'label' => 'Status',
-            'type' => 'select2',
-            'entity' => 'status',
-            'attribute' => 'naziv',
-            'wrapper' => ['class' => 'col-md-3 my-3',],
-        ],
-        'si_vrsta_id' => [
-            'name' => 'siVrsta',
-            'label' => 'Vrsta ispita',
-            'type' => 'relationship',
-            'attribute' => 'naziv',
-            'wrapper' => ['class' => 'col-md-3 my-3',],
+            'wrapper' => ['class' => 'col-md-6 my-3',],
         ],
         'osoba_id' => [
             'name' => 'osoba',
@@ -267,13 +262,34 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Ime prezime (jmbg)',
             'attribute' => 'ime_prezime_jmbg',
             'ajax' => TRUE,
-            'wrapper' => ['class' => 'col-md-6 my-3',],
+            'wrapper' => ['class' => 'col-md-4 my-3',],
         ],
         'zvanje_id' => [
             'name' => 'zvanje',
             'label' => 'Zvanje',
             'type' => 'relationship',
             'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'si_vrsta_id' => [
+            'name' => 'siVrsta',
+            'label' => 'Vrsta ispita',
+            'type' => 'relationship',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-4 my-3',],
+        ],
+        'status_prijave' => [
+            'name' => 'status_prijave',
+            'label' => 'Status',
+            'type' => 'select2',
+            'entity' => 'status',
+            'attribute' => 'naziv',
+            'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+        'uspeh_id' => [
+            'name' => 'uspeh',
+            'label' => 'Uspeh',
+            'type' => 'relationship',
             'wrapper' => ['class' => 'col-md-6 my-3',],
         ],
         'vrsta_posla_id' => [
