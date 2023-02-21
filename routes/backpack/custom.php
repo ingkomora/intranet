@@ -19,7 +19,7 @@ Route::group([
     Route::crud('registar', 'OsobaCrudController');
     Route::crud('osiguranje', 'OsiguranjeCrudController');
     Route::crud('firma', 'FirmaCrudController');
-    Route::crud('siprijava', 'SiPrijavaCrudController');
+    Route::crud('si', 'SiPrijavaCrudController');
     Route::crud('zvanje', 'ZvanjeCrudController');
     Route::crud('regoblast', 'RegOblastCrudController');
     Route::crud('regpodoblast', 'RegPodOblastCrudController');
