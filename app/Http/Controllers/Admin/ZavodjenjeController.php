@@ -224,6 +224,8 @@ class ZavodjenjeController extends Controller
                     $document_category_id = reset($temp);
                 }
                 $documents = [];
+
+                // zahtev ima neke dokumente
                 if ($existingDocuments->isNotEmpty()) {
                     if (isset($prilog['text'])) {
                         $filteredExistingDocuments = $existingDocuments->filter(function ($document, $key) use ($document_category_id) {
@@ -261,6 +263,7 @@ class ZavodjenjeController extends Controller
                         $documents[] = $document;
                     }
                 } else {
+                    // nema dokument
                     if ($request->{$requestStatusColumnName} >= REQUEST_IN_PROGRESS or in_array($request->{$requestStatusColumnName}, [REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])) {
                         $result['ERROR'][1] = "Greška 9! Zahtev $request->id ima status \"" . $request->{$requestStatusRelationName}->naziv . "\", a nema evidentiranih dokumenata! Kontaktirajte službu za informacione tehnologije";
                         return $result;

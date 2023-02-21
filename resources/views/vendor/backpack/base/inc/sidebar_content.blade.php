@@ -59,7 +59,7 @@
     <li class="nav-item nav-dropdown">
         <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>STRUČNI ISPITI</a>
         <ul class="nav-dropdown-items">
-            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('siprijava') }}'> Prijave</a></li>
+            <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('si') }}'> Prijave</a></li>
             <li class='nav-item'><a class='nav-link py-1 pl-5' href='{{ backpack_url('sivrsta') }}'> Vrste ispita</a></li>
         </ul>
     </li>

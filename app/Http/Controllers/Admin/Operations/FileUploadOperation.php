@@ -99,8 +99,17 @@ trait FileUploadOperation
         CRUD::field('library')->type('select_from_array')->options($this->getLibrary(TRUE))->size(6);
         CRUD::field('method')->type('select_from_array')->options($this->methods)->size(6)->label('Action');
 
-        // removing all unnecessary save actions from stack
-        $this->crud->removeSaveActions(['save_and_edit', 'save_and_new', 'save_and_back']);
+        // setting up save action for file upload operation
+        $this->crud->removeSaveActions(['save_and_edit', 'save_and_new', 'save_and_back', 'save_and_preview']);
+
+        $this->crud->addSaveAction([
+            'name' => 'save_and_back_custom',
+            'redirect' => redirect()->back(), // what's the redirect URL, where the user will be taken after saving?
+
+            // OPTIONAL:
+            'button_text' => 'Execute', // override text appearing on the button
+
+        ]);
 
 
         $this->data['crud'] = $this->crud;
@@ -151,7 +160,7 @@ trait FileUploadOperation
 
 
             // Notify user about action result
-            $this->sendResultToMail($result);
+            $this->sendResultToMail($method, $result);
 
 
             // show a success message
@@ -219,10 +228,12 @@ trait FileUploadOperation
         return $result;
     }
 
-    private function sendResultToMail($result, array $to = []): void
+    private function sendResultToMail($method, $result, array $to = []): void
     {
 
+
         // parsing result
+        $subject = ucfirst(strtolower(implode(' ', preg_split('/(?=[A-Z])/', $method))));
         $body = '';
         $errors = isset($result['error']) and count($result['error']) > 0;
         $success = isset($result['success']) and count($result['success']) > 0;
@@ -257,7 +268,7 @@ trait FileUploadOperation
                 $message
                     ->to($to)
                     //->cc([])
-                    ->subject("Brisanje podataka upisanih u Registar - usled smrti");
+                    ->subject($subject);
             }
         );
     }

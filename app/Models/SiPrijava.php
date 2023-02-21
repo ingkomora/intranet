@@ -35,6 +35,9 @@ use Illuminate\Support\Str;
  * @property Document $documents
  * @property Status $status
  * @property RequestCategory $requestCategory
+ * @property int $uspeh_id
+ * @property string $rok
+ * @property string $datum_polaganja
  * @property SiUspeh $uspeh
  */
 class SiPrijava extends Model

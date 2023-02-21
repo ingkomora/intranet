@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\FileUploadOperation;
 use App\Http\Requests\SiPrijavaRequest;
 use App\Models\Document;
-use App\Models\Licenca;
-use App\Models\Osoba;
-use App\Models\Referenca;
 use App\Models\RegOblast;
 use App\Models\RegPodoblast;
 use App\Models\Sekcija;
@@ -18,6 +16,7 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanel;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Backpack\CRUD\app\Library\Widget;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PrijavaCrudController
@@ -34,6 +33,8 @@ class SiPrijavaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use Operations\RegisterRequestBulkOperation;
+    use FileUploadOperation;
+
 
     protected
         $column_definition_array_admin = [
@@ -96,6 +97,13 @@ class SiPrijavaCrudController extends CrudController
             'name' => 'uspeh',
             'label' => 'Uspeh',
             'type' => 'relationship',
+        ],
+        'rok',
+        'datum_polaganja' => [
+            'name' => 'datum_polaganja',
+            'label' => 'Datum polaganja',
+            'type' => 'date',
+            'format' => 'DD.MM.Y.',
         ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
@@ -200,6 +208,13 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Uspeh',
             'type' => 'relationship',
         ],
+        'rok',
+        'datum_polaganja' => [
+            'name' => 'datum_polaganja',
+            'label' => 'Datum polaganja',
+            'type' => 'date',
+            'format' => 'DD.MM.Y.',
+        ],
         'strucni_rad' => [
             'name' => 'strucni_rad',
             'label' => 'Stručni rad',
@@ -291,6 +306,17 @@ class SiPrijavaCrudController extends CrudController
             'label' => 'Uspeh',
             'type' => 'relationship',
             'wrapper' => ['class' => 'col-md-6 my-3',],
+        ],
+        'rok',
+        'datum_polaganja' => [
+            'name' => 'datum_polaganja',
+            'label' => 'Datum polaganja',
+            'type' => 'date_picker',
+            'date_picker_options' => [
+                'todayBtn' => 'linked',
+                'format' => 'dd.mm.yyyy.',
+//                'language' => 'sr-latn'
+            ],
         ],
         'vrsta_posla_id' => [
             'name' => 'vrstaPosla',
@@ -394,8 +420,8 @@ class SiPrijavaCrudController extends CrudController
         $segment = \Request::segment(2);
 
         switch ($segment) {
-            case 'siprijava':
-                CRUD::setRoute(config('backpack.base.route_prefix') . '/siprijava');
+            case 'si':
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/si');
                 CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
 
                 // disabling RegisterRequestBulkOperation
@@ -535,6 +561,20 @@ class SiPrijavaCrudController extends CrudController
         /*
          *  Filter definition section
          */
+        // select2_multiple filter
+        $this->crud->addFilter([
+            'name' => 'rok_filter',
+            'type' => 'select2_multiple',
+            'label' => 'Rok'
+        ], function () {
+            return SiPrijava::select('rok')->distinct('rok')->pluck('rok', 'rok')->toArray();
+
+        }, function ($values) { // if the filter is active
+
+            $this->crud->addClause('whereIn', 'rok', json_decode($values));
+        });
+
+
         // select2_multiple filter
         $this->crud->addFilter([
             'name' => 'vrsta_posla',
@@ -690,19 +730,19 @@ class SiPrijavaCrudController extends CrudController
             ->label('Zahtev za licencu')
             ->before('reference');
 
-/*        CRUD::column('reference')
-            ->attribute('data_reference_to_array')
-            ->limit(500)
-            ->before('created_at')
-            ->wrapper([
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    $odgovorno_lice_licenca = Referenca::find($related_key)->odgovorno_lice_licenca_id;
-                    $odgovorno_lice = Licenca::find($odgovorno_lice_licenca)->osoba;
-                    return backpack_url('osoba/' . $odgovorno_lice . '/show');
-                },
-                'class' => 'btn btn-sm btn-outline-info mr-1',
-                'target' => '_blank',
-            ]);*/
+        /*        CRUD::column('reference')
+                    ->attribute('data_reference_to_array')
+                    ->limit(500)
+                    ->before('created_at')
+                    ->wrapper([
+                        'href' => function ($crud, $column, $entry, $related_key) {
+                            $odgovorno_lice_licenca = Referenca::find($related_key)->odgovorno_lice_licenca_id;
+                            $odgovorno_lice = Licenca::find($odgovorno_lice_licenca)->osoba;
+                            return backpack_url('osoba/' . $odgovorno_lice . '/show');
+                        },
+                        'class' => 'btn btn-sm btn-outline-info mr-1',
+                        'target' => '_blank',
+                    ]);*/
 
         CRUD::column('documents')
             ->type('relationship')

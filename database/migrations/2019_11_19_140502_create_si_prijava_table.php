@@ -36,7 +36,6 @@ class CreateSiPrijavaTable extends Migration {
             $table->foreign('si_vrsta_id')->references('id')->on('tvrstasi')->onUpdate('cascade')->onDelete('restrict');
             $table->foreign('app_korisnik_id')->references('id')->on('tappkorisnik')->onUpdate('cascade')->onDelete('restrict');
             $table->foreign('vrsta_posla_id')->references('id')->on('vrste_poslova')->onUpdate('cascade')->onDelete('restrict');
-            $table->foreign('uspeh_id')->references('id')->on('si_uspesi')->onUpdate('cascade')->onDelete('restrict');
         });
 
     }
