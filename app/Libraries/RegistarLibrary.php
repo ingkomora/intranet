@@ -20,11 +20,17 @@ abstract class RegistarLibrary
 {
     private static $fields = [];
     private static $document_category_id;
+    private static $registry_type = 'registar';
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | ACTION METHODS
+    |--------------------------------------------------------------------------
+    */
     /**
-     * This method is an action method
-     * @throws \Exception
+     * @param array $data
+     * @return array
      */
     public static function brisanjeUsledSmrti(array $data): array
     {
@@ -61,8 +67,9 @@ abstract class RegistarLibrary
                 // updating licence model
                 self::deactivateLicence($filtered_row['osoba_id'], $filtered_row['datum_dokumenta'], $filtered_row['broj_dokumenta']);
 
+
                 // getting request model
-                $request = self::getRequest($filtered_row['request_id']);
+                $request = RequestLibrary::get($filtered_row['request_id'], [REQUEST_IN_PROGRESS]);
                 $request->status_id = REQUEST_FINISHED;
 
                 // TODO: Upisati inzenjere u registar tabelu
@@ -71,8 +78,10 @@ abstract class RegistarLibrary
 
                 if (!$request->save())
                     throw new \Exception("Greška prilikom ažuriranja zahteva.");
+
+
                 // create document resenje o brisanju podataka iz Registra
-                RegistryLibrary::createDocument($request, $filtered_row['document_category_id'], $filtered_row['datum_dokumenta'], $filtered_row['broj_dokumenta']);
+                RegistryLibrary::createDocument($request, $filtered_row['document_category_id'], $filtered_row['datum_dokumenta'], $filtered_row['broj_dokumenta'], self::$registry_type);
 
 
                 $result['success'][$request->id] = "Uspešno završeno brisanje iz Registra usled smrti.";
@@ -89,27 +98,15 @@ abstract class RegistarLibrary
 
     }
 
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SETTERS
+    |--------------------------------------------------------------------------
+    */
     /**
-     * @throws \Exception
-     */
-    private static function getRequest(int $request_id): ?Request
-    {
-        $request = Request::where('id', $request_id)->where('status_id', REQUEST_IN_PROGRESS)->get();
-
-
-        if ($request->isEmpty())
-            throw new \Exception("Zahtev nije pronađen.");
-
-        return $request->first();
-    }
-
-    private static function getLicence(string $jmbg): ?Collection
-    {
-        return Licenca::where('osoba', $jmbg)->where('status', '<>', 'D')->get();
-    }
-
-    /**
-     * @param mixed $document_category_id
+     * @param int $document_category_id
      */
     private static function setDocumentCategoryId(int $document_category_id): void
     {
@@ -125,6 +122,17 @@ abstract class RegistarLibrary
         self::$fields = $fields;
     }
 
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPERS
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * @param array $data
+     * @return array
+     */
     private static function filterData(array $data): array
     {
         foreach ($data as $field => $value) {
@@ -143,7 +151,30 @@ abstract class RegistarLibrary
         return $result;
     }
 
+
+
+
     /**
+     * @param string $jmbg
+     * @return Collection|null
+     * @deprecated
+     * Method is marked as deprecated due to application architecture changes.
+     * It will be usable until the Licence library is ready.
+     */
+    private static function getLicence(string $jmbg): ?Collection
+    {
+        return Licenca::where('osoba', $jmbg)->where('status', '<>', 'D')->get();
+    }
+
+
+    /**
+     * @param string $jmbg
+     * @param string $datum_dokumenta
+     * @param string $broj_dokumenta
+     * @param string $uzrok
+     * @deprecated
+     * Method is marked as deprecated due to application architecture changes.
+     * It will be usable until the Licence library is ready.
      * @throws \Exception
      */
     private static function deactivateLicence(string $jmbg, string $datum_dokumenta, string $broj_dokumenta, string $uzrok = 'usled smrti'): void

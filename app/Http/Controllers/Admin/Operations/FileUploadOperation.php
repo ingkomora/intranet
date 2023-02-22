@@ -264,7 +264,7 @@ trait FileUploadOperation
         // send raw mail
         Mail::raw(
             $body,
-            function ($message) use ($to) {
+            function ($message) use ($to, $subject) {
                 $message
                     ->to($to)
                     //->cc([])
