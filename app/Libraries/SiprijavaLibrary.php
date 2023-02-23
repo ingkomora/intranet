@@ -34,7 +34,6 @@ abstract class SiprijavaLibrary
 {
 
     private static $fields = [];
-    private static $document_category_id;
     private static $registry_type = 'si';
 
 
@@ -51,7 +50,7 @@ abstract class SiprijavaLibrary
     public function azurirajRezultatIspita(array $data): array
     {
 
-        self::$document_category_id = 21; // Potvrda o položenom stručnom ispitu
+        $document_category_id = 21; // Potvrda o položenom stručnom ispitu
 
         // Set class property fields to suit excel column names
         self::setFields([
@@ -64,7 +63,6 @@ abstract class SiprijavaLibrary
             'datum_polaganja' => 'datum_polaganja',
         ]);
 
-        self::setDocumentCategoryId(self::$document_category_id);
 
         // creating necessary data array for program execution from excel data
         $data = self::adjustExcelData($data, self::$fields);
@@ -72,7 +70,7 @@ abstract class SiprijavaLibrary
         foreach ($data as $row) {
 
             $filtered_row = self::filterData($row);
-            $filtered_row['document_category_id'] = self::$document_category_id;
+            $filtered_row['document_category_id'] = $document_category_id;
 
 
             try {
@@ -156,13 +154,6 @@ abstract class SiprijavaLibrary
         self::$fields = $fields;
     }
 
-    /**
-     * @param mixed $document_category_id
-     */
-    private static function setDocumentCategoryId(int $document_category_id): void
-    {
-        self::$document_category_id = $document_category_id;
-    }
 
 
     /*

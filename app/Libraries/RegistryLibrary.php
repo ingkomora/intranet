@@ -11,6 +11,7 @@ use App\Models\RegistryRequestCategory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 
 /**
  * Class RegistryLibrary
@@ -149,7 +150,7 @@ abstract class RegistryLibrary
     {
 
         $request_category_id = $model->request_category_id;
-        $zvanje_grupa_id = OsobaLibrary::getZvanjeGrupa($model)->id;
+        $zvanje_grupa_id = OsobaLibrary::getSekcija($model)->id;
 
 
         if (is_null($zvanje_grupa_id)) {
@@ -252,6 +253,7 @@ abstract class RegistryLibrary
 
     }
 
+
     /**
      * @param int $document_category_id
      * @return DocumentCategory
@@ -298,7 +300,7 @@ abstract class RegistryLibrary
             throw new \Exception("Greška. Nedostaje parametar za određivanje oznake organizacione jedinice.");
 
 
-        $zg = OsobaLibrary::getZvanjeGrupa($model)->id;
+        $zg = OsobaLibrary::getSekcija($model)->id;
 
         switch ($registry_type) {
 

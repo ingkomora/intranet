@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\RegistarDelationOperation;
 use App\Http\Controllers\Admin\Operations\UpdateZalbaStatusOperation;
 use App\Http\Requests\RequestRequest;
 use App\Models\Document;
-use App\Models\Request;
 use App\Models\RequestCategory;
-use App\Models\Status;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 /**
  * Class RequestCrudController
@@ -27,6 +24,7 @@ class RequestCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use UpdateZalbaStatusOperation;
+    use RegistarDelationOperation;
 
     protected $fields_definition_operation_array = [
         'id' => [
