@@ -223,7 +223,8 @@ trait FileUploadOperation
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method)
-            $result[Str::kebab($method->name)] = $method->name;
+            if (str_contains($method->name, 'File'))
+                $result[Str::kebab($method->name)] = $method->name;
 
         return $result;
     }
