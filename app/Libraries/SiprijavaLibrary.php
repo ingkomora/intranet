@@ -47,7 +47,7 @@ abstract class SiprijavaLibrary
      * This method is an action method
      * @throws \Exception
      */
-    public function azurirajRezultatIspita(array $data): array
+    public function azurirajRezultatIspitaFromFile(array $data): array
     {
 
         $document_category_id = 21; // Potvrda o položenom stručnom ispitu
@@ -65,7 +65,7 @@ abstract class SiprijavaLibrary
 
 
         // creating necessary data array for program execution from excel data
-        $data = self::adjustExcelData($data, self::$fields);
+        $data = self::mapExcelFields($data, self::$fields);
 
         foreach ($data as $row) {
 
@@ -77,7 +77,7 @@ abstract class SiprijavaLibrary
                 DB::beginTransaction();
 
                 // check if osoba exist
-                if (!OsobaLibrary::osobaExists($filtered_row['osoba_id']))
+                if (!OsobaLibrary::exists($filtered_row['osoba_id']))
                     throw new \Exception("Osoba sa jmbg {$filtered_row['osoba_id']} nije pronađena u bazi.");
 
 
@@ -199,7 +199,7 @@ abstract class SiprijavaLibrary
      * @param array $mappedFields
      * @return array
      */
-    private static function adjustExcelData(array $data, array $mappedFields): array
+    private static function mapExcelFields(array $data, array $mappedFields): array
     {
         return array_map(function ($field) use ($mappedFields) {
             foreach ($field as $key => $value) {
