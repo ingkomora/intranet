@@ -95,7 +95,7 @@ class PromenaPodataka extends Model
 
         $posta_opstina = Opstina::find($posta->opstina_id);
 
-        $posta->broj = !empty($posta->podbroj) ? $posta->broj . "/" . $posta->podbroj : '';
+        $posta->broj = !empty($posta->podbroj) ? $posta->broj . "/" . $posta->podbroj : $posta->broj;
 
         $string = "{$posta->ulica} {$posta->broj}, {$posta_opstina->ime}<br>{$posta->pb} {$posta->mesto}";
 
