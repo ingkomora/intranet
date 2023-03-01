@@ -112,15 +112,15 @@ class RegisterRequestCrudController extends CrudController
                 $this->request_category = [8];
                 $this->requestable_model = '\App\Models\Request';
                 break;
-/*            case 'registerrequestiksmobnet':
-                CRUD::setEntityNameStrings('zahtev', 'Zahtevi za IKS Mobnet usluge');
-                CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestiksmobnet');
-                CRUD::addClause('whereIn', 'request_category_id', [15]);
-                $allowCreate = TRUE;
-                $this->request_category_type = 2;
-                $this->request_category = [15];
-                $this->requestable_model = '\App\Models\Request';
-                break;*/
+            /*            case 'registerrequestiksmobnet':
+                            CRUD::setEntityNameStrings('zahtev', 'Zahtevi za IKS Mobnet usluge');
+                            CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestiksmobnet');
+                            CRUD::addClause('whereIn', 'request_category_id', [15]);
+                            $allowCreate = TRUE;
+                            $this->request_category_type = 2;
+                            $this->request_category = [15];
+                            $this->requestable_model = '\App\Models\Request';
+                            break;*/
         }
 
         $this->crud->set('show.setFromDb', FALSE);
@@ -130,12 +130,12 @@ class RegisterRequestCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        $this->crud->addButtonFromView('line', 'requestDocuments', 'requestDocuments', 'end');
-
-
-//        if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
+        if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
             $this->crud->allowAccess(['create', 'registerrequestbulk']);
-//        }
+        }
+
+
+        $this->crud->addButtonFromView('line', 'requestDocuments', 'requestDocuments', 'end');
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();

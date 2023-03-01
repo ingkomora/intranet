@@ -22,7 +22,6 @@ class RequestExternalCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     use Operations\RegisterRequestBulkOperation;
-    use Operations\DocumentCancelationBulkOperation;
 
 
     protected $request_category_id;
@@ -46,10 +45,7 @@ class RequestExternalCrudController extends CrudController
                 $this->request_category_id = [15];
                 $this->requestable_model = '\App\Models\RequestExternal';
 
-                $this->crud->operation('list', function () {
-                    $this->crud->disableBulkActions();
-                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
-                });
+                $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
 
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/request-external');
                 CRUD::setEntityNameStrings('eksterni zahtev', 'Eksterni zahtevi');
@@ -64,15 +60,8 @@ class RequestExternalCrudController extends CrudController
                 CRUD::setEntityNameStrings('eksterni zahtev', 'Zahtevi za IKS Mobnet usluge');
                 CRUD::addClause('where', 'request_category_id', $this->request_category_id);
 
-                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+                $this->crud->denyAccess(['fileUpload', 'documentcancelation']);
 
-                $this->crud->operation('list', function () {
-                    if (backpack_user()->hasPermissionTo('zavedi')) {
-                        $this->crud->enableBulkActions();
-                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
-                    }
-                    $this->crud->allowAccess(['registerrequestbulk']);
-                });
 
                 break;
         }
