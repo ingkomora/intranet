@@ -26,7 +26,7 @@ class ZahtevLicencaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
-    use Operations\DocumentCancelationBulkOperation;
+//    use Operations\DocumentCancelationBulkOperation;
 
     protected $allow_register = FALSE;
     protected $segment;
@@ -46,11 +46,27 @@ class ZahtevLicencaCrudController extends CrudController
             case 'zahtevlicenca':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
+
+                $this->crud->operation('list', function () {
+                    $this->crud->disableBulkActions();
+                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
+                });
+
                 break;
             case 'registerrequestlicence':
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
                 $this->allow_register = TRUE;
+
+                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+
+                $this->crud->operation('list', function () {
+                    if (backpack_user()->hasPermissionTo('zavedi')) {
+                        $this->crud->enableBulkActions();
+                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
+                    }
+                    $this->crud->allowAccess(['registerrequestbulk']);
+                });
                 break;
         }
 
@@ -58,9 +74,8 @@ class ZahtevLicencaCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasPermissionTo('zavedi') and $this->allow_register) {
-            $this->crud->allowAccess(['create']);
-        }
+        $this->crud->addButtonFromView('line', 'zahtevLicencaDocuments', 'zahtevLicencaDocuments', 'end');
+
 
         CRUD::enableDetailsRow();
         CRUD::enableExportButtons();
