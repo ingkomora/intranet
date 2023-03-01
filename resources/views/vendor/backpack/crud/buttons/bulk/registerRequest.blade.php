@@ -2,10 +2,12 @@
     <a
         href="javascript:void(0)"
         onclick="requestZavodjenjeBulkEntries(this)"
-        class="btn btn-primary bulk-button"
+        class="btn bulk-button border"
+        data-toggle="tooltip"
+        title="Zavedi"
     >
         <span class="ladda-label">
-            <i class="la la-clone"></i> Zavođenje
+            <i class="las la-archive"></i> Zavedi
         </span>
     </a>
 @endif

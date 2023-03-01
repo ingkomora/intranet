@@ -3,6 +3,8 @@
         href="javascript:void(0)"
         onclick="createRequestStopMembershipBulkEntries(this)"
         class="btn btn-warning bulk-button"
+        data-toggle="tooltip"
+        title="Kreiraj zahtev za brisanje"
     >
         <span class="ladda-label">
             <i class="las la-sign-out-alt"></i> Kreiraj zahtev za brisanje

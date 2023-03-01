@@ -1,5 +1,14 @@
 @if ($crud->hasAccess('updatelicencastatus') AND $entry->licence->isNotEmpty())
-    <a href="javascript:void(0)" onclick="updateLicencaStatus(this)" data-route="{{ url($crud->route.'/'.$entry->getKey().'/updatelicencastatus') }}" class="btn btn-sm btn-link" data-button-type="clone"><i class="la la-certificate"></i> Ažuriraj Licence</a>
+    <a
+        href="javascript:void(0)"
+        onclick="updateLicencaStatus(this)"
+        data-route="{{ url($crud->route.'/'.$entry->getKey().'/updatelicencastatus') }}"
+        class="btn btn-sm btn-link"
+        data-toggle="tooltip"
+        title="Ažuriraj statuse licenci"
+    >
+        <i class="la la-2x la-certificate"></i>
+    </a>
 @endif
 
 {{-- Button Javascript --}}
@@ -22,7 +31,7 @@
                     console.log(result);
                     var message = '<strong>Provera uspešno izvršena!</strong><br><strong>Osoba: </strong>' + result.osoba + '<br>';
                     $.each(result.licence, function (key, value) {
-                        message += '<strong>' + key.substr(0,1).toUpperCase()+key.substr(1) + '</strong>: ' + value + '<br>';
+                        message += '<strong>' + key.substr(0, 1).toUpperCase() + key.substr(1) + '</strong>: ' + value + '<br>';
                     })
 
                     // Show an alert with the result
