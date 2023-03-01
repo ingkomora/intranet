@@ -422,10 +422,9 @@ class SiPrijavaCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/si');
                 CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
 
-                // disabling RegisterRequestBulkOperation
                 $this->crud->operation('list', function () {
-                    $this->crud->denyAccess(['registerrequestbulk']);
                     $this->crud->disableBulkActions();
+                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
                 });
 //                CRUD::addClause('where', 'request_category_id', 7);
 //                $this->requestCategoryType = 1;
@@ -435,14 +434,21 @@ class SiPrijavaCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestsi');
                 CRUD::setEntityNameStrings('siprijava', 'Zavodjenje Prijave SI');
 
-                // turn off file upload operation
-                $this->crud->denyAccess(['fileUpload']);
+                $this->allowRegister = TRUE;
 
+                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+
+                $this->crud->operation('list', function () {
+                    if (backpack_user()->hasPermissionTo('zavedi')) {
+                        $this->crud->enableBulkActions();
+                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
+                    }
+                    $this->crud->allowAccess(['registerrequestbulk']);
+                });
 
                 // CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
                 // $this->requestCategoryType = 1;
                 // $this->requestCategory = [1, 2];
-                $this->allowRegister = TRUE;
                 break;
         }
 
@@ -455,10 +461,6 @@ class SiPrijavaCrudController extends CrudController
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
-        }
-
-        if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
-            $this->crud->allowAccess(['registerrequestbulk']);
         }
 
         $this->crud->addButtonFromView('line', 'siPrijavaDocuments', 'siPrijavaDocuments', 'end');

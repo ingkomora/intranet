@@ -28,7 +28,11 @@ Route::group([
     Route::crud('regpodoblast', 'RegPodOblastCrudController');
     Route::crud('sivrsta', 'SiVrstaCrudController');
     Route::crud('licenca', 'LicencaCrudController');
+
     Route::crud('zahtevlicenca', 'ZahtevLicencaCrudController');
+    Route::crud('zahtevlicenca/{zahtev_id}/document', 'NestedResources\ZahtevLicencaDocumentCrudController');
+
+
     Route::crud('brojac', 'BrojacCrudController');
     Route::get('home', 'HomeController@dashboard');
 //    Route::get('pdf', 'PdfController@downloadPDF');
