@@ -64,9 +64,15 @@ class RequestExternalCrudController extends CrudController
                 CRUD::setEntityNameStrings('eksterni zahtev', 'Zahtevi za IKS Mobnet usluge');
                 CRUD::addClause('where', 'request_category_id', $this->request_category_id);
 
-                if (backpack_user()->hasPermissionTo('zavedi') and $this->allow_create) {
-                    $this->crud->allowAccess(['create']);
-                }
+                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+
+                $this->crud->operation('list', function () {
+                    if (backpack_user()->hasPermissionTo('zavedi')) {
+                        $this->crud->enableBulkActions();
+                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
+                    }
+                    $this->crud->allowAccess(['registerrequestbulk']);
+                });
 
                 break;
         }
