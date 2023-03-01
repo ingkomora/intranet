@@ -20,7 +20,7 @@ trait RegisterRequestBulkOperation
     {
         Route::post($segment . '/registerrequestbulk', [
             'as' => $routeName . '.registerrequestbulk',
-            'uses' => $controller . '@registerrequestbulk',
+            'uses' => $controller . '@registerRequestBulk',
             'operation' => 'registerrequestbulk',
         ]);
     }
@@ -40,12 +40,11 @@ trait RegisterRequestBulkOperation
         });
     }
 
+
     /**
-     * Show the view for performing the operation.
-     *
      * @return array
      */
-    public function registerrequestbulk()
+    public function registerRequestBulk(): array
     {
         $this->crud->hasAccessOrFail('registerrequestbulk');
 //        $entries = $this->crud->getRequest()->input('entries');

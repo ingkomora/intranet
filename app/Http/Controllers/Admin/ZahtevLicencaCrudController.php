@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\RegisterRequestBulkOperation;
 use App\Http\Requests\ZahtevLicencaRequest;
 use App\Models\Document;
 use App\Models\LicencaTip;
@@ -26,7 +27,8 @@ class ZahtevLicencaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
-//    use Operations\DocumentCancelationBulkOperation;
+
+    use RegisterRequestBulkOperation;
 
     protected $allow_register = FALSE;
     protected $segment;
@@ -47,10 +49,7 @@ class ZahtevLicencaCrudController extends CrudController
                 CRUD::setEntityNameStrings('zahtev', 'zahtevi za izdavanje licence');
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/zahtevlicenca');
 
-                $this->crud->operation('list', function () {
-                    $this->crud->disableBulkActions();
-                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
-                });
+                $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
 
                 break;
             case 'registerrequestlicence':
@@ -58,15 +57,8 @@ class ZahtevLicencaCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestlicence');
                 $this->allow_register = TRUE;
 
-                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+                $this->crud->denyAccess(['fileUpload', 'documentcancelation']);
 
-                $this->crud->operation('list', function () {
-                    if (backpack_user()->hasPermissionTo('zavedi')) {
-                        $this->crud->enableBulkActions();
-                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
-                    }
-                    $this->crud->allowAccess(['registerrequestbulk']);
-                });
                 break;
         }
 

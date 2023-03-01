@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Operations\FileUploadOperation;
+use App\Http\Controllers\Admin\Operations\RegisterRequestBulkOperation;
 use App\Http\Requests\SiPrijavaRequest;
 use App\Models\Document;
 use App\Models\RegOblast;
@@ -32,6 +33,7 @@ class SiPrijavaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use FileUploadOperation;
+    use RegisterRequestBulkOperation;
 
 
     protected
@@ -422,10 +424,8 @@ class SiPrijavaCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/si');
                 CRUD::setEntityNameStrings('siprijava', 'Prijave Stručni ispit');
 
-                $this->crud->operation('list', function () {
-                    $this->crud->disableBulkActions();
-                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
-                });
+                $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
+
 //                CRUD::addClause('where', 'request_category_id', 7);
 //                $this->requestCategoryType = 1;
 //                $this->requestCategory = [10];
@@ -436,15 +436,8 @@ class SiPrijavaCrudController extends CrudController
 
                 $this->allowRegister = TRUE;
 
-                $this->crud->denyAccess(['fileUpload', 'registerrequestbulk', 'documentcancelation']);
+                $this->crud->denyAccess(['fileUpload', 'documentcancelation']);
 
-                $this->crud->operation('list', function () {
-                    if (backpack_user()->hasPermissionTo('zavedi')) {
-                        $this->crud->enableBulkActions();
-                        $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
-                    }
-                    $this->crud->allowAccess(['registerrequestbulk']);
-                });
 
                 // CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
                 // $this->requestCategoryType = 1;
