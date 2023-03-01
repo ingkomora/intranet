@@ -35,6 +35,7 @@
         <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon fas fa-file-signature"></i>ZAHTEVI</a>
         <ul class="nav-dropdown-items">
             <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request') }}'> Zahtevi</a></li>
+            <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-external') }}'> Eksterni zahtevi</a></li>
             <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category') }}'> Kategorije zahteva</a></li>
             <li class='nav-item'><a class='nav-link' href='{{ backpack_url('request-category-type') }}'> Tipovi kategorija zahteva</a></li>
         </ul>
