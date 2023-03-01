@@ -35,7 +35,7 @@ trait UpdateLicencaStatusOperation
         });
 
         $this->crud->operation('list', function () {
-            $this->crud->addButtonFromView('line', 'updatelicencastatus', 'updatelicencastatus', 'end');
+            $this->crud->addButtonFromView('line', 'updateLicencaStatus', 'updateLicencaStatus', 'end');
         });
     }
 

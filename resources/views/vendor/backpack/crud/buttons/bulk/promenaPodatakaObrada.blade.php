@@ -3,9 +3,11 @@
         href="javascript:void(0)"
         onclick="promenaPodatakaObradaBulkEntries(this)"
         class="btn btn-primary bulk-button"
+        data-toggle="tooltip"
+        title="Obrada zahteva"
     >
         <span class="ladda-label">
-            <i class="la la-clone"></i> Obrada
+            <i class="las la-wrench"></i> Obrada
         </span>
     </a>
 @endif

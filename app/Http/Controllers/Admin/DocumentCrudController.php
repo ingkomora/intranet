@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\DocumentCancelationBulkOperation;
 use App\Http\Requests\DocumentRequest;
 use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\DocumentCategoryType;
+use App\Models\IKSMobnetZahtev;
 use App\Models\Status;
 use App\Models\ZahtevLicenca;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -21,9 +23,11 @@ class DocumentCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
+
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
+    use DocumentCancelationBulkOperation;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -44,8 +48,8 @@ class DocumentCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasRole('sluzba_maticne_sekcije')) {
-            $this->crud->allowAccess(['update']);
+        if (backpack_user()->hasPermissionTo('document-cancelation')) {
+            $this->crud->allowAccess(['documentcancelation']);
         }
 
 //        $this->crud->enableDetailsRow();
@@ -61,7 +65,7 @@ class DocumentCrudController extends CrudController
     protected function setupListOperation()
     {
         $this->crud->addColumns([
-//            'id',
+            'id',
             'documentable_id' => [
                 'name' => 'documentable_id',
                 'type' => 'text',
@@ -72,13 +76,6 @@ class DocumentCrudController extends CrudController
                 'label' => 'Status',
                 'type' => 'relationship',
                 'attribute' => 'naziv',
-            ],
-            'osoba' => [
-                'name' => 'osoba',
-                'type' => 'model_function',
-                'label' => 'Ime prezime (jmbg)',
-                'function_name' => 'getOsobaImePrezimeJmbg', // the method in your Model
-
             ],
             'registry_number' => [
                 'name' => 'registry_number',
@@ -103,6 +100,33 @@ class DocumentCrudController extends CrudController
                         ],*/
         ]);
 
+        if (\Request::segment(2) != 'request-external') {
+
+            $this->crud->addColumn([
+                'name' => 'osoba',
+                'type' => 'model_function',
+                'label' => 'Ime prezime (jmbg)',
+                'function_name' => 'getOsobaImePrezimeJmbg', // the method in your Model
+            ]);
+
+            $this->crud->setColumnDetails('osoba', [
+                'searchLogic' => function ($query, $column, $searchTerm) {
+                    $query->whereHasMorph(
+                        'documentable',
+                        [IKSMobnetZahtev::class],
+                        function ($query, $type) use ($searchTerm) {
+                            $query->orWhere('documentable_type', "App\Models\IKSMobnetZahtev") // Constraint on "commentable"
+                            ->whereHas('osobaId', function ($q) use ($searchTerm) {
+                                $q->where('id', 'ilike', $searchTerm . '%');
+                            });
+
+//                        dd($query->toSql());
+                        }
+                    );
+                }
+            ]);
+        }
+
         $this->crud->setColumnDetails('status', [
             'wrapper' => [
                 'class' => function ($crud, $column, $entry, $related_key) {
@@ -119,25 +143,6 @@ class DocumentCrudController extends CrudController
             ]
         ]);
 
-
-        $this->crud->setColumnDetails('osoba', [
-            'searchLogic' => function ($query, $column, $searchTerm) {
-//dd($this->crud->getEntries());
-                $query->whereHasMorph(
-                    'documentable',
-                    [ZahtevLicenca::class/*, SiPrijava::class, Request::class*/],
-                    function ($query, $type) use ($searchTerm) {
-                        $query->orWhere('documentable_type', "App\Models\ZahtevLicenca") // Constraint on "commentable"
-                        ->whereHas('osobaId', function ($q) use ($searchTerm) {
-//                            $q->where('id', '0902991779519');
-                            $q->where('id', 'ilike', $searchTerm . '%');
-                        });
-
-//                        dd($query->toSql());
-                    }
-                );
-            }
-        ]);
 
         CRUD::addFilter([
             'type' => 'select2',
@@ -235,7 +240,7 @@ class DocumentCrudController extends CrudController
                         return backpack_url('status/' . $related_key . '/show');
                     },
                     'target' => '_blank',
-                    'class' =>  function ($crud, $column, $entry, $related_key) {
+                    'class' => function ($crud, $column, $entry, $related_key) {
                         switch ($related_key) {
                             case DOCUMENT_CREATED:
                             default:
@@ -297,7 +302,7 @@ class DocumentCrudController extends CrudController
             'note',
             'path',
             'location',
-            'updated_at'=>[
+            'updated_at' => [
                 'name' => 'updated_at',
                 'label' => 'Ažuriran',
                 'type' => 'date',

@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Admin\Operations;
 
 use App\Http\Controllers\Admin\ZavodjenjeController;
 use App\Models\Log;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
 use function Composer\Autoload\includeFile;
 
 trait RegisterRequestBulkOperation
@@ -35,9 +33,9 @@ trait RegisterRequestBulkOperation
         $this->crud->allowAccess(['registerrequestbulk']);
 
         $this->crud->operation('list', function () {
-            if (backpack_user()->hasRole('admin') OR backpack_user()->hasPermissionTo('zavedi')) {
+            if (backpack_user()->hasPermissionTo('zavedi')) {
                 $this->crud->enableBulkActions();
-                $this->crud->addButtonFromView('top', 'registerrequestbulkbutton', 'registerrequestbulkbutton', 'end');
+                $this->crud->addButtonFromView('top', 'bulk.registerRequest', 'bulk.registerRequest', 'end');
             }
         });
     }

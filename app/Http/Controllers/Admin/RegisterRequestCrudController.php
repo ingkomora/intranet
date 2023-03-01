@@ -130,6 +130,9 @@ class RegisterRequestCrudController extends CrudController
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
+        $this->crud->addButtonFromView('line', 'requestDocuments', 'requestDocuments', 'end');
+
+
         if (backpack_user()->hasPermissionTo('zavedi') and $allowCreate) {
             $this->crud->allowAccess(['create']);
         }

@@ -68,7 +68,7 @@ trait RegistarDelationOperation
 
         $this->crud->operation(['list', 'show'], function () {
             if (backpack_user()->hasPermissionTo('registar-deletion'))
-                $this->crud->addButtonFromView('line', 'registardelationbutton', 'registardelationbutton', 'end');
+                $this->crud->addButtonFromView('line', 'registarDelation', 'registarDelation', 'end');
         });
 
         $this->crud->enableGroupedErrors();

@@ -19,7 +19,10 @@ Route::group([
     Route::crud('registar', 'OsobaCrudController');
     Route::crud('osiguranje', 'OsiguranjeCrudController');
     Route::crud('firma', 'FirmaCrudController');
+
     Route::crud('si', 'SiPrijavaCrudController');
+    Route::crud('si/{si_prijava_id}/document', 'NestedResources\SiPrijavaDocumentCrudController');
+
     Route::crud('zvanje', 'ZvanjeCrudController');
     Route::crud('regoblast', 'RegOblastCrudController');
     Route::crud('regpodoblast', 'RegPodOblastCrudController');
@@ -46,12 +49,12 @@ Route::group([
     Route::get('/registries', 'ZahtevController@registries');
     Route::get('/clanstvo/{action}/{save?}', 'ZahtevController@clanstvo');
     Route::get('/clanstvo', 'ZahtevController@clanstvo');
-/*    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
-    Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
-    Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
-    Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
-    Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
-    Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');*/
+    /*    Route::view('clanstvo/obradamirovanja', 'obradamirovanja');
+        Route::post('clanstvo/obradamirovanja', 'ZahtevController@obradamirovanja');
+        Route::get('/clanstvo/mirovanja/import', 'ZahtevController@import');
+        Route::crud('clanstvo/mirovanja', 'MirovanjeCrudController');
+        Route::view('clanstvo/mirovanja/administracijamirovanja', 'vendor.backpack.crud.administracijamirovanja');
+        Route::get('/generateWordDocument', 'ZahtevController@generateWordDocument');*/
 
     Route::get('/prijava/si/{prijava_id}/{type?}', 'ZavodjenjeController@prijavaPDF');
 //    Route::get('/prijava/si/{prijava_id}', 'ZavodjenjeController@prijavaPDF');
@@ -74,7 +77,13 @@ Route::group([
     Route::crud('funkcija-tip', 'FunkcijaTipCrudController');
     Route::crud('request-category-type', 'RequestCategoryTypeCrudController');
     Route::crud('request-category', 'RequestCategoryCrudController');
+
     Route::crud('request', 'RequestCrudController');
+    Route::crud('request/{request_id}/document', 'NestedResources\RequestDocumentCrudController');
+
+    Route::crud('request-external', 'RequestExternalCrudController');
+    Route::crud('request-external/{request_external_id}/document', 'NestedResources\RequestExternalDocumentCrudController');
+
     Route::crud('requestmembership', 'RequestMembershipCrudController');
     Route::crud('osoba-edit', 'OsobaEditCrudController');
     Route::crud('registry-department-unit', 'RegistryDepartmentUnitCrudController');
@@ -90,6 +99,7 @@ Route::group([
     Route::post('/zavodjenje/zavedi/licence', 'ZavodjenjeController@storeLicence');
     Route::get('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@show');
     Route::post('/zavodjenje/zavedi/{type}', 'ZavodjenjeController@zavedi');
+
 
     Route::crud('registerrequestpromenapodataka', 'RegisterRequestCrudController');
 //    Route::crud('registerrequestiksmobnet', 'RegisterRequestCrudController');

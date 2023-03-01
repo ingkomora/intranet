@@ -52,7 +52,7 @@ trait PromenaPodatakaEmailOperation
         });
 
         $this->crud->operation(['list', 'show'], function () {
-            $this->crud->addButtonFromView('line', 'promenapodatakaemailbutton', 'promenapodatakaemailbutton', 'end');
+            $this->crud->addButtonFromView('line', 'promenaPodatakaEmail', 'promenaPodatakaEmail', 'end');
         });
 
         $this->crud->enableGroupedErrors();

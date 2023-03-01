@@ -43,7 +43,7 @@ trait PromenaPodatakaObradaBulkOperation
         $this->crud->operation('list', function () {
             if (backpack_user()->hasRole('admin')) {
                 $this->crud->enableBulkActions();
-                $this->crud->addButtonFromView('top', 'promenapodatakaobradabulkbutton', 'promenapodatakaobradabulkbutton', 'end');
+                $this->crud->addButtonFromView('top', 'bulk.promenaPodatakaObrada', 'bulk.promenaPodatakaObrada', 'end');
             }
         });
     }

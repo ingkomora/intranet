@@ -81,7 +81,7 @@ trait FileUploadOperation
 
         $this->crud->operation('list', function () {
             if (backpack_user()->hasPermissionTo('file-upload'))
-                $this->crud->addButton('top', 'fileUploadButton', 'view', 'backpack::crud.buttons.fileUploadButton');
+                $this->crud->addButton('top', 'fileUpload', 'view', 'backpack::crud.buttons.fileUpload');
         });
 
     }

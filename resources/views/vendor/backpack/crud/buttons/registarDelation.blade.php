@@ -6,7 +6,10 @@
     )
     <a
         href="{{ url($crud->route.'/'.$entry->getKey().'/registar-delation') }}"
-        class="btn btn-sm btn-link text-danger">
-        <i class="la la-sign-out-alt"></i> Obriši iz Registra
+        class="btn btn-sm btn-link"
+        data-toggle="tooltip"
+        title="Obriši iz Registra"
+    >
+        <i class="las la-2x la-user-minus"></i>
     </a>
 @endif
