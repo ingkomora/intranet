@@ -24,14 +24,14 @@ class OsobaCrudController extends CrudController
 
 //    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use UpdateLicencaStatusOperation;
-    use UnlockMembershipFeeRegistrationOperation;
-    use FileUploadOperation;
-
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
+
+    use UpdateLicencaStatusOperation;
+    use UnlockMembershipFeeRegistrationOperation;
+    use FileUploadOperation;
 
     protected $action;
     protected $osoba_columns_definition_array = [
@@ -224,7 +224,7 @@ class OsobaCrudController extends CrudController
             'name' => 'posta_drzava',
             'label' => 'Država',
         ],
-        'full_address' =>[
+        'full_address' => [
             'name' => 'full_address',
             'label' => 'Puna adresa',
             'limit' => 500,
@@ -613,13 +613,15 @@ class OsobaCrudController extends CrudController
                 $this->crud->setRoute(config('backpack.base.route_prefix') . '/registar');
                 $this->crud->setEntityNameStrings('registar', 'registar');
 
+                $this->crud->denyAccess(['unlockmembershipfeeregistration']);
+
+                if (backpack_user()->hasPermissionTo('file-upload'))
+                    $this->crud->allowAccess(['fileUpload']);
+
                 $this->crud->addClause('whereHas', "licence", function ($q) {
                     $q->where('status', '<>', 'D');
                 });
                 $this->crud->addClause('whereNotNull', 'lib');
-
-                if (backpack_user()->hasPermissionTo('file-upload'))
-                    $this->crud->allowAccess(['fileUpload']);
 
                 $this->crud->addColumns($this->registar_columns_definition_array);
 
@@ -847,6 +849,7 @@ class OsobaCrudController extends CrudController
                 $this->crud->addClause('where', 'clan', $value);
             });
         }
+
         if ($this->action == 'registar') {
 
             $this->crud->addFilter([
@@ -862,6 +865,7 @@ class OsobaCrudController extends CrudController
                 $this->crud->addClause('where', 'clan', $value);
             });
         }
+
 
         $this->crud->addFilter([
             'type' => 'select2',
@@ -918,21 +922,23 @@ class OsobaCrudController extends CrudController
             ],
                 FALSE,
                 function () {
-                    $this->crud->addClause('whereHas', 'licence');
+                    $this->crud->addClause('whereHas', 'licence', function ($q) {
+                        $q->where('status', '<>', 'D');
+                    });
                 }
             );
 
-            $this->crud->addFilter([
-                'type' => 'simple',
-                'name' => 'firma_mb',
-                'label' => 'MB firme'
-            ],
-                FALSE,
-                function () {
-                    $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
-                    $this->crud->addClause('where', 'firma_mb', '<>', 0);
-                }
-            );
+//            $this->crud->addFilter([
+//                'type' => 'simple',
+//                'name' => 'firma_mb',
+//                'label' => 'MB firme'
+//            ],
+//                FALSE,
+//                function () {
+//                    $this->crud->addClause('where', 'firma_mb', '<>', 'NULL');
+//                    $this->crud->addClause('where', 'firma_mb', '<>', 0);
+//                }
+//            );
 
             $this->crud->addFilter([
                 'type' => 'simple',
@@ -1536,25 +1542,25 @@ class OsobaCrudController extends CrudController
     {
         return $this->fetch([
             'model' => Firma::class, // required
-//            'searchable_attributes' => ['mb'],
+            // 'searchable_attributes' => ['mb'],
             'searchable_attributes' => ['mb', 'naziv'],
             'paginate' => 10, // items to show per page
-//            'query' => function($model) {
-//                return $model->active();
-//            } // to filter the results that are returned
+            // 'query' => function($model) {
+            //     return $model->active();
+            // } // to filter the results that are returned
         ]);
 
     }
 
     protected function showDetailsRow($id)
     {
-//        $this->crud->hasAccessOrFail('details_row');//???
+        // $this->crud->hasAccessOrFail('details_row');//???
 
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
-//dd($this->data['entry']->clanarine->count());
+        // dd($this->data['entry']->clanarine->count());
         // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-//        return view('crud.details_row', $this->data);
+        // return view('crud.details_row', $this->data);
         return view('crud::osoba_details_row', $this->data);
     }
 }

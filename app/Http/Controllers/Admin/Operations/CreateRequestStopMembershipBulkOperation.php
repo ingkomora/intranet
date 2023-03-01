@@ -45,8 +45,10 @@ trait CreateRequestStopMembershipBulkOperation
         $this->crud->allowAccess(['createrequeststopmembership']);
 
         $this->crud->operation('list', function () {
-            $this->crud->enableBulkActions();
-            $this->crud->addButtonFromView('top', 'createRequestStopMembershipBulkButton', 'createRequestStopMembershipBulkButton', 'end');
+            if (backpack_user()->hasPermissionTo('update-memberships-evidence')) {
+                $this->crud->enableBulkActions();
+                $this->crud->addButtonFromView('top', 'bulk.createRequestStopMembership', 'bulk.createRequestStopMembership', 'end');
+            }
         });
     }
 

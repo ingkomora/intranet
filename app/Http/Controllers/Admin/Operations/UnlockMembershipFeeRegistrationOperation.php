@@ -38,7 +38,7 @@ trait UnlockMembershipFeeRegistrationOperation
 
         $this->crud->operation(['list', 'show'], function () {
             if (backpack_user()->hasPermissionTo('otkljucaj clanarinu')) {
-                $this->crud->addButtonFromView('line', 'unlockmembershipfeeregistration', 'unlockmembershipfeeregistration', 'end');
+                $this->crud->addButtonFromView('line', 'unlockMembershipFeeRegistration', 'unlockMembershipFeeRegistration', 'end');
             }
         });
     }

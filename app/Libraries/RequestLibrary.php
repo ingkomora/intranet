@@ -49,4 +49,14 @@ abstract class RequestLibrary
         return $request->first();
     }
 
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public static function cancel(Request $request): bool
+    {
+        $request->status_id = REQUEST_CANCELED;
+        return $request->save();
+    }
+
 }

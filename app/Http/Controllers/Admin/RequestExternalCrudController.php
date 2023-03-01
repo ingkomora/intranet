@@ -22,6 +22,7 @@ class RequestExternalCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     use Operations\RegisterRequestBulkOperation;
+    use Operations\DocumentCancelationBulkOperation;
 
 
     protected $request_category_id;
@@ -41,6 +42,19 @@ class RequestExternalCrudController extends CrudController
         $type = \Request::segment(2);
 
         switch ($type) {
+            case 'request-external':
+                $this->request_category_id = [15];
+                $this->requestable_model = '\App\Models\RequestExternal';
+
+                $this->crud->operation('list', function () {
+                    $this->crud->disableBulkActions();
+                    $this->crud->denyAccess(['documentcancelation', 'registerrequestbulk']);
+                });
+
+                CRUD::setRoute(config('backpack.base.route_prefix') . '/request-external');
+                CRUD::setEntityNameStrings('eksterni zahtev', 'Eksterni zahtevi');
+                CRUD::addClause('where', 'request_category_id', $this->request_category_id);
+                break;
             case 'registerrequestiksmobnet':
                 $this->request_category_id = [15];
                 $this->requestable_model = '\App\Models\RequestExternal';
@@ -49,19 +63,22 @@ class RequestExternalCrudController extends CrudController
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestiksmobnet');
                 CRUD::setEntityNameStrings('eksterni zahtev', 'Zahtevi za IKS Mobnet usluge');
                 CRUD::addClause('where', 'request_category_id', $this->request_category_id);
+
+                if (backpack_user()->hasPermissionTo('zavedi') and $this->allow_create) {
+                    $this->crud->allowAccess(['create']);
+                }
+
                 break;
         }
-
-        $this->crud->set('show.setFromDb', FALSE);
-
 
         if (!backpack_user()->hasRole('admin')) {
             $this->crud->denyAccess(['create', 'delete', 'update']);
         }
 
-        if (backpack_user()->hasPermissionTo('zavedi') and $this->allow_create) {
-            $this->crud->allowAccess(['create']);
-        }
+        $this->crud->set('show.setFromDb', FALSE);
+
+
+        $this->crud->addButtonFromView('line', 'requestExternalDocuments', 'requestExternalDocuments', 'end');
 
 //        $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();

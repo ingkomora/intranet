@@ -45,7 +45,7 @@ trait UpdateZalbaStatusOperation
 
         $this->crud->operation(['list', 'show'], function () {
             if (backpack_user()->hasPermissionTo('azuriraj status zalbe')) {
-                $this->crud->addButtonFromView('line', 'updatezalbastatus', 'updatezalbastatus', 'end');
+                $this->crud->addButtonFromView('line', 'updateZalbaStatus', 'updateZalbaStatus', 'end');
             }
         });
     }
@@ -55,7 +55,7 @@ trait UpdateZalbaStatusOperation
         $this->crud->hasAccessOrFail('updatezalbastatus');
 
         if (backpack_user()->hasPermissionTo('azuriraj status zalbe')) {
-            $this->crud->addButtonFromView('line', 'updatezalbastatus', 'updatezalbastatus', 'end');
+            $this->crud->addButtonFromView('line', 'updateZalbaStatus', 'updateZalbaStatus', 'end');
         }
 
         /**

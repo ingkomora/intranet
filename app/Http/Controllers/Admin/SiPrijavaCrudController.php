@@ -31,7 +31,6 @@ class SiPrijavaCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\FetchOperation;
-    use Operations\RegisterRequestBulkOperation;
     use FileUploadOperation;
 
 
@@ -435,9 +434,14 @@ class SiPrijavaCrudController extends CrudController
             case 'registerrequestsi':
                 CRUD::setRoute(config('backpack.base.route_prefix') . '/registerrequestsi');
                 CRUD::setEntityNameStrings('siprijava', 'Zavodjenje Prijave SI');
-//                CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
-//                $this->requestCategoryType = 1;
-//                $this->requestCategory = [1, 2];
+
+                // turn off file upload operation
+                $this->crud->denyAccess(['fileUpload']);
+
+
+                // CRUD::addClause('whereIn', 'request_category_id', [1, 2]);
+                // $this->requestCategoryType = 1;
+                // $this->requestCategory = [1, 2];
                 $this->allowRegister = TRUE;
                 break;
         }
@@ -456,6 +460,9 @@ class SiPrijavaCrudController extends CrudController
         if (backpack_user()->hasPermissionTo('zavedi') and $this->allowRegister) {
             $this->crud->allowAccess(['registerrequestbulk']);
         }
+
+        $this->crud->addButtonFromView('line', 'siPrijavaDocuments', 'siPrijavaDocuments', 'end');
+
 
         CRUD::enableExportButtons();
         CRUD::enableDetailsRow();

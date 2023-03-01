@@ -63,7 +63,7 @@ trait MembershipApprovingOperation
         });
 
         $this->crud->operation(['list', 'show'], function () {
-            $this->crud->addButtonFromView('line', 'membershipapprovingbutton', 'membershipapprovingbutton', 'end');
+            $this->crud->addButtonFromView('line', 'membershipApproving', 'membershipApproving', 'end');
         });
 
         $this->crud->enableGroupedErrors();

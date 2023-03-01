@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Operations\PromenaPodatakaEmailOperation;
 use App\Http\Controllers\Admin\Operations\UpdateDataBrisanjeClanstvoOperation;
 use App\Http\Requests\OsobaEditRequest;
-use App\Models\Request;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -174,18 +174,18 @@ class OsobaEditCrudController extends CrudController
 
         $this->crud->setColumns($this->columns_definition_array);
 
-        /*$this->crud->addClause('whereHas', 'requests', function ($query) {
+        $this->crud->addClause('whereHas', 'requests', function ($query) {
             $query->where('request_category_id', 2);
-        });*/
+        });
 
 //        $this->crud->addClause('where', 'clan', 10); // privremeni status za clanove kojima se sprema brisanje
         $this->crud->addClause('orderBy', 'ime');
 
-        if (!backpack_user()->hasRole(['admin'])) {
-            $this->crud->denyAccess(['create']);
-        } else if (!backpack_user()->hasPermissionTo('update addresses')) {
-            $this->crud->denyAccess(['create']);
-        }
+//        if (!backpack_user()->hasRole(['admin'])) {
+//            $this->crud->denyAccess(['create']);
+//        } else if (!backpack_user()->hasPermissionTo('update addresses')) {
+//            $this->crud->denyAccess(['create']);
+//        }
 
         $this->crud->enableDetailsRow();
         $this->crud->enableExportButtons();
