@@ -7,6 +7,7 @@ use App\Mail\PromenaPodataka\ConfirmationEmail;
 use App\Models\Firma;
 use App\Models\Log;
 use App\Models\Opstina;
+use App\Models\Osoba;
 use App\Models\PromenaPodataka;
 use App\Models\User;
 use Carbon\Carbon;
@@ -51,7 +52,7 @@ trait PromenaPodatakaObradaBulkOperation
     /**
      * Show the view for performing the operation.
      *
-     * @return Response
+     * @return array
      */
     public function promenapodatakaobradabulk()
     {
@@ -74,8 +75,14 @@ trait PromenaPodatakaObradaBulkOperation
             try {
 
                 DB::beginTransaction();
+                // email is set to unique in tosoba
+                if (Osoba::where('kontaktemail', $zahtev->email)->count() > 0) {
+                    $log->type = 'ERROR';
+                    $result[$log->type][$id]['message'] = "Imejl $zahtev->email već postoji u bazi...";
+                }
 
                 if (in_array($zahtev->obradjen, [3, 116, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142])) { // email
+
                     if ($osoba->kontaktemail != $zahtev->email) {
                         $osoba->kontaktemail = $zahtev->email;
                         $mail_data->fields['Email']['azurirano'] = $osoba->kontaktemail; // polje koje se azurira

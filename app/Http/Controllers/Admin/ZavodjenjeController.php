@@ -192,23 +192,18 @@ class ZavodjenjeController extends Controller
                 } else {
                     $document_category_ids = (array)$this->zavodjenje[$type]['document_category_id'];
                 }
-                if (isset($data['prilog_text'])) {
-//                        ZAVEDI SAMO DOPUNU
-                    if (strlen($data['prilog_text']) > 90) {
-                        $result['ERROR'][1] = "Greška 4! Naziv dopune ne sme imati više od 90 karaktera!";
-                        return $result;
-                    }
-                    $categoryDopuna = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
-                    $temp = array_filter($document_category_ids, function ($id) use ($categoryDopuna) {
-                        return in_array($id, $categoryDopuna);
-                    });
-                    $document_category_id = reset($temp);
-                } else if (isset($data['prilog'])) {
+                if (isset($data['prilog'])) {
                     if (!in_array($request->{$requestStatusColumnName}, [REQUEST_IN_PROGRESS, REQUEST_FINISHED, REQUEST_CANCELED, REQUEST_BOARD, ZALBA, PONISTEN, ZALBA_ODUSTAO, ZALBA_MGSI])
                     ) {
-
                         $result['ERROR'][1] = "Greška 3! Zavođenje dopune je moguće samo za zahtev koji je prethodno zaveden!";
                         return $result;
+                    }
+                    if (isset($data['prilog_text'])) {
+//                        ZAVEDI SAMO DOPUNU
+                        if (strlen($data['prilog_text']) > 90) {
+                            $result['ERROR'][1] = "Greška 4! Naziv dopune ne sme imati više od 90 karaktera!";
+                            return $result;
+                        }
                     }
                     $categoryDopuna = DocumentCategory::whereIn('id', $document_category_ids)->where('document_category_type_id', 11)->pluck('id')->toArray();
                     $temp = array_filter($document_category_ids, function ($id) use ($categoryDopuna) {
@@ -288,7 +283,7 @@ class ZavodjenjeController extends Controller
                     array_push($data['result'], $resultDocument['data']);
                     $documentsOK &= $resultDocument['registerDocumentOK'];
                 }
-                if ($request->{$requestStatusColumnName} == REQUEST_SUBMITED) {
+                if ($request->{$requestStatusColumnName} == REQUEST_SUBMITED and $document->documentCategory->document_category_type_id <> 11) {
                     $request->{$requestStatusColumnName} = REQUEST_IN_PROGRESS;
                     if ($request->save()) {
                         $requestOK = TRUE;

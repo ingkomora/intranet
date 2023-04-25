@@ -78,7 +78,7 @@
                                 if (result['ERROR']) {
                                     var errors = "<strong>Zahtevi koji nisu ažurirani:</strong> <br>| ";
                                     $.each(result['ERROR'], function (id, item) {
-                                        errors += id + " | ";
+                                        errors += id + " | " + item.message + "<br>";
                                     });
                                     new Noty({
                                         type: "warning",
