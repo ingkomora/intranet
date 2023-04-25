@@ -454,6 +454,8 @@ class PromenaPodatakaCrudController extends CrudController
                         return 'Noviji';
                     case 6:
                         return 'Potpis';
+                    case 7:
+                        return 'Brisanje';
                     default:
                         return 'Nepoznat status';
                 }
@@ -507,6 +509,7 @@ class PromenaPodatakaCrudController extends CrudController
                     4 => '4 - Otkazan',
                     5 => '5 - Noviji',
                     6 => '6 - Potpis',
+                    7 => '7 - Brisanje',
                 ];
             }, function ($values) { // if the filter is active
                 $this->crud->addClause('whereIn', 'obradjen', json_decode($values));
@@ -569,6 +572,7 @@ class PromenaPodatakaCrudController extends CrudController
                 4 => '(4) Otkazan',
                 5 => '(5) Noviji',
                 6 => '(6) Potpis',
+                7 => '(7) Brisanje',
             ]
         ]);
     }
