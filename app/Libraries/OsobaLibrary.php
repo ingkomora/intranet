@@ -7,9 +7,72 @@ namespace App\Libraries;
 use App\Models\Osoba;
 use App\Models\Sekcija;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 abstract class OsobaLibrary
 {
+
+    private static $fields = [];
+//    private static $registry_type = 'registar';
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTION METHODS
+    |--------------------------------------------------------------------------
+    */
+
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public static function updateEducationData(array $data): array
+    {
+        dd($data);
+
+        // Set class property fields to suit excel column names
+        self::setFields([
+            'jmbg' => 'osoba_id',
+            'zahtev' => 'request_id',
+            'br_resenja' => 'broj_dokumenta',
+            'datum_resenja' => 'datum_dokumenta',
+        ]);
+
+
+        // creating necessary data array for program execution from excel data
+        $data = self::mapExcelFields($data, self::$fields);
+
+
+        foreach ($data as $row) {
+
+            $filtered_row = self::filterData($row);
+            $filtered_row['document_category_id'] = $document_category_id;
+
+
+            try {
+                DB::beginTransaction();
+
+                // getting request model
+                $request = RequestLibrary::get($data['request_id'], [REQUEST_IN_PROGRESS]);
+
+
+                // performing all necessary logic for this action
+                self::performAction($request, $filtered_row);
+
+
+                $result['success'][$request->id] = "Uspešno završeno brisanje iz Registra usled smrti.";
+                DB::commit();
+
+            } catch (\Exception $e) {
+
+                $result['error'][$filtered_row['request_id']] = $e->getMessage();
+                DB::rollBack();
+            }
+        }
+
+        return $result;
+
+    }
 
 
     /**
